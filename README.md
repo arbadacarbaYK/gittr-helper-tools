@@ -14,7 +14,7 @@ Utilities that sit next to the gittr UI and its gitnostr-based bridge. Each help
 ### Related documentation
 
 - gitnostr fork enhancements: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/gittr-enhancements.md
-- gittr file-fetch flow: https://github.com/arbadacarbaYK/ngit/blob/main/docs/FILE_FETCHING_INSIGHTS.md
+- gittr file-fetch flow: https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md
 - Standalone bridge setup: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/STANDALONE_BRIDGE_SETUP.md
 
 ### Quick start

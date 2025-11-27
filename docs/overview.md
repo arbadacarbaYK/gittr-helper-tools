@@ -15,6 +15,6 @@ gittr UI ──(repo missing)──▶ git-nostr-bridge ──▶ clone-events-s
 3. File viewers can call `blossom-fetch-helper` to fetch pack files over HTTPS (GitHub/GitLab/Codeberg or Blossom) before falling back to slower external APIs.
 
 ### Reference docs
-- gittr file-fetch flow: https://github.com/arbadacarbaYK/ngit/blob/main/docs/FILE_FETCHING_INSIGHTS.md
+- gittr file-fetch flow: https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md
 - gitnostr fork enhancements: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/gittr-enhancements.md
 - Standalone bridge setup: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/STANDALONE_BRIDGE_SETUP.md
