@@ -1,33 +1,46 @@
-## gittr helper tools
+# gittr helper tools & snippets
 
-Utilities that sit next to the gittr UI and its gitnostr-based bridge. Each helper is optional: flip on the ones you need to boost clone notifications, Blossom/NIP-96 fetches, or deployment automation.
+Utilities and code snippets extracted from [gittr.space](https://gittr.space) that handle complex file-fetching logic, URL normalization, GRASP server detection, and other tricky bits we've built.
 
-### Components
+These are **actual code snippets** we use in production, not theoretical helpers. They solve real problems we encountered while building gittr.
 
-| Folder | Summary | Where it plugs in |
+## What's in here
+
+| Folder | What it does | Why it exists |
 | --- | --- | --- |
-| `cmd/clone-events-sse` | Webhook endpoint → Server-Sent Events broadcaster. Turns bridge `repo cloned` hooks into live UI refreshes. | Configure the gittr-enhanced bridge to POST repo clone events here; gittr UI tabs listen on `/events`. |
-| `cmd/blossom-fetch-helper` | CLI that normalizes git URLs, fetches pack files via HTTPS/NIP-96 Blossom, and seeds the bridge cache. | Called by gittr UI’s file-fetch flow before falling back to GitHub/GitLab/Codeberg. |
-| `docs/` | Diagrams + flow explanations linking back to the main gittr docs. | Shows how helpers align with `docs/FILE_FETCHING_INSIGHTS.md` and the gitnostr fork enhancements. |
-| `scripts/` | Sanitized systemd units + sample env files. | Drop onto Hetzner (or any host) to keep helpers running beside bridge/UI. |
+| `snippets/file-fetching/` | Parse clone URLs from NIP-34 events, identify source types (GitHub/GitLab/Codeberg/GRASP), handle multiple fallback sources | NIP-34 repos can have multiple clone URLs. We need to parse them, identify the source type, and try them in parallel. |
+| `snippets/url-normalization/` | Convert SSH (`git@host:path`) and `git://` URLs to HTTPS for API calls | Different git servers use different URL formats. We normalize them to HTTPS for consistent API calls. |
+| `snippets/grasp-detection/` | Identify GRASP servers (git servers that are also Nostr relays) vs regular relays | GRASP servers need special handling - they serve repos via git protocol, not REST APIs. |
+| `cmd/` | (Future) Standalone CLI tools or services | Helpers that can run independently (e.g., clone-events-sse, blossom-fetch-helper) |
 
-### Related documentation
+## Quick start
 
-- gitnostr fork enhancements: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/gittr-enhancements.md
-- gittr file-fetch flow: https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md
-- Standalone bridge setup: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/STANDALONE_BRIDGE_SETUP.md
+These are TypeScript snippets. Copy them into your project or import them:
 
-### Quick start
+```typescript
+import { parseGitSource } from './snippets/file-fetching/git-source-parser';
+import { normalizeGitUrl } from './snippets/url-normalization/normalize-git-url';
+import { isGraspServer } from './snippets/grasp-detection/grasp-servers';
 
-```bash
-git clone https://github.com/arbadacarbaYK/gittr-helper-tools.git
-cd gittr-helper-tools
-go test ./...
-make build
+// Parse a clone URL from a NIP-34 event
+const source = parseGitSource('https://github.com/user/repo.git');
+// { type: 'github', url: '...', owner: 'user', repo: 'repo', ... }
+
+// Normalize SSH URL to HTTPS
+const normalized = normalizeGitUrl('git@github.com:user/repo.git');
+// { original: 'git@...', normalized: 'https://github.com/user/repo.git', protocol: 'ssh' }
+
+// Check if a relay is a GRASP server
+const isGrasp = isGraspServer('wss://relay.ngit.dev');
+// true
 ```
 
-Binaries land in `bin/`. Each helper directory has its own README section (env vars, webhook URLs, systemd snippets).
+## Related documentation
 
-### License
+- **gittr file-fetch flow**: https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md
+- **gitnostr fork enhancements**: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/gittr-enhancements.md
+- **Standalone bridge setup**: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/STANDALONE_BRIDGE_SETUP.md
 
-MIT, keeping attribution to @spearson78’s original gitnostr and the gittr.space fork.
+## License
+
+MIT, keeping attribution to @spearson78's original gitnostr and the gittr.space fork.
