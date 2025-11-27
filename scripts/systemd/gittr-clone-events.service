@@ -1,0 +1,14 @@
+[Unit]
+Description=gittr clone events SSE helper
+After=network.target
+
+[Service]
+EnvironmentFile=/opt/gittr-helper-tools/config/helper.env
+ExecStart=/opt/gittr-helper-tools/bin/clone-events-sse
+Restart=on-failure
+User=gittr
+Group=gittr
+WorkingDirectory=/opt/gittr-helper-tools
+
+[Install]
+WantedBy=multi-user.target
