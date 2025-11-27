@@ -55,11 +55,25 @@ In your bridge's `git-nostr-bridge.json`, add a webhook section to POST repo clo
 
 ### gittr UI Configuration
 
-In your gittr UI codebase, configure the SSE endpoint URL. This is typically set via environment variable or config file:
+The gittr UI connects to the SSE endpoint. Configure the helper URL using environment variables that match gittr's naming convention:
 
+**Environment variables for gittr UI** (add to `ui/.env.local`):
+```
+# Clone events SSE helper (matches gittr's BRIDGE_HTTP_* naming pattern)
+CLONE_EVENTS_SSE_PORT=4010
+CLONE_EVENTS_SSE_HOST=localhost
+# Or for production:
+# CLONE_EVENTS_SSE_HOST=helper.gittr.space
+```
+
+**Note:** These variable names follow the same pattern as `BRIDGE_HTTP_PORT` and `BRIDGE_HTTP_HOST` used in gittr for the bridge connection.
+
+Example integration in gittr UI code:
 ```typescript
-// Example: gittr UI connects to clone-events-sse
-const sseUrl = process.env.CLONE_EVENTS_SSE_URL || 'http://localhost:4010/events';
+// gittr UI connects to clone-events-sse
+const ssePort = process.env.CLONE_EVENTS_SSE_PORT || "4010";
+const sseHost = process.env.CLONE_EVENTS_SSE_HOST || "localhost";
+const sseUrl = `http://${sseHost}:${ssePort}/events`;
 const source = new EventSource(sseUrl);
 
 source.addEventListener('repo_cloned', (event) => {
@@ -67,11 +81,6 @@ source.addEventListener('repo_cloned', (event) => {
   // Refresh the repo view for data.repo
   refreshRepoView(data.repo);
 });
-```
-
-**Environment variable for gittr UI:**
-```
-CLONE_EVENTS_SSE_URL=https://helper.gittr.space/events
 ```
 
 ## blossom-fetch-helper Configuration
@@ -86,24 +95,26 @@ This helper is called as a CLI tool, not a service. It accepts command-line flag
 
 ### gittr UI Integration
 
-The gittr UI calls this helper when fetching files. Example integration:
+The gittr UI calls this helper when fetching files. Configure the helper path:
 
+**Environment variable for gittr UI** (add to `ui/.env.local`):
+```
+BLOSSOM_FETCH_HELPER_PATH=/opt/gittr-helper-tools/bin/blossom-fetch-helper
+```
+
+Example integration:
 ```typescript
 // gittr UI file-fetch flow
+const helperPath = process.env.BLOSSOM_FETCH_HELPER_PATH || 'blossom-fetch-helper';
 async function fetchRepoFiles(repoPath: string, sourceUrl: string) {
   // Try helper first
-  const result = await exec(`blossom-fetch-helper --source ${sourceUrl} --repo-path ${repoPath}`);
+  const result = await exec(`${helperPath} --source ${sourceUrl} --repo-path ${repoPath}`);
   if (result.success) {
     // Retry bridge API
     return await fetchFromBridge(repoPath);
   }
   // Fallback to external APIs...
 }
-```
-
-**Environment variable for gittr UI:**
-```
-BLOSSOM_FETCH_HELPER_PATH=/opt/gittr-helper-tools/bin/blossom-fetch-helper
 ```
 
 ## Systemd Service Example
@@ -131,7 +142,7 @@ WantedBy=multi-user.target
 1. **Build helpers:** `cd gittr-helper-tools && make build`
 2. **Configure clone-events-sse:** Set `WEBHOOK_SECRET` and `ALLOW_ORIGINS` in `config/helper.env`
 3. **Configure bridge:** Add `webhooks.repo_cloned` section to `git-nostr-bridge.json` with matching secret
-4. **Configure gittr UI:** Set `CLONE_EVENTS_SSE_URL` env var pointing to helper's `/events` endpoint
+4. **Configure gittr UI:** Add `CLONE_EVENTS_SSE_PORT`, `CLONE_EVENTS_SSE_HOST`, and `BLOSSOM_FETCH_HELPER_PATH` to `ui/.env.local`
 5. **Start services:** `systemctl start gittr-clone-events` (and restart bridge/UI if needed)
 
 ## Testing
