@@ -1,5 +1,5 @@
 BIN_DIR := bin
-GO := /home/homie/Downloads/go/bin/go
+GO := go
 
 .PHONY: all build test clean
 
