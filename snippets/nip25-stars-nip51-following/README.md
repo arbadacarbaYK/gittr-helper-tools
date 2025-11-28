@@ -1,5 +1,35 @@
 # NIP-25 Stars & NIP-51 Following Implementation
 
+Code snippets for implementing repository starring and following using **NIP-25** (Reactions) and **NIP-51** (Lists) in a Nostr-based Git hosting platform.
+
+## `repo-stars.ts`
+
+Functions for querying, publishing, and removing star reactions (NIP-25) for repositories.
+
+**What it does:**
+- Queries star reactions (Kind 7) for a repository event
+- Publishes positive reactions ("+") to star a repository
+- Publishes negative reactions ("-") to unstar a repository
+- Aggregates star counts from multiple users
+
+**Usage:**
+```typescript
+import { queryRepoStars, publishStarReaction, removeStarReaction } from './repo-stars';
+
+// Query star count for a repository
+const { count, starers } = await queryRepoStars(subscribe, repoEventId);
+
+// Star a repository
+await publishStarReaction(repoEventId, repoOwnerPubkey, publish, getSigner);
+
+// Unstar a repository
+await removeStarReaction(repoEventId, repoOwnerPubkey, publish, getSigner);
+```
+
+**Extracted from:** `gittr/ui/src/lib/nostr/repo-stars.ts`
+
+---
+
 This document explains how to implement repository starring and following using **NIP-25** (Reactions) and **NIP-51** (Lists) in a Nostr-based Git hosting platform.
 
 ## Overview

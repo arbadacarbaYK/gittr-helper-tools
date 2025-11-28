@@ -1,6 +1,43 @@
 # NIP-46 Remote Signer Integration
 
-This document explains how to implement NIP-46 (Remote Signing) in a Nostr client, using the approach we implemented in gittr.space. This enables users to pair hardware signers (like LNbits Remote Nostr Signer, Nowser bunker) without exposing private keys to the browser.
+Code snippets for implementing NIP-46 (Remote Signing) in a Nostr client, enabling users to pair hardware signers (like LNbits Remote Nostr Signer, Nowser bunker) without exposing private keys to the browser.
+
+## `remote-signer.ts`
+
+Classes and functions for pairing with remote signers via NIP-46 and exposing a NIP-07 compatible adapter.
+
+**What it does:**
+- Parses `bunker://` and `nostrconnect://` URIs
+- Manages NIP-46 client-side connection flow
+- Handles encrypted request/response events (Kind 24133)
+- Exposes NIP-07 compatible `window.nostr` adapter
+- Persists sessions in localStorage for reconnection
+
+**Usage:**
+```typescript
+import { RemoteSignerManager, parseRemoteSignerUri } from './remote-signer';
+
+// Parse a bunker:// or nostrconnect:// URI
+const config = parseRemoteSignerUri('bunker://<pubkey>?relay=wss://...');
+
+// Initialize manager
+const manager = new RemoteSignerManager({
+  publish: (event, relays) => { /* publish to relays */ },
+  subscribe: (filters, relays, onEvent) => { /* subscribe */ return () => {}; },
+});
+
+// Connect to remote signer
+const { session, npub } = await manager.connect(uri);
+
+// Sign events via remote signer (NIP-07 compatible)
+const signedEvent = await window.nostr.signEvent(unsignedEvent);
+```
+
+**Extracted from:** `gittr/ui/src/lib/nostr/remoteSigner.ts`
+
+---
+
+This document explains how to implement NIP-46 (Remote Signing) in a Nostr client, using the approach we implemented in gittr.space.
 
 ## Overview
 
