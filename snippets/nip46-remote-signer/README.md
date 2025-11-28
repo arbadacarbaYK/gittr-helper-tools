@@ -47,7 +47,9 @@ This document explains how to implement NIP-46 (Remote Signing) in a Nostr clien
 - Private keys never leave the hardware signer
 - Works with any NIP-46 compatible signer (bunker://, nostrconnect://)
 - Exposes a NIP-07-compatible API, so existing code works without changes
-- Session persistence for reconnection
+- **Session persistence**: Once paired, users stay logged in across page reloads
+- **Automatic login**: Session is restored from localStorage on app load
+- **Complete NIP-07 support**: Includes `getRelays` and `nip44` methods
 
 ## Dependencies
 
@@ -147,7 +149,8 @@ class RemoteSignerManager {
     const config = parseRemoteSignerUri(uri);
     
     // 2. Generate ephemeral client keypair
-    const clientSecretKey = generateSecretKey();
+    // CRITICAL: generatePrivateKey() returns a hex string directly, no conversion needed
+    const clientSecretKey = generatePrivateKey();
     const clientPubkey = getPublicKey(clientSecretKey);
     
     // 3. Send "connect" request (encrypted Kind 24133 event)
@@ -170,7 +173,7 @@ class RemoteSignerManager {
     const session: RemoteSignerSession = {
       remotePubkey: config.remotePubkey,
       relays: config.relays,
-      clientSecretKey: bytesToHex(clientSecretKey),
+      clientSecretKey: clientSecretKey, // generatePrivateKey() already returns hex string
       clientPubkey,
       userPubkey,
       secret: config.secret,
@@ -191,87 +194,40 @@ class RemoteSignerManager {
 
 ### 4. NIP-07 Compatible Adapter
 
-Override `window.nostr` to route signing through the remote signer:
+Override `window.nostr` to route signing through the remote signer. The adapter includes complete NIP-07 support with `getRelays` and `nip44` methods:
 
 ```typescript
-applyNip07Adapter() {
-  const originalNostr = window.nostr;
-  
-  window.nostr = {
+function createRemoteNip07Adapter(manager: RemoteSignerManager) {
+  return {
     getPublicKey: async () => {
-      return this.session?.userPubkey || "";
+      const pubkey = manager.getUserPubkey();
+      if (!pubkey) {
+        throw new Error("Remote signer not paired");
+      }
+      return pubkey;
     },
     
-    signEvent: async (event: UnsignedEvent) => {
-      if (!this.session) throw new Error("Remote signer not connected");
-      
-      // Send "sign_event" request
-      const request = {
-        id: randomRequestId(),
-        method: "sign_event",
-        params: {
-          event: event,
-        },
-      };
-      
-      const response = await this.sendRequest(
-        this.session.remotePubkey,
-        request,
-        this.session.relays
-      );
-      
-      return response.result.event; // Signed event from remote signer
+    signEvent: (event: UnsignedEvent) => manager.signEvent(event),
+    
+    getRelays: async () => {
+      const session = manager.getSession();
+      if (!session) return {};
+      return session.relays.reduce<Record<string, { read: boolean; write: boolean }>>((acc, relay) => {
+        acc[relay] = { read: true, write: true };
+        return acc;
+      }, {});
     },
     
     nip04: {
-      encrypt: async (pubkey: string, plaintext: string) => {
-        // Request NIP-04 encryption via remote signer
-        const request = {
-          id: randomRequestId(),
-          method: "nip04_encrypt",
-          params: { pubkey, plaintext },
-        };
-        const response = await this.sendRequest(/* ... */);
-        return response.result.ciphertext;
-      },
-      decrypt: async (pubkey: string, ciphertext: string) => {
-        // Request NIP-04 decryption via remote signer
-        const request = {
-          id: randomRequestId(),
-          method: "nip04_decrypt",
-          params: { pubkey, ciphertext },
-        };
-        const response = await this.sendRequest(/* ... */);
-        return response.result.plaintext;
-      },
+      encrypt: (pubkey: string, plaintext: string) => manager.nip04Encrypt(pubkey, plaintext),
+      decrypt: (pubkey: string, ciphertext: string) => manager.nip04Decrypt(pubkey, ciphertext),
     },
     
     nip44: {
-      encrypt: async (pubkey: string, plaintext: string) => {
-        // Request NIP-44 encryption via remote signer
-        const request = {
-          id: randomRequestId(),
-          method: "nip44_encrypt",
-          params: { pubkey, plaintext },
-        };
-        const response = await this.sendRequest(/* ... */);
-        return response.result.ciphertext;
-      },
-      decrypt: async (pubkey: string, ciphertext: string) => {
-        // Request NIP-44 decryption via remote signer
-        const request = {
-          id: randomRequestId(),
-          method: "nip44_decrypt",
-          params: { pubkey, ciphertext },
-        };
-        const response = await this.sendRequest(/* ... */);
-        return response.result.plaintext;
-      },
+      encrypt: (pubkey: string, plaintext: string) => manager.nip44Encrypt(pubkey, plaintext),
+      decrypt: (pubkey: string, ciphertext: string) => manager.nip44Decrypt(pubkey, ciphertext),
     },
   };
-  
-  // Store original for restoration on disconnect
-  this.originalNostr = originalNostr;
 }
 ```
 
@@ -285,8 +241,9 @@ async sendRequest(
   request: { id: string; method: string; params: any },
   relays: string[]
 ): Promise<any> {
-  // Encrypt request using NIP-44 (or NIP-04)
-  const encrypted = await nip44.encrypt(
+  // Encrypt request using NIP-04
+  // CRITICAL: nip04.encrypt accepts hex secret key directly (nostr-tools handles hex strings)
+  const encrypted = await nip04.encrypt(
     this.session.clientSecretKey,
     remotePubkey,
     JSON.stringify(request)
@@ -350,25 +307,40 @@ export function loadStoredRemoteSignerSession(): RemoteSignerSession | null {
 }
 ```
 
-### 7. Bootstrap from Storage
+### 7. Bootstrap from Storage (Automatic Login)
 
-On app load, attempt to reconnect:
+On app load, attempt to reconnect. This enables automatic login - users stay logged in after initial pairing:
 
 ```typescript
-bootstrapFromStorage() {
+async bootstrapFromStorage() {
   const stored = loadStoredRemoteSignerSession();
   if (!stored) return;
   
-  this.session = stored;
+  try {
+    console.log("[RemoteSigner] Restoring session from storage");
+    await this.activateSession(stored);
+    this.notifyState("ready");
+  } catch (error: any) {
+    console.error("[RemoteSigner] Failed to resume session:", error);
+    this.clearSession();
+    this.notifyState("error", error?.message || "Failed to resume remote signer session");
+  }
+}
+
+private async activateSession(session: RemoteSignerSession) {
+  this.session = session;
+  persistRemoteSignerSession(session);
+  await this.ensureRelays(session.relays);
+  await this.startSubscription(session);
   this.applyNip07Adapter();
-  
-  // Subscribe to responses
-  this.startSubscription();
-  
-  // Notify state change
-  this.onStateChange?.("ready", this.session, undefined);
 }
 ```
+
+**Key Points:**
+- Session is restored synchronously from localStorage
+- User's pubkey is immediately available (no waiting for async operations)
+- This prevents UI flickering during authentication initialization
+- If restoration fails, session is cleared and user can reconnect
 
 ## UI Integration
 
@@ -455,6 +427,18 @@ if (hasNip07 && window.nostr) {
   await publish(signedEvent);
 }
 ```
+
+## Automatic Login Flow
+
+After initial pairing, users stay logged in automatically:
+
+1. **Initial Pairing**: User scans QR code and pairs with remote signer
+2. **Session Persistence**: Session is saved to localStorage
+3. **Automatic Restoration**: On next page load, `bootstrapFromStorage()` restores the session
+4. **Immediate Availability**: User's pubkey is available immediately (no async wait)
+5. **Seamless Experience**: No re-pairing needed unless user explicitly disconnects
+
+This prevents UI flickering and provides a seamless login experience similar to traditional web apps.
 
 ## Supported Operations
 
