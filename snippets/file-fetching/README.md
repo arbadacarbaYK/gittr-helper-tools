@@ -25,3 +25,14 @@ const graspSource = parseGitSource('https://relay.ngit.dev/npub123abc/repo.git',
 
 **Extracted from:** `gittr/ui/src/lib/utils/git-source-fetcher.ts`
 
+## Performance Notes
+
+This parser is used as part of a larger file fetching system that includes performance optimizations:
+
+- **Bridge API Cache**: Deduplicates API calls to `git-nostr-bridge` (reduces from 7+ calls to 1 per repo/branch)
+- **Clone Trigger Cache**: Prevents duplicate clone triggers for the same repository
+- **Source Prioritization**: Known-good sources (GitHub, Codeberg, GitLab) are tried first
+- **Nostr-Git Optimization**: Only the first nostr-git source is tried since they all hit the same bridge API
+
+For full implementation details, see [gittr FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md#file-fetching-performance-optimizations-2024).
+
