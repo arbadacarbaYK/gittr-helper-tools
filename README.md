@@ -23,32 +23,32 @@ Each snippet folder contains its own README with detailed documentation, code ex
 
 ## Recent Additions
 
-### NIP-C0 Code Snippets (2025-01-30)
+### NIP-C0 Code Snippets (2025-11-30)
 - Added `snippets/nip-c0-code-snippets/` with complete NIP-C0 implementation
 - Event creation utilities (`code-snippet-events.ts`) for creating and parsing kind:1337 events
 - React renderer component (`code-snippet-renderer.tsx`) for displaying snippets with syntax highlighting
 - Support for linking snippets to source repositories using NIP-34 format
 - Full documentation with usage examples and tag reference
 
-### Markdown Media Handling (2024-12)
+### Markdown Media Handling (2025-11-28)
 - Added `snippets/markdown-media-handling/` for handling images, videos, and media in markdown
 - Two approaches: simple inline handler and full-featured component-based solution
 - Resolves relative image paths to Git provider raw URLs (GitHub/GitLab/Codeberg)
 - Converts base64 API responses to data URLs
 - Supports YouTube/Vimeo embeds and relative links within repositories
 
-### NIP-25 Stars & NIP-51 Following (2024-11)
+### NIP-25 Stars & NIP-51 Following (2025-11-28)
 - Added `snippets/nip25-stars-nip51-following/` for decentralized repository starring and following
 - NIP-25 reactions for starring repositories
 - NIP-51 lists for following/watching repositories
 - Platform-wide visibility without server storage
 
-### NIP-46 Remote Signer (2024-10)
+### NIP-46 Remote Signer (2025-11-28, updated 2025-11-29)
 - Added `snippets/nip46-remote-signer/` for hardware signer integration
 - QR code scanning support using `html5-qrcode`
 - Support for LNbits, Nowser, Bunker, and other remote signers
 
-### Core Utilities (2024-09)
+### Core Utilities (2025-11-27)
 - Added `snippets/file-fetching/` for parsing and handling Git clone URLs from NIP-34 events
 - Added `snippets/url-normalization/` for converting SSH and git:// URLs to HTTPS
 - Added `snippets/grasp-detection/` for identifying GRASP servers vs regular relays
