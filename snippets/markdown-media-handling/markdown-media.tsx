@@ -564,13 +564,18 @@ export function createMarkdownLinkRenderer(
     if (youtubeMatch) {
       const videoId = youtubeMatch[1];
       return (
-        <div className="my-4 aspect-video w-full max-w-4xl mx-auto">
+        <div className="my-4">
           <iframe
+            width="560"
+            height="315"
             src={`https://www.youtube.com/embed/${videoId}`}
-            title={typeof children === "string" ? children : "YouTube video"}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
-            className="w-full h-full rounded"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="w-full max-w-full rounded"
+            style={{ aspectRatio: '16/9' }}
           />
         </div>
       );

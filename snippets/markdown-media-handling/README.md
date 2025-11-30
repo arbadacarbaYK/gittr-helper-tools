@@ -255,3 +255,42 @@ function RepositoryReadmeViewer({
 - Base64 content is automatically converted to data URLs with appropriate MIME types
 - The component handles the case where `sourceUrl` becomes available after initial render (retry logic)
 
+## Content Security Policy (CSP) Configuration
+
+**Important**: For YouTube embeds to work, you must configure your Content Security Policy to allow YouTube domains in the `frame-src` directive.
+
+### Next.js Configuration
+
+In your `next.config.js`:
+
+```javascript
+async headers() {
+  return [
+    {
+      source: '/:path*',
+      headers: [
+        {
+          key: 'Content-Security-Policy',
+          value: [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: https: blob:",
+            "font-src 'self' data:",
+            "connect-src 'self' https://*.github.com wss://* https://*",
+            "frame-src 'self' https://www.youtube.com https://youtube.com https://youtu.be", // Required for YouTube embeds
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'self'",
+            "upgrade-insecure-requests"
+          ].join('; ')
+        }
+      ]
+    }
+  ]
+}
+```
+
+Without this CSP configuration, YouTube embeds will be blocked by the browser's security policy.
+
