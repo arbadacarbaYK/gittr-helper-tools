@@ -2,21 +2,102 @@
 
 Utilities and React components for handling images, videos, and other media files in markdown content within repository viewers.
 
+## Two Approaches
+
+This folder contains two implementations:
+
+1. **`readme-image-handler.tsx`** - Simple inline approach (currently used in gittr)
+   - Direct URL transformation for relative image paths
+   - Works with GitHub, GitLab, Codeberg raw URLs
+   - Minimal dependencies, easy to integrate
+   - Best for: Simple use cases where you have `sourceUrl` available
+
+2. **`markdown-media.tsx`** - Full-featured component-based approach
+   - API endpoint support with base64 conversion
+   - URL caching and retry logic
+   - Supports Nostr-native repos via API endpoints
+   - Best for: Complex scenarios with multiple data sources
+
 ## Features
 
 - ✅ **Relative Image Path Resolution**: Resolves relative image paths to repository assets
-- ✅ **API Endpoint Support**: Handles API endpoints that return base64-encoded binary content
+- ✅ **Git Provider Raw URLs**: Direct support for GitHub, GitLab, Codeberg raw URL formats
+- ✅ **API Endpoint Support**: Handles API endpoints that return base64-encoded binary content (full implementation)
 - ✅ **Base64 to Data URL Conversion**: Automatically converts base64 content to data URLs for direct image display
 - ✅ **Video Embeds**: Supports YouTube, Vimeo, and direct video file embeds
 - ✅ **Relative Link Handling**: Handles relative links within repositories
-- ✅ **URL Caching**: Caches fetched URLs to prevent redundant network requests
+- ✅ **URL Caching**: Caches fetched URLs to prevent redundant network requests (full implementation)
 - ✅ **Multi-Source Support**: Works with GitHub, GitLab, Codeberg, and Nostr-native repos
 
 ## Installation
 
-Copy the `markdown-media.tsx` file to your project and import the functions you need.
+Choose the approach that fits your needs:
+- For simple cases: Copy `readme-image-handler.tsx` and use inline in ReactMarkdown components
+- For complex cases: Copy `markdown-media.tsx` and import the helper functions
 
 ## Usage
+
+### Simple Approach (readme-image-handler.tsx)
+
+This is the approach currently used in gittr. It's simpler and works well when you have a `sourceUrl`:
+
+```tsx
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+
+<ReactMarkdown
+  remarkPlugins={[remarkGfm]}
+  rehypePlugins={[rehypeRaw]}
+  components={{
+    img: ({ node, ...props }) => {
+      let imageSrc = props.src || "";
+      
+      // Skip absolute URLs
+      if (imageSrc.startsWith("http://") || imageSrc.startsWith("https://") || imageSrc.startsWith("data:")) {
+        return <img {...props} className="max-w-full h-auto rounded" alt={props.alt || ""} />;
+      }
+      
+      // Transform relative paths using sourceUrl
+      if (imageSrc && repoData?.sourceUrl) {
+        const branch = selectedBranch || repoData?.defaultBranch || "main";
+        const imagePath = imageSrc.startsWith("/") ? imageSrc.slice(1) : imageSrc;
+        
+        // GitHub
+        const githubMatch = repoData.sourceUrl.match(/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);
+        if (githubMatch) {
+          const [, owner, repo] = githubMatch;
+          imageSrc = `https://raw.githubusercontent.com/${owner}/${repo}/${encodeURIComponent(branch)}/${imagePath}`;
+        }
+        // GitLab
+        else if (repoData.sourceUrl.includes('gitlab.com')) {
+          const gitlabMatch = repoData.sourceUrl.match(/gitlab\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);
+          if (gitlabMatch) {
+            const [, owner, repo] = gitlabMatch;
+            imageSrc = `https://gitlab.com/${owner}/${repo}/-/raw/${encodeURIComponent(branch)}/${imagePath}`;
+          }
+        }
+        // Codeberg
+        else if (repoData.sourceUrl.includes('codeberg.org')) {
+          const codebergMatch = repoData.sourceUrl.match(/codeberg\.org\/([^\/]+)\/([^\/]+?)(?:\.git)?$/);
+          if (codebergMatch) {
+            const [, owner, repo] = codebergMatch;
+            imageSrc = `https://codeberg.org/${owner}/${repo}/raw/branch/${encodeURIComponent(branch)}/${imagePath}`;
+          }
+        }
+      }
+      
+      return <img {...props} src={imageSrc} className="max-w-full h-auto rounded" alt={props.alt || ""} />;
+    },
+  }}
+>
+  {readmeContent}
+</ReactMarkdown>
+```
+
+**See `readme-image-handler.tsx` for the complete implementation with error handling.**
+
+### Full-Featured Approach (markdown-media.tsx)
 
 ### Basic Usage with ReactMarkdown
 
