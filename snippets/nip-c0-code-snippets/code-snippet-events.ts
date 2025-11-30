@@ -6,7 +6,7 @@
  * NIP-C0 allows sharing code snippets as standalone Nostr events that can be discovered
  * across the network. Snippets can optionally link back to source repositories.
  * 
- * @see https://github.com/nostr-protocol/nips/pull/1337 (NIP-C0 draft)
+ * @see https://github.com/nostr-protocol/nips/blob/master/C0.md
  */
 
 import { getEventHash, getPublicKey, signEvent } from "nostr-tools";

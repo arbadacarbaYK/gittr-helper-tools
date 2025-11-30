@@ -229,7 +229,7 @@ Default color scheme:
 
 ## Related Documentation
 
-- **NIP-C0 Draft**: https://github.com/nostr-protocol/nips/pull/1337
+- **NIP-C0 Specification**: https://github.com/nostr-protocol/nips/blob/master/C0.md
 - **NIP-34**: Repository events (for repo references)
 - **gittr Implementation**: See `ui/src/lib/nostr/events.ts` and `ui/src/components/ui/code-snippet-renderer.tsx` in the main gittr repository
 
