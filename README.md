@@ -55,9 +55,9 @@ Each snippet folder contains its own README with detailed documentation, code ex
 
 ## Related Documentation
 
-- **gittr file-fetch flow**: https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md
-- **gitnostr fork enhancements**: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/gittr-enhancements.md
-- **Standalone bridge setup**: https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/STANDALONE_BRIDGE_SETUP.md
+- **gittr file-fetch flow**: [`FILE_FETCHING_INSIGHTS.md`](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md)
+- **gitnostr fork enhancements**: [`gittr-enhancements.md`](https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/gittr-enhancements.md)
+- **Standalone bridge setup**: [`STANDALONE_BRIDGE_SETUP.md`](https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/STANDALONE_BRIDGE_SETUP.md)
 
 ## License
 
