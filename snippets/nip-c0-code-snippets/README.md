@@ -46,6 +46,14 @@ yarn add lucide-react
 
 ## Usage
 
+### Mobile-Friendly Code Selection
+
+The code viewer implementation includes mobile-optimized features:
+- **Line numbers hidden on mobile** - To avoid alignment issues on small screens
+- **Code lines remain fully clickable** - All selection functionality preserved
+- **Floating action bar** - Appears near selected code with responsive buttons
+- **Touch-friendly** - Optimized button sizes and spacing for mobile devices
+
 ### Creating a Code Snippet Event
 
 ```typescript
