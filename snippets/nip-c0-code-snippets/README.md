@@ -68,9 +68,40 @@ const snippet: CodeSnippetEvent = {
   repoRelay: "wss://relay.example.com" // Optional relay for repo event
 };
 
-// Create and sign the event
+// Create the event (with private key for direct signing)
+import { getPublicKey } from 'nostr-tools';
 const privateKey = "your-private-key";
-const event = createCodeSnippetEvent(snippet, privateKey);
+const pubkey = getPublicKey(privateKey);
+const event = createCodeSnippetEvent(snippet, pubkey, privateKey);
+
+// Publish to Nostr
+await publish(event, relays);
+```
+
+#### With NIP-07 Extension
+
+```typescript
+import { createCodeSnippetEvent, CodeSnippetEvent } from './code-snippet-events';
+
+// Define your snippet
+const snippet: CodeSnippetEvent = {
+  content: `function greet(name: string) {
+  return \`Hello, \${name}!\`;
+}`,
+  language: "typescript",
+  extension: "ts",
+  name: "greet.ts",
+  description: "Simple greeting function"
+};
+
+// Get pubkey from NIP-07
+const pubkey = await window.nostr.getPublicKey();
+
+// Create unsigned event (no privateKey parameter)
+let event = createCodeSnippetEvent(snippet, pubkey);
+
+// Sign with NIP-07
+event = await window.nostr.signEvent(event);
 
 // Publish to Nostr
 await publish(event, relays);
@@ -137,8 +168,11 @@ The optional third parameter is a recommended relay for fetching the repository 
 
 ## Example: Sharing Code from a File Viewer
 
+### With Private Key
+
 ```typescript
 import { createCodeSnippetEvent } from './code-snippet-events';
+import { getPublicKey } from 'nostr-tools';
 import { getNostrPrivateKey } from './security/encryptedStorage';
 
 async function shareCodeAsSnippet(
@@ -173,9 +207,64 @@ async function shareCodeAsSnippet(
     repo: repoRef,
   };
   
-  // Get private key and create event
+  // Get private key and create signed event
   const privateKey = await getNostrPrivateKey();
-  const event = createCodeSnippetEvent(snippet, privateKey);
+  const pubkey = getPublicKey(privateKey);
+  const event = createCodeSnippetEvent(snippet, pubkey, privateKey);
+  
+  // Publish
+  await publish(event, relays);
+}
+```
+
+### With NIP-07 Extension
+
+```typescript
+import { createCodeSnippetEvent } from './code-snippet-events';
+
+async function shareCodeAsSnippetWithNIP07(
+  selectedCode: string,
+  filePath: string,
+  entity: string,
+  repoName: string
+) {
+  // Check for NIP-07
+  if (!window.nostr) {
+    throw new Error('NIP-07 extension not available');
+  }
+  
+  // Extract file extension and language
+  const extension = filePath.split('.').pop() || '';
+  const languageMap: Record<string, string> = {
+    'js': 'javascript',
+    'ts': 'typescript',
+    'py': 'python',
+    'rs': 'rust',
+    'go': 'go',
+  };
+  const language = languageMap[extension] || extension;
+  
+  // Create NIP-34 repo reference
+  const repoRef = `30617:${entity}:${repoName}`;
+  
+  // Create snippet
+  const snippet = {
+    content: selectedCode,
+    language,
+    extension,
+    name: filePath.split('/').pop() || 'snippet',
+    description: `Code snippet from ${filePath}`,
+    repo: repoRef,
+  };
+  
+  // Get pubkey from NIP-07
+  const pubkey = await window.nostr.getPublicKey();
+  
+  // Create unsigned event (no privateKey parameter)
+  let event = createCodeSnippetEvent(snippet, pubkey);
+  
+  // Sign with NIP-07
+  event = await window.nostr.signEvent(event);
   
   // Publish
   await publish(event, relays);

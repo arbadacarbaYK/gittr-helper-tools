@@ -36,11 +36,13 @@ export interface CodeSnippetEvent {
  * Creates a NIP-C0 code snippet event
  * 
  * @param snippet - The snippet data
- * @param privateKey - Private key for signing the event
- * @returns Signed Nostr event ready to publish
+ * @param pubkey - Public key for the event (required)
+ * @param privateKey - Optional private key for signing. If not provided, event will be unsigned (for NIP-07 signing)
+ * @returns Nostr event (signed if privateKey provided, otherwise unsigned for NIP-07)
  * 
  * @example
  * ```typescript
+ * // With private key (direct signing)
  * const snippet: CodeSnippetEvent = {
  *   content: "console.log('Hello, Nostr!');",
  *   language: "javascript",
@@ -50,16 +52,32 @@ export interface CodeSnippetEvent {
  *   repo: "30617:9a83779e75080556c656d4d418d02a4d7edbe288a2f9e6dd2b48799ec935184c:my-repo"
  * };
  * 
- * const event = createCodeSnippetEvent(snippet, privateKey);
+ * const pubkey = getPublicKey(privateKey);
+ * const event = createCodeSnippetEvent(snippet, pubkey, privateKey);
+ * await publish(event);
+ * ```
+ * 
+ * @example
+ * ```typescript
+ * // With NIP-07 (sign separately)
+ * const snippet: CodeSnippetEvent = {
+ *   content: "console.log('Hello, Nostr!');",
+ *   language: "javascript",
+ *   extension: "js",
+ *   name: "hello.js"
+ * };
+ * 
+ * const pubkey = await window.nostr.getPublicKey();
+ * let event = createCodeSnippetEvent(snippet, pubkey); // No privateKey = unsigned
+ * event = await window.nostr.signEvent(event); // Sign with NIP-07
  * await publish(event);
  * ```
  */
 export function createCodeSnippetEvent(
   snippet: CodeSnippetEvent,
-  privateKey: string
+  pubkey: string, // Accept pubkey directly (required)
+  privateKey?: string // Optional: only needed if signing with private key
 ): any {
-  const pubkey = getPublicKey(privateKey);
-  
   const tags: string[][] = [];
   
   // NIP-C0: Add language tag (lowercase)
@@ -122,7 +140,12 @@ export function createCodeSnippetEvent(
   };
   
   event.id = getEventHash(event);
-  event.sig = signEvent(event, privateKey);
+  
+  // Only sign if privateKey is provided (for non-NIP-07 signing)
+  if (privateKey) {
+    event.sig = signEvent(event, privateKey);
+  }
+  
   return event;
 }
 
