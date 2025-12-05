@@ -395,11 +395,12 @@ Ensure your relays allow:
 - **Kind 7** (Reactions) - for stars
 - **Kind 3000** (Bookmark Lists) - for following
 - **Kind 30617** (Replaceable Events) - for repository announcements
+- **Kind 30618** (NIP-34: Repository State) - for repository state (required for ngit clients)
 
 Example relay config (nostr-rs-relay):
 ```toml
 [relay]
-allowed_kinds = [0, 1, 7, 50, 51, 52, 3000, 30617, 9735, 9803, 9804]
+allowed_kinds = [0, 1, 7, 50, 51, 52, 3000, 30617, 30618, 9735, 9803, 9804]
 ```
 
 ## References
