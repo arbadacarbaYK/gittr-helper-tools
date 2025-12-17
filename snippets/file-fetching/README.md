@@ -35,5 +35,5 @@ This parser is used as part of a larger file fetching system that includes perfo
 - **Nostr-Git Optimization**: Only the first nostr-git source is tried since they all hit the same bridge API
 - **GitLab Pagination**: GitLab API returns max 100 items per page - gittr implements pagination using `X-Total-Pages` and `X-Page` headers to fetch ALL files (critical for repos with >100 files)
 
-For full implementation details, see [gittr FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md#file-fetching-performance-optimizations-2024).
+For full implementation details, see [gittr FILE_FETCHING_INSIGHTS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?path=docs&file=docs%2FFILE_FETCHING_INSIGHTS.md#file-fetching-performance-optimizations-2024).
 

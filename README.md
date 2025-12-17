@@ -8,7 +8,7 @@ These are **actual code snippets** we use in production, not theoretical helpers
 
 | Folder | What it does | Why it exists |
 | --- | --- | --- |
-| <span style="color: #8b5cf6;">[`snippets/file-fetching/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools/snippets/file-fetching)</span> | Parse clone URLs from NIP-34 events, identify source types (GitHub/GitLab/Codeberg/GRASP), handle multiple fallback sources | NIP-34 repos can have multiple clone URLs. We need to parse them, identify the source type, and try them in parallel. **Note**: The full fetching system includes performance optimizations (caching, deduplication, source prioritization) - see [gittr FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md) for details. |
+| <span style="color: #8b5cf6;">[`snippets/file-fetching/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools/snippets/file-fetching)</span> | Parse clone URLs from NIP-34 events, identify source types (GitHub/GitLab/Codeberg/GRASP), handle multiple fallback sources | NIP-34 repos can have multiple clone URLs. We need to parse them, identify the source type, and try them in parallel. **Note**: The full fetching system includes performance optimizations (caching, deduplication, source prioritization) - see [gittr FILE_FETCHING_INSIGHTS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?path=docs&file=docs%2FFILE_FETCHING_INSIGHTS.md) for details. |
 | <span style="color: #8b5cf6;">[`snippets/url-normalization/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools/snippets/url-normalization)</span> | Convert SSH (`git@host:path`) and `git://` URLs to HTTPS for API calls | Different git servers use different URL formats. We normalize them to HTTPS for consistent API calls. |
 | <span style="color: #8b5cf6;">[`snippets/grasp-detection/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools/snippets/grasp-detection)</span> | Identify GRASP servers (git servers that are also Nostr relays) vs regular relays | GRASP servers need special handling - they serve repos via git protocol, not REST APIs. |
 | <span style="color: #8b5cf6;">[`snippets/nip46-remote-signer/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools/snippets/nip46-remote-signer)</span> | NIP-46 remote signer integration with QR scanning support | Enable users to pair hardware signers (LNbits, Nowser, Bunker) without exposing private keys. Includes QR code scanning using `html5-qrcode`. |
@@ -55,9 +55,9 @@ Each snippet folder contains its own README with detailed documentation, code ex
 
 ## Related Documentation
 
-- **gittr file-fetch flow**: [`FILE_FETCHING_INSIGHTS.md`](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md)
-- **gitnostr fork enhancements**: [`gittr-enhancements.md`](https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/gittr-enhancements.md)
-- **Standalone bridge setup**: [`STANDALONE_BRIDGE_SETUP.md`](https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/STANDALONE_BRIDGE_SETUP.md)
+- **gittr file-fetch flow**: [`FILE_FETCHING_INSIGHTS.md`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?path=docs&file=docs%2FFILE_FETCHING_INSIGHTS.md)
+- **gitnostr fork enhancements**: [`gittr-enhancements.md`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gitnostr?path=docs&file=docs%2Fgittr-enhancements.md)
+- **Standalone bridge setup**: [`STANDALONE_BRIDGE_SETUP.md`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gitnostr?path=docs&file=docs%2FSTANDALONE_BRIDGE_SETUP.md)
 
 ## License
 
