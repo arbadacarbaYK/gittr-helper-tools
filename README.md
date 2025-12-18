@@ -19,7 +19,7 @@ These are **actual code snippets** we use in production, not theoretical helpers
 
 ## Getting Started
 
-Each snippet folder contains its own README with detailed documentation, code examples, and usage instructions. Click on any <span style="color: #8b5cf6;">violet link</span> above to jump to the specific snippet documentation.
+Each snippet folder contains its own README with detailed documentation, code examples, and usage instructions. 
 
 ## Recent Additions
 
