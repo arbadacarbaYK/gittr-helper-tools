@@ -25,7 +25,7 @@ export interface GitSource {
   displayName: string;
   owner?: string;
   repo?: string;
-  npub?: string; // For nostr-git sources
+  npub?: string; // For nostr-git sources (can be npub, NIP-05, or hex pubkey)
 }
 
 /**

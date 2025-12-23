@@ -11,6 +11,7 @@ Parses clone URLs and identifies the source type (GitHub, GitLab, Codeberg, GRAS
 - Identifies source type (github, gitlab, codeberg, nostr-git, unknown)
 - Normalizes SSH (`git@host:path`) and `git://` URLs to HTTPS
 - Detects GRASP servers (Nostr git servers)
+- Supports multiple entity formats for Nostr git servers: `npub`, `NIP-05` (e.g., `user@domain.com`), and `hex pubkey` (64-char)
 
 **Usage:**
 ```typescript
@@ -21,6 +22,13 @@ const source = parseGitSource('https://github.com/user/repo.git', knownGraspDoma
 
 const graspSource = parseGitSource('https://relay.ngit.dev/npub123abc/repo.git', knownGraspDomains);
 // { type: 'nostr-git', npub: 'npub123abc', repo: 'repo', url: '...', displayName: 'relay.ngit.dev' }
+
+// Also supports NIP-05 and hex pubkey formats:
+const nip05Source = parseGitSource('https://git.gittr.space/geek@primal.net/repo.git', knownGraspDomains);
+// { type: 'nostr-git', npub: 'geek@primal.net', repo: 'repo', url: '...', displayName: 'git.gittr.space' }
+
+const hexSource = parseGitSource('https://git.gittr.space/daa41bedb68591363bf4407f687cb9789cc543ed024bb77c22d2c84d88f54153/repo.git', knownGraspDomains);
+// { type: 'nostr-git', npub: 'daa41bedb68591363bf4407f687cb9789cc543ed024bb77c22d2c84d88f54153', repo: 'repo', url: '...', displayName: 'git.gittr.space' }
 ```
 
 **Extracted from:** `gittr/ui/src/lib/utils/git-source-fetcher.ts`
