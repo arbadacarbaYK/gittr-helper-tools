@@ -80,16 +80,50 @@ export function parseGitSource(cloneUrl: string, knownGraspDomains: string[] = [
   
   // Nostr git server (grasp) pattern: https://relay.ngit.dev/npub.../repo
   // or: https://ngit.danconwaydev.com/npub.../repo
+  // or: https://git.gittr.space/geek@primal.net/repo (NIP-05 format)
+  // or: https://git.gittr.space/daa41bedb68591363bf4407f687cb9789cc543ed024bb77c22d2c84d88f54153/repo (hex pubkey)
   // or: https://git.vanderwarker.family/nostr/repo (without npub in path)
-  const nostrGitMatch = url.match(/^https?:\/\/([^\/]+)\/(npub[a-z0-9]+)\/([^\/]+)$/i);
-  if (nostrGitMatch) {
-    const [, domain, npub, repo] = nostrGitMatch;
+  
+  // Pattern 1: npub format (recommended, per NIP-34)
+  const nostrGitNpubMatch = url.match(/^https?:\/\/([^\/]+)\/(npub[a-z0-9]+)\/([^\/]+)$/i);
+  if (nostrGitNpubMatch) {
+    const [, domain, npub, repo] = nostrGitNpubMatch;
     if (domain && npub && repo) {
       return {
         type: "nostr-git",
         url: normalizedUrl, // Use normalized URL (https://) for API calls
         displayName: domain,
         npub,
+        repo,
+      };
+    }
+  }
+  
+  // Pattern 2: NIP-05 format (e.g., geek@primal.net)
+  const nostrGitNip05Match = url.match(/^https?:\/\/([^\/]+)\/([^@]+@[^\/]+)\/([^\/]+)$/i);
+  if (nostrGitNip05Match) {
+    const [, domain, nip05, repo] = nostrGitNip05Match;
+    if (domain && nip05 && repo) {
+      return {
+        type: "nostr-git",
+        url: normalizedUrl, // Use normalized URL (https://) for API calls
+        displayName: domain,
+        npub: nip05, // Store NIP-05 as npub field (will be resolved by caller if needed)
+        repo,
+      };
+    }
+  }
+  
+  // Pattern 3: hex pubkey format (64-char)
+  const nostrGitHexMatch = url.match(/^https?:\/\/([^\/]+)\/([0-9a-f]{64})\/([^\/]+)$/i);
+  if (nostrGitHexMatch) {
+    const [, domain, hexPubkey, repo] = nostrGitHexMatch;
+    if (domain && hexPubkey && repo) {
+      return {
+        type: "nostr-git",
+        url: normalizedUrl, // Use normalized URL (https://) for API calls
+        displayName: domain,
+        npub: hexPubkey, // Store hex as npub field (will be encoded to npub by caller if needed)
         repo,
       };
     }
