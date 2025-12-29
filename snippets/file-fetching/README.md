@@ -33,6 +33,25 @@ const hexSource = parseGitSource('https://git.gittr.space/daa41bedb68591363bf440
 
 **Extracted from:** `gittr/ui/src/lib/utils/git-source-fetcher.ts`
 
+## File Path Encoding
+
+**CRITICAL**: When making API calls with file paths, always URL-encode the path parameter using `encodeURIComponent()` to handle non-ASCII characters correctly:
+
+```typescript
+// ✅ Correct: URL-encode file paths
+const apiUrl = `/api/nostr/repo/file-content?ownerPubkey=${encodeURIComponent(ownerPubkey)}&repo=${encodeURIComponent(repoName)}&path=${encodeURIComponent(filePath)}&branch=${encodeURIComponent(branch)}`;
+
+// ✅ Also correct for external git servers
+const gitApiUrl = `/api/git/file-content?sourceUrl=${encodeURIComponent(sourceUrl)}&path=${encodeURIComponent(filePath)}&branch=${encodeURIComponent(branch)}`;
+```
+
+This ensures files with non-ASCII characters (Cyrillic, Chinese, accented characters, etc.) are handled correctly:
+- Cyrillic: `ЧИТАЙ.md` → `%D0%A7%D0%98%D0%A2%D0%90%D0%99.md`
+- Chinese: `读我D.md` → `%E8%AF%BB%E6%88%91D.md`
+- Accented: `LÉAME.md` → `L%C3%89AME.md`
+
+The API endpoints automatically decode these and handle UTF-8 correctly on the backend.
+
 ## Performance Notes
 
 This parser is used as part of a larger file fetching system that includes performance optimizations:
