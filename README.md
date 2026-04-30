@@ -24,6 +24,11 @@ Each snippet folder contains its own README with detailed documentation, code ex
 
 ## Recent Additions
 
+### NIP-34 Interop Updates (2026-04-30)
+- Clarified ngit/gitworkshop-compatible event expectations across repository (`30617`, `30618`), issues (`1621`), pull requests (`1618`, `1619`), follows (`10018`), and label overlays (`1985`).
+- Added guidance to treat `r` (earliest unique commit) as required for issue/PR-family events, and to resolve it from repository git history when local cache metadata is missing.
+- Aligned helper docs with cross-client compatibility behavior used in production gittr flows.
+
 ### NIP-34 Repository Events (2025-12-28)
 - Added `snippets/nip34-repository-events/` with complete NIP-34 implementation
 - Request/response schema examples showing exact event structure

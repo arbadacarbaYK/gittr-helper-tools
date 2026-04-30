@@ -240,6 +240,12 @@ const unsub = subscribe(
 
 ## Important Notes
 
+### Cross-Client Interoperability (ngit/gitworkshop)
+
+For full interop, repository announcements (`30617`) should be paired with repository state events (`30618`) for the same `d` identifier. Collaborative events that reference a repository (issues `1621`, pull requests `1618`, PR updates `1619`, patches `1617`) should include `r` (earliest unique commit/root commit) so clients can anchor history consistently.
+
+If local repository cache metadata is incomplete, resolve `r` from git history (for example via `git rev-list --max-parents=0 <branch|HEAD>`) instead of blocking event creation.
+
 ### Content Field
 
 **CRITICAL**: The `content` field **MUST be empty** (`""`) per NIP-34 spec. All metadata goes in tags, not in content. This ensures interoperability with other NIP-34 clients.
