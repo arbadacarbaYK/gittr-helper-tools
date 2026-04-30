@@ -246,6 +246,8 @@ For full interop, repository announcements (`30617`) should be paired with repos
 
 If local repository cache metadata is incomplete, resolve `r` from git history (for example via `git rev-list --max-parents=0 <branch|HEAD>`) instead of blocking event creation.
 
+For merge flows, do not stop at publishing a PR status update. After merge status (`1631`) is published, also publish refreshed repository/state events (`30617` + `30618`) so multi-client users see the merged commit/file state without relying on local cache order or timeline reconstruction.
+
 ### Content Field
 
 **CRITICAL**: The `content` field **MUST be empty** (`""`) per NIP-34 spec. All metadata goes in tags, not in content. This ensures interoperability with other NIP-34 clients.
