@@ -36,7 +36,7 @@ This document explains how to implement repository starring and following using 
 
 Following the [Nostr community discussion](https://github.com/nostr-protocol/nips/pull/880), we use:
 - **NIP-25 (Kind 7)** for repository stars (reactions to Kind 30617 repository events)
-- **NIP-51 (Kind 3000/3001)** for following/watching repositories (bookmark lists)
+- **NIP-51 (Kind 10018)** for following/watching repositories (Git repositories list)
 
 **Key Benefits:**
 - Platform-wide visibility (everyone sees who starred what)
@@ -53,7 +53,7 @@ This implementation uses standard Nostr libraries:
 ## Event Kinds Used
 
 - **Kind 7** (NIP-25: Reactions) - Star reactions to repositories
-- **Kind 3000** (NIP-51: Bookmark Lists) - Following/watching repositories
+- **Kind 10018** (NIP-51: Git Repositories List) - Following/watching repositories
 - **Kind 30617** (NIP-34: Replaceable Events) - Repository announcements (what we're reacting to)
 
 ## NIP-25 Star Reactions
@@ -249,11 +249,11 @@ useEffect(() => {
 
 ### Event Structure
 
-When a user follows a repository, publish a **Kind 3000** (Bookmark List) event:
+When a user follows a repository, publish a **Kind 10018** (Git Repositories List) event:
 
 ```typescript
 {
-  kind: 3000, // NIP-51: Bookmark List
+  kind: 10018, // NIP-51: Git repositories list
   created_at: Math.floor(Date.now() / 1000),
   tags: [
     ["d", "followed-repos"], // List identifier
@@ -284,10 +284,10 @@ Two formats are supported:
 ```typescript
 // ui/src/lib/nostr/events.ts
 
-export const KIND_BOOKMARK_LIST = 3000; // NIP-51
+export const KIND_GIT_REPOSITORIES_LIST = 10018; // NIP-51
 
 export function createRepoFollowListEvent(
-  listIdentifier: string, // e.g., "followed-repos" or "watched-repos"
+  listIdentifier: string, // e.g., "gittr-followed-repos"
   repoReferences: Array<{
     eventId?: string;
     relay?: string;
@@ -314,7 +314,7 @@ export function createRepoFollowListEvent(
   }
   
   const event = {
-    kind: KIND_BOOKMARK_LIST,
+    kind: KIND_GIT_REPOSITORIES_LIST,
     created_at: Math.floor(Date.now() / 1000),
     tags,
     content: "", // Empty content for lists
@@ -344,7 +344,7 @@ export async function queryUserFollowList(
     
     const filters: Filter[] = [
       {
-        kinds: [KIND_BOOKMARK_LIST], // 3000
+        kinds: [KIND_GIT_REPOSITORIES_LIST], // 10018
         authors: [userPubkey],
         "#d": [listIdentifier],
       },
@@ -393,14 +393,14 @@ NIP-25 allows negative reactions (`content: "-"`). When aggregating:
 
 Ensure your relays allow:
 - **Kind 7** (Reactions) - for stars
-- **Kind 3000** (Bookmark Lists) - for following
+- **Kind 10018** (Git repositories list) - for following
 - **Kind 30617** (Replaceable Events) - for repository announcements
 - **Kind 30618** (NIP-34: Repository State) - for repository state (required for ngit clients)
 
 Example relay config (nostr-rs-relay):
 ```toml
 [relay]
-allowed_kinds = [0, 1, 7, 50, 51, 52, 3000, 30617, 30618, 9735, 9803, 9804]
+allowed_kinds = [0, 1, 7, 50, 51, 52, 10018, 30617, 30618, 9735, 9803, 9804]
 ```
 
 ## References
