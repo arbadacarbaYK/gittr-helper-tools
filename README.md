@@ -16,6 +16,7 @@ These are **actual code snippets** we use in production, not theoretical helpers
 | [`snippets/markdown-media-handling/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets%2Fmarkdown-media-handling) | Handle images, videos, and media in markdown files with API endpoint support | Two approaches: simple inline handler (currently used in gittr) and full-featured component-based solution. Resolves relative image paths to Git provider raw URLs (GitHub/GitLab/Codeberg), converts base64 API responses to data URLs, supports YouTube/Vimeo embeds, and handles relative links within repositories. |
 | [`snippets/nip-c0-code-snippets/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets%2Fnip-c0-code-snippets) | NIP-C0 code snippet sharing and rendering | Create and display code snippets as standalone Nostr events (kind:1337). Includes event creation utilities, React renderer component, and support for linking snippets back to source repositories using NIP-34 format. |
 | [`snippets/nip34-repository-events/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets%2Fnip34-repository-events) | NIP-34 repository event schemas and handling | Complete request/response schemas for NIP-34 (kind:30617) repository announcements. Shows what you send, what you receive, and how to parse it. Essential for developers of other Nostr clients to ensure spec compliance and interoperability. |
+| [`snippets/nip34-push-paywall/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets%2Fnip34-push-paywall) | NIP-34 push paywall extension (`push_cost_sats`) | Interop profile for pay-to-push: publish policy on kind `30617`, normalize `owner+d`, and enforce payment server-side (HTTP/SSH) with `402` + invoice flow. |
 | `cmd/` | (Future) Standalone CLI tools or services | Helpers that can run independently (e.g., clone-events-sse, blossom-fetch-helper) |
 
 ## Getting Started
@@ -23,6 +24,11 @@ These are **actual code snippets** we use in production, not theoretical helpers
 Each snippet folder contains its own README with detailed documentation, code examples, and usage instructions. 
 
 ## Recent Additions
+
+### NIP-34 Push Paywall Interop (2026-05-01)
+- Added `snippets/nip34-push-paywall/` describing `push_cost_sats` as an optional extension tag on kind `30617`.
+- Documented normalization (`owner pubkey + d tag`), host-side enforcement model, and reference HTTP API pattern (`push-payment` + `402` semantics).
+- Clarified that pay-to-push should stay on NIP-34 repository metadata, not a separate PR kind.
 
 ### NIP-34 Interop Updates (2026-04-30)
 - Clarified ngit/gitworkshop-compatible event expectations across repository (`30617`, `30618`), issues (`1621`), pull requests (`1618`, `1619`), follows (`10018`), and label overlays (`1985`).
