@@ -19,6 +19,21 @@ These are **actual code snippets** we use in production, not theoretical helpers
 | [`snippets/nip34-push-paywall/`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets%2Fnip34-push-paywall) | NIP-34 push paywall extension (`push_cost_sats`) | Interop profile for pay-to-push: publish policy on kind `30617`, normalize `owner+d`, and enforce payment server-side (HTTP/SSH) with `402` + invoice flow. |
 | `cmd/` | (Future) Standalone CLI tools or services | Helpers that can run independently (e.g., clone-events-sse, blossom-fetch-helper) |
 
+## Supported NIPs (gittr ecosystem)
+
+This repo is **documentation + snippets**; “support” means what **[gittr.space](https://gittr.space)** and the **[gitnostr bridge fork](https://github.com/arbadacarbaYK/gitnostr)** actually implement in production.
+
+| NIP / kind | Where it lives | Notes |
+| --- | --- | --- |
+| **NIP-46** (kind **`24133`**) | **gittr web UI only** | Remote signer / `bunker://` / `nostrconnect://`, QR, NIP-07 adapter. The **bridge never implements NIP-46**; it only sees normal signed events on relays. |
+| **NIP-07** | gittr web UI | In-browser extension signing (separate code path from NIP-46, same UX goal). |
+| **NIP-34** + kinds **`30617` / `30618`** | UI + bridge | Repository metadata and state; bridge clones and SSH. |
+| **NIP-57** (e.g. **`9735`**) | gittr UI + relays | Zaps; bridge may see zap receipts on relays but does not create them. |
+| **NIP-96** | gittr UI | Blossom uploads (e.g. packs, Pages assets). |
+| **Kinds `50`–`52`, NIP-22 threads, etc.** | Mostly bridge + UI | See gittr’s canonical list: [`docs/NIPS_AND_EVENT_KINDS.md`](https://github.com/arbadacarbaYK/gittr/blob/main/docs/NIPS_AND_EVENT_KINDS.md). |
+
+**If you are implementing NIP-46:** read [`docs/NIP46_REMOTE_SIGNER_INTEGRATION.md`](https://github.com/arbadacarbaYK/gittr/blob/main/docs/NIP46_REMOTE_SIGNER_INTEGRATION.md) on gittr (architecture + pitfalls), then the snippet [`snippets/nip46-remote-signer/`](./snippets/nip46-remote-signer) for extracted code. The table above avoids the common mistake of expecting the **git server** to participate in bunker/nostrconnect pairing.
+
 ## Getting Started
 
 Each snippet folder contains its own README with detailed documentation, code examples, and usage instructions. 
@@ -63,10 +78,11 @@ Each snippet folder contains its own README with detailed documentation, code ex
 - NIP-51 lists for following/watching repositories
 - Platform-wide visibility without server storage
 
-### NIP-46 Remote Signer (2025-11-28, updated 2025-11-29)
+### NIP-46 Remote Signer (2025-11-28, updated 2026-05-08)
 - Added `snippets/nip46-remote-signer/` for hardware signer integration
 - QR code scanning support using `html5-qrcode`
-- Support for LNbits, Nowser, Bunker, and other remote signers
+- Support for LNbits, Nowser, Amber, Bunker, and other remote signers
+- Documented **bunker vs nostrconnect** URI semantics, **subscription-before-scan** ordering, **JSON-RPC id** quirks, and clarified **bridge does not implement NIP-46** (see **Supported NIPs** section above + snippet README learnings)
 
 ### Core Utilities (2025-11-27)
 - Added `snippets/file-fetching/` for parsing and handling Git clone URLs from NIP-34 events
