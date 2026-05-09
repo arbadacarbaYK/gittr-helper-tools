@@ -59,7 +59,7 @@ const signedEvent = await window.nostr.signEvent(unsignedEvent);
 
 - **Host** = **client** pubkey for this pairing session **(not the signer’s pubkey)**.
 - **Signer** pubkey is unknown until you receive the first valid **`24133`** addressed to the client (`#p` = client pubkey); the **author** of that event becomes `remotePubkey`.
-- Many flows put the **client private key** in the `secret` query param (64-hex) so a printed/QR URI is self-contained. You must use **the same** client keys that appear in the URI when subscribing and encrypting.
+- Treat `secret` as an opaque **challenge** (not a private key). Store the ephemeral client key locally (indexed by client pubkey), then require `result === secret` on the first decrypted `24133` before trusting signer identity.
 
 Wrong mental model (breaks Amber / QR): treating `nostrconnect` host as the signer like `bunker`.
 
@@ -97,7 +97,7 @@ These are the issues that show up as “I approved on the phone and **nothing ha
    Wallets may ask to create a **new** NIP-46 connection for each URI; that is normal when the client pubkey is new.
 
 7. **Security**  
-   A `nostrconnect` URI with embedded `secret` is powerful; treat QR like a **password**. Document that for users.
+   Never place client private keys in the URI. Keep them local, treat `secret` as a challenge string, and only accept signer identity after explicit challenge match.
 
 ---
 
