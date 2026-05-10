@@ -10,7 +10,7 @@ These are **actual code snippets** we use in production, not theoretical helpers
 
 | Folder | What it does | Why it exists |
 | --- | --- | --- |
-| [`snippets/file-fetching/`](./snippets/file-fetching) | Parse clone URLs from NIP-34 events, identify source types (GitHub/GitLab/Codeberg/GRASP), handle multiple fallback sources, GitHub OAuth token support | NIP-34 repos can have multiple clone URLs. We need to parse them, identify the source type, and try them in parallel. **GitHub OAuth**: For private repositories, users authenticate via GitHub OAuth and their tokens are passed to the file-content API. The API prioritizes user tokens (private repos) over platform tokens (public repos). **Note**: The full fetching system includes performance optimizations (caching, deduplication, source prioritization) — see [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md) on the gittr repo. |
+| [`snippets/file-fetching/`](./snippets/file-fetching) | Parse clone URLs from NIP-34 events, identify source types (GitHub/GitLab/Codeberg/GRASP/self-hosted), handle multiple fallback sources, GitHub OAuth token support | NIP-34 repos can have multiple clone URLs. We need to parse them, identify the source type, and try them in parallel. **GRASP / bridge:** gittr triggers clone when **`/api/nostr/repo/files`** is **404** or **200 with empty `files`**, not only on 404. **GitHub OAuth**: For private repositories, users authenticate via GitHub OAuth and their tokens are passed to the file-content API. The API prioritizes user tokens (private repos) over platform tokens (public repos). **Note**: The full fetching system includes performance optimizations (caching, deduplication, source prioritization) — see [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md) on the gittr repo. |
 | [`snippets/url-normalization/`](./snippets/url-normalization) | Convert SSH (`git@host:path`) and `git://` URLs to HTTPS for API calls | Different git servers use different URL formats. We normalize them to HTTPS for consistent API calls. |
 | [`snippets/grasp-detection/`](./snippets/grasp-detection) | Identify GRASP servers (git servers that are also Nostr relays) vs regular relays | GRASP servers need special handling - they serve repos via git protocol, not REST APIs. |
 | [`snippets/nip46-remote-signer/`](./snippets/nip46-remote-signer) | NIP-46 remote signer integration with QR scanning support | Enable users to pair hardware signers (LNbits, Nowser, Bunker) without exposing private keys. Includes QR code scanning using `html5-qrcode`. |
@@ -41,6 +41,9 @@ This repo is **documentation + snippets**; “support” means what **[gittr.spa
 Each snippet folder contains its own README with detailed documentation, code examples, and usage instructions. 
 
 ## Recent Additions
+
+### File-fetch docs sync (2026-05-09)
+- Aligned [`snippets/file-fetching/README.md`](./snippets/file-fetching/README.md) with production gittr: **`user@host:path`** as **self-hosted-git**, **200 + empty `files`** as clone trigger alongside **404**, fixed deep-link anchor to [`FILE_FETCHING_INSIGHTS.md` § GRASP cloning](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md#grasp-server-automatic-cloning-mechanism).
 
 ### NIP-34 Push Paywall Interop (2026-05-01)
 - Added `snippets/nip34-push-paywall/` describing `push_cost_sats` as an optional extension tag on kind `30617`.

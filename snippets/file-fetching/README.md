@@ -9,7 +9,8 @@ Parses clone URLs and identifies the source type (GitHub, GitLab, Codeberg, GRAS
 **What it does:**
 - Parses clone URLs from NIP-34 `clone` tags
 - Identifies source type (github, gitlab, codeberg, nostr-git, unknown)
-- Normalizes SSH (`git@host:path`) and `git://` URLs to HTTPS
+- Normalizes **`git@host:path`** and `git://` URLs to HTTPS where appropriate
+- Treats **`user@host:path`** (no scheme, generic SSH remote) as **`self-hosted-git`** for tree/file APIs (see gittr `parseGitSource` / `repo-files` route)
 - Detects GRASP servers (Nostr git servers)
 - Supports multiple entity formats for Nostr git servers: `npub`, `NIP-05` (e.g., `user@domain.com`), and `hex pubkey` (64-char)
 
@@ -62,5 +63,5 @@ This parser is used as part of a larger file fetching system that includes perfo
 - **Nostr-Git Optimization**: Only the first nostr-git source is tried since they all hit the same bridge API
 - **GitLab Pagination**: GitLab API returns max 100 items per page - gittr implements pagination using `X-Total-Pages` and `X-Page` headers to fetch ALL files (critical for repos with >100 files)
 
-For full implementation details, see [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md#file-fetching-performance-optimizations-2024) in the gittr repository.
+For full implementation details, see [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md#grasp-server-automatic-cloning-mechanism) in the gittr repository (GRASP clone triggers, empty `files` on 200, bridge `repo` normalization, and related behavior).
 
