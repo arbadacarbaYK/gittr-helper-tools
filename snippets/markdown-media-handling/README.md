@@ -1,5 +1,7 @@
 # Markdown Media Handling
 
+> **Other clients & agents:** Image/embed logic is portable; **relative repo links** in production gittr also use `markdown-anchor.tsx` (see porting table). [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
+
 Utilities and React components for handling images, videos, and other media files in markdown content within repository viewers.
 
 ## Two Approaches

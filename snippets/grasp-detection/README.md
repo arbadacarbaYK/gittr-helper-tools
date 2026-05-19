@@ -1,5 +1,7 @@
 # GRASP Server Detection
 
+> **Other clients & agents:** Reuse the detection logic; **update domain lists** for your deployment. [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
+
 Code snippets for identifying GRASP (Git-Nostr-Bridge) servers vs regular Nostr relays.
 
 ## `grasp-servers.ts`

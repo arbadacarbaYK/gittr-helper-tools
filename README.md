@@ -1,10 +1,20 @@
 # gittr helper tools & snippets
 
-Utilities and code snippets extracted from [gittr.space](https://gittr.space) that handle complex file-fetching logic, URL normalization, GRASP server detection, and other tricky bits we've built.
+## About — who this repo is for
 
-These are **actual code snippets** we use in production, not theoretical helpers. They solve real problems we encountered while building gittr.
+**Developers and coding agents** building or extending **Nostr-native Git clients** (web apps, desktop tools, relays, bridges). This is not end-user documentation for gittr.space.
 
-**Forking / docs hygiene:** Examples in this repo intentionally use **placeholders** (e.g. `lnbits.example.com`). Do not commit real **server IPs**, **SSH key paths**, **OAuth client secrets**, **LNbits admin keys**, or **nsecs** into public docs or `.env` files you push to git. Use `.env.example` patterns and keep operator-specific deploy scripts private.
+We publish **copy-pasteable modules** and **interop notes** taken from [gittr.space](https://gittr.space) production so you can:
+
+- implement the same NIPs (NIP-34, C0, 25, 51, 46, …) without rediscovering edge cases;
+- match behaviour other clients already see on the network (multi-value `clone` rows, GRASP HTTPS rules, pay-to-push tags);
+- enlarge your client’s feature set (stars, snippets, markdown repos, remote signers) faster than reading the full gittr monorepo.
+
+Each folder is **self-contained** where possible. What is **portable** (standard NIP behaviour) vs **gittr-specific** (URLs, API routes, domain lists) is spelled out in that folder’s README and in **[`docs/FOR_OTHER_CLIENTS.md`](./docs/FOR_OTHER_CLIENTS.md)** — start there if you are an agent planning a port.
+
+These are **actual snippets** we run in production, not sample tutorials. When gittr changes, we sync the relevant folders here.
+
+**Forking / docs hygiene:** Examples use **placeholders** (e.g. `lnbits.example.com`). Do not commit real **server IPs**, **SSH key paths**, **OAuth secrets**, **LNbits admin keys**, or **nsecs** into public docs. Use `.env.example` and keep operator deploy secrets private.
 
 ## What's in here
 
@@ -15,7 +25,7 @@ These are **actual code snippets** we use in production, not theoretical helpers
 | [`snippets/grasp-detection/`](./snippets/grasp-detection) | Identify GRASP servers (git servers that are also Nostr relays) vs regular relays | GRASP servers need special handling - they serve repos via git protocol, not REST APIs. |
 | [`snippets/nip46-remote-signer/`](./snippets/nip46-remote-signer) | NIP-46 remote signer integration with QR scanning support | Enable users to pair hardware signers (LNbits, Nowser, Bunker) without exposing private keys. Includes QR code scanning using `html5-qrcode`. |
 | [`snippets/nip25-stars-nip51-following/`](./snippets/nip25-stars-nip51-following) | NIP-25 reactions for starring and NIP-51 `10018` lists for following repositories | Decentralized starring and following using standard NIPs. Platform-wide visibility without server storage. |
-| [`snippets/markdown-media-handling/`](./snippets/markdown-media-handling) | Handle images, videos, and media in markdown files with API endpoint support | Two approaches: simple inline handler (currently used in gittr) and full-featured component-based solution. Resolves relative image paths to Git provider raw URLs (GitHub/GitLab/Codeberg), converts base64 API responses to data URLs, supports YouTube/Vimeo embeds, and handles relative links within repositories. |
+| [`snippets/markdown-media-handling/`](./snippets/markdown-media-handling) | Markdown images, embeds, and **repo-relative links** | Two approaches in the snippet folder; **production gittr** also uses `markdown-anchor.tsx` (relative `./` → `?file=`, `#L` preserved) on the repo page. Images: inline handler or full `markdown-media.tsx`. Portable: path normalization + raw URL rules; adapt: your API routes and repo URL shape. |
 | [`snippets/nip-c0-code-snippets/`](./snippets/nip-c0-code-snippets) | NIP-C0 code snippet sharing and rendering | Kind `1337` events + renderer. On gittr, **Copy permalink** (`#L6-L10` in file code view) is separate from **Share as snippet** (Nostr event). See snippet README for URL shape and “View Code” on `.md` files. |
 | [`snippets/nip34-repository-events/`](./snippets/nip34-repository-events) | NIP-34 repository event schemas and handling | Complete request/response schemas for NIP-34 (kind:30617) repository announcements. Shows what you send, what you receive, and how to parse it. Essential for developers of other Nostr clients to ensure spec compliance and interoperability. |
 | [`snippets/nip34-push-paywall/`](./snippets/nip34-push-paywall) | NIP-34 push paywall extension (`push_cost_sats`) | Interop profile for pay-to-push: publish policy on kind `30617`, normalize `owner+d`, and enforce payment server-side (HTTP/SSH) with `402` + invoice flow. |
@@ -38,7 +48,12 @@ This repo is **documentation + snippets**; “support” means what **[gittr.spa
 
 ## Getting Started
 
-Each snippet folder contains its own README with detailed documentation, code examples, and usage instructions. 
+1. Open **[`docs/FOR_OTHER_CLIENTS.md`](./docs/FOR_OTHER_CLIENTS.md)** — portability matrix and agent workflow.
+2. Pick a snippet folder; read its README and copy the `.ts` / `.tsx` files you need.
+3. Compare with the **canonical path** in the [gittr / ngit](https://github.com/arbadacarbaYK/gittr) repo if something fails interop (snippets can lag main by a few commits).
+4. For file trees, cloning, and bridge triggers, read gittr **[`FILE_FETCHING_INSIGHTS.md`](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md)** (not duplicated here in full).
+
+Each snippet README documents **what is reusable**, **what is gittr-only**, and **where it was extracted from**.
 
 ## Recent Additions
 
@@ -75,7 +90,11 @@ Each snippet folder contains its own README with detailed documentation, code ex
 
 ### gittr line permalinks vs NIP-C0 (2026-05)
 - Documented in [`snippets/nip-c0-code-snippets/README.md`](./snippets/nip-c0-code-snippets/README.md): permalinks (`?file=…#L6-L10`) vs kind `1337` snippets; **View Code** for markdown; grid line layout
-- Full documentation with usage examples and tag reference
+
+### Porting guide for other clients (2026-05)
+- Added [`docs/FOR_OTHER_CLIENTS.md`](./docs/FOR_OTHER_CLIENTS.md) — reusability matrix, agent workflow, standard vs gittr-only behaviour
+- README **About** section for developers and coding agents extending Nostr Git clients
+- Each snippet README links to the porting guide
 
 ### Markdown Media Handling (2025-11-28)
 - Added `snippets/markdown-media-handling/` for handling images, videos, and media in markdown
@@ -103,7 +122,9 @@ Each snippet folder contains its own README with detailed documentation, code ex
 
 ## Related Documentation
 
+- **Porting index (devs & agents)**: [`docs/FOR_OTHER_CLIENTS.md`](./docs/FOR_OTHER_CLIENTS.md)
 - **gittr file-fetch flow**: [`FILE_FETCHING_INSIGHTS.md`](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md)
+- **NIPs & kinds on gittr**: [`NIPS_AND_EVENT_KINDS.md`](https://github.com/arbadacarbaYK/gittr/blob/main/docs/NIPS_AND_EVENT_KINDS.md)
 - **gitnostr fork enhancements**: [`gittr-enhancements.md`](https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/gittr-enhancements.md)
 - **Standalone bridge setup**: [`STANDALONE_BRIDGE_SETUP.md`](https://github.com/arbadacarbaYK/gitnostr/blob/main/docs/STANDALONE_BRIDGE_SETUP.md)
 

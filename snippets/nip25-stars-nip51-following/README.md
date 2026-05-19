@@ -1,5 +1,7 @@
 # NIP-25 Stars & NIP-51 Following Implementation
 
+> **Other clients & agents:** Standard NIP-25 / NIP-51 — reusable with your relay filters and UI. [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
+
 Code snippets for implementing repository starring and following using **NIP-25** (Reactions) and **NIP-51** (Lists) in a Nostr-based Git hosting platform.
 
 ## `repo-stars.ts`

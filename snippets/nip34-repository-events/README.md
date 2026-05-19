@@ -1,5 +1,7 @@
 # NIP-34 Repository Events
 
+> **Other clients & agents:** Core interop for any Nostr Git client — parsers and emission rules below match gittr/ngit-relay production. [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
+
 Code snippets for implementing **NIP-34** (Replaceable Events) repository announcements in a Nostr client. This shows the complete request/response cycle: what you send, what you receive, and how to handle it.
 
 ## What is NIP-34?

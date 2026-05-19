@@ -1,5 +1,7 @@
 # NIP-C0 Code Snippets
 
+> **Other clients & agents:** Kind `1337` is portable; **line permalinks** (`#L…`) are gittr UI only. [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
+
 Code snippets for implementing **NIP-C0** (Code Snippets) in a Nostr client, enabling users to share code snippets as standalone discoverable events on the Nostr network.
 
 ## What is NIP-C0?
