@@ -12,9 +12,9 @@ We publish **copy-pasteable modules** and **interop notes** taken from [gittr.sp
 
 Each folder is **self-contained** where possible. What is **portable** (standard NIP behaviour) vs **gittr-specific** (URLs, API routes, domain lists) is spelled out in that folder’s README and in **[`docs/FOR_OTHER_CLIENTS.md`](./docs/FOR_OTHER_CLIENTS.md)** — start there if you are an agent planning a port.
 
-**gittr sidebar About:** The section under **## About — who this repo is for** (above) is what gittr shows when the Nostr description is still the default `Repository: …` placeholder. To store it on relays, paste [`docs/GITTR_REPO_ABOUT.md`](./docs/GITTR_REPO_ABOUT.md) into **Settings → Description** on gittr.space.
-
 These are **actual snippets** we run in production, not sample tutorials. When gittr changes, we sync the relevant folders here.
+
+**gittr.space sidebar:** Use the short text in [`docs/GITTR_REPO_ABOUT.md`](./docs/GITTR_REPO_ABOUT.md) in **Settings → Description** (1–2 sentences). The long README stays on the repo page; do not paste the full About section into Description.
 
 **Forking / docs hygiene:** Examples use **placeholders** (e.g. `lnbits.example.com`). Do not commit real **server IPs**, **SSH key paths**, **OAuth secrets**, **LNbits admin keys**, or **nsecs** into public docs. Use `.env.example` and keep operator deploy secrets private.
 
