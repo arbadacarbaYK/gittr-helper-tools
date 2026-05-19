@@ -1,9 +1,6 @@
 # gittr helper tools & snippets
 
-Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Upstream lives in [github.com/arbadacarbaYK/gittr](https://github.com/arbadacarbaYK/gittr) (not the separate **ngit** product).
-
-**gittr repo description (NIP-34, 1–2 sentences for Settings → Description):**  
-*Production snippets from gittr.space for developers and agents porting Nostr Git features (NIP-34, GRASP, C0, NIP-46, etc.) into their own clients.*
+Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [github.com/arbadacarbaYK/gittr](https://github.com/arbadacarbaYK/gittr).
 
 Do not commit secrets into examples; use placeholders in `.env.example`.
 
