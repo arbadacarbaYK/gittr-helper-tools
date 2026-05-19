@@ -24,6 +24,25 @@ NIP-C0 defines `kind:1337` events for sharing code snippets on Nostr. Unlike cod
    - Better than pasting raw code in text
    - Makes code discussions more readable
 
+### gittr.space: two ways to share code (do not confuse them)
+
+| Feature | What it is | Where it lives |
+|--------|------------|----------------|
+| **Copy permalink** | Normal web link to a file + line range (`#L6` or `#L6-L10`). No Nostr event. | `CodeViewer` in gittr (`ui/src/components/ui/code-viewer.tsx`) |
+| **Share as snippet** | NIP-C0 `kind:1337` event on relays. Shows on issues/PRs via `CodeSnippetRenderer`. | This folder + `ui/src/lib/nostr/events.ts` |
+
+**Line permalinks (gittr production behaviour, 2026-05):**
+
+- URL shape: `https://gittr.space/{npub}/{repo}?file={path/to/file}#L6-L10`
+  - `file` is the repo path (e.g. `README.md`, `snippets/foo/bar.ts`).
+  - Fragment is always `#L{start}` or `#L{start}-L{end}` (GitHub-style).
+- Works in **code view** (line numbers + yellow selection bar with **Copy permalink**).
+- **Markdown / HTML files** open in **Preview** by default — switch to **View Code** first, then click or drag lines.
+- README **preview** heading links (`#some-heading`) are separate (markdown anchors), not line numbers.
+- Opening a permalink scrolls to the start line and highlights the range.
+
+**NIP-C0 snippets** do not embed the `#L…` URL in the event today; the `repo` tag points at the repository (`30617:pubkey:d-tag`). Optional future tag for `file` + line range is not in the NIP yet.
+
 ## Files
 
 - **`code-snippet-events.ts`** - Event creation and parsing utilities
@@ -49,10 +68,11 @@ yarn add lucide-react
 ### Mobile-Friendly Code Selection
 
 The code viewer implementation includes mobile-optimized features:
-- **Line numbers hidden on mobile** - To avoid alignment issues on small screens
-- **Code lines remain fully clickable** - All selection functionality preserved
-- **Floating action bar** - Appears near selected code with responsive buttons
-- **Touch-friendly** - Optimized button sizes and spacing for mobile devices
+- **Line numbers hidden on small screens** — gutter hidden below `sm` breakpoint; whole row stays clickable
+- **One grid row per line** — gutter and code share one row so wrapped lines stay aligned (2026-05 layout fix)
+- **Action bar below the file** — **Copy permalink** / **Share as snippet** after selection
+- **Long-press** on a line copies permalink (mobile equivalent of right-click)
+- **Select Range** button for two-tap range selection on touch devices
 
 ### Creating a Code Snippet Event
 
@@ -328,7 +348,9 @@ Default color scheme:
 
 - **NIP-C0 Specification**: https://github.com/nostr-protocol/nips/blob/master/C0.md
 - **NIP-34**: Repository events (for repo references)
-- **gittr Implementation**: See `ui/src/lib/nostr/events.ts` and `ui/src/components/ui/code-snippet-renderer.tsx` in the main gittr repository
+- **gittr Implementation**: `ui/src/lib/nostr/events.ts`, `ui/src/components/ui/code-snippet-renderer.tsx`, `ui/src/components/ui/code-viewer.tsx`
+- **README / relative links** (separate from line `#L`): [`../markdown-media-handling/`](../markdown-media-handling/) and gittr `markdown-anchor.tsx`
+- **User help**: gittr Help → Code Snippets (NIP-C0)
 
 ## License
 

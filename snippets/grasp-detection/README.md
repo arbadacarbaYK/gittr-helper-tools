@@ -11,9 +11,17 @@ Detects GRASP servers (git servers that are also Nostr relays) and filters relay
 - Detects GRASP servers by domain pattern matching
 - Filters relay lists to separate GRASP servers from regular relays
 
+**Exports:** `KNOWN_GRASP_DOMAINS` (all known mirrors for detection), **`GRASP_SERVERS_FOR_PUSHING`** (subset that accept arbitrary user pushes — used when synthesizing extra HTTPS clone lines for relays like ngit-relay).
+
 **Usage:**
 ```typescript
-import { isGraspServer, getGraspServers, getRegularRelays, KNOWN_GRASP_DOMAINS } from './grasp-servers';
+import {
+  isGraspServer,
+  getGraspServers,
+  getRegularRelays,
+  KNOWN_GRASP_DOMAINS,
+  GRASP_SERVERS_FOR_PUSHING,
+} from './grasp-servers';
 
 // Check if a URL is a GRASP server
 const isGrasp = isGraspServer('wss://relay.ngit.dev');

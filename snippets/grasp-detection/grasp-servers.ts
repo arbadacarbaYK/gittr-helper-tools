@@ -23,14 +23,32 @@
  */
 export const KNOWN_GRASP_DOMAINS = [
   // Actual GRASP git servers (verified to serve git repos)
-  'relay.ngit.dev',
-  'ngit-relay.nostrver.se',
-  'gitnostr.com',
-  'ngit.danconwaydev.com',
-  'git.shakespeare.diy',
-  'git-01.uid.ovh',
-  'git-02.uid.ovh',
-  'git.jb55.com',
+  "relay.ngit.dev",
+  "ngit-relay.nostrver.se",
+  "gitnostr.com",
+  "ngit.danconwaydev.com",
+  "git.shakespeare.diy",
+  "git-01.uid.ovh",
+  "git-02.uid.ovh",
+  "git.jb55.com", // Read-only mirror for many users: jb55 hosts their own repos, not a public multi-tenant GRASP push target
+  "git.gittr.space",
+] as const;
+
+/**
+ * GRASP servers that typically accept pushes from arbitrary users (used when building
+ * extra HTTPS clone lines for relays like ngit-relay). Mirrors that only host their
+ * operator's repos should stay in {@link KNOWN_GRASP_DOMAINS} for read detection but
+ * not here.
+ */
+export const GRASP_SERVERS_FOR_PUSHING = [
+  "relay.ngit.dev",
+  "ngit-relay.nostrver.se",
+  "gitnostr.com",
+  "ngit.danconwaydev.com",
+  "git.shakespeare.diy",
+  "git-01.uid.ovh",
+  "git-02.uid.ovh",
+  "git.gittr.space",
 ] as const;
 
 /**
@@ -50,12 +68,17 @@ export function isGraspServer(url: string): boolean {
     ?.toLowerCase() || '';
   
   // Check against known GRASP domains
-  if (domain && KNOWN_GRASP_DOMAINS.some(grasp => {
-    const graspDomain = grasp.toLowerCase();
-    return domain === graspDomain || 
-           domain.includes(graspDomain) || 
-           graspDomain.includes(domain);
-  })) {
+  if (
+    domain &&
+    KNOWN_GRASP_DOMAINS.some((grasp) => {
+      const graspDomain = grasp.toLowerCase();
+      return (
+        domain === graspDomain ||
+        domain.includes(graspDomain) ||
+        graspDomain.includes(domain)
+      );
+    })
+  ) {
     return true;
   }
   
@@ -87,6 +110,6 @@ export function getGraspServers(relays: string[]): string[] {
  * @returns Array of regular relay URLs
  */
 export function getRegularRelays(relays: string[]): string[] {
-  return relays.filter(r => !isGraspServer(r));
+  return relays.filter((r) => !isGraspServer(r));
 }
 

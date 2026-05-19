@@ -16,7 +16,7 @@ These are **actual code snippets** we use in production, not theoretical helpers
 | [`snippets/nip46-remote-signer/`](./snippets/nip46-remote-signer) | NIP-46 remote signer integration with QR scanning support | Enable users to pair hardware signers (LNbits, Nowser, Bunker) without exposing private keys. Includes QR code scanning using `html5-qrcode`. |
 | [`snippets/nip25-stars-nip51-following/`](./snippets/nip25-stars-nip51-following) | NIP-25 reactions for starring and NIP-51 `10018` lists for following repositories | Decentralized starring and following using standard NIPs. Platform-wide visibility without server storage. |
 | [`snippets/markdown-media-handling/`](./snippets/markdown-media-handling) | Handle images, videos, and media in markdown files with API endpoint support | Two approaches: simple inline handler (currently used in gittr) and full-featured component-based solution. Resolves relative image paths to Git provider raw URLs (GitHub/GitLab/Codeberg), converts base64 API responses to data URLs, supports YouTube/Vimeo embeds, and handles relative links within repositories. |
-| [`snippets/nip-c0-code-snippets/`](./snippets/nip-c0-code-snippets) | NIP-C0 code snippet sharing and rendering | Create and display code snippets as standalone Nostr events (kind:1337). Includes event creation utilities, React renderer component, and support for linking snippets back to source repositories using NIP-34 format. |
+| [`snippets/nip-c0-code-snippets/`](./snippets/nip-c0-code-snippets) | NIP-C0 code snippet sharing and rendering | Kind `1337` events + renderer. On gittr, **Copy permalink** (`#L6-L10` in file code view) is separate from **Share as snippet** (Nostr event). See snippet README for URL shape and “View Code” on `.md` files. |
 | [`snippets/nip34-repository-events/`](./snippets/nip34-repository-events) | NIP-34 repository event schemas and handling | Complete request/response schemas for NIP-34 (kind:30617) repository announcements. Shows what you send, what you receive, and how to parse it. Essential for developers of other Nostr clients to ensure spec compliance and interoperability. |
 | [`snippets/nip34-push-paywall/`](./snippets/nip34-push-paywall) | NIP-34 push paywall extension (`push_cost_sats`) | Interop profile for pay-to-push: publish policy on kind `30617`, normalize `owner+d`, and enforce payment server-side (HTTP/SSH) with `402` + invoice flow. |
 | `cmd/` | (Future) Standalone CLI tools or services | Helpers that can run independently (e.g., clone-events-sse, blossom-fetch-helper) |
@@ -41,6 +41,10 @@ This repo is **documentation + snippets**; “support” means what **[gittr.spa
 Each snippet folder contains its own README with detailed documentation, code examples, and usage instructions. 
 
 ## Recent Additions
+
+### GRASP + NIP-34 snippet sync (2026-05-15)
+- **`snippets/grasp-detection/grasp-servers.ts`:** Added **`git.gittr.space`**, documented **`git.jb55.com`** as read-oriented, introduced **`GRASP_SERVERS_FOR_PUSHING`** (mirrors excluded from multi-tenant push lists).
+- **`snippets/nip34-repository-events/`:** Documented gittr production **multi-value `clone` / `relays` rows**, **HTTPS GRASP clone requirement** for ngit-relay acceptance, **no `git@` SSH in `clone`** for gitworkshop-style clients, and updated **`repository-events.ts` + `schema-examples.ts`** to **parse every value** on those rows (not only `tag[1]`).
 
 ### File-fetch docs sync (2026-05-09)
 - Aligned [`snippets/file-fetching/README.md`](./snippets/file-fetching/README.md) with production gittr: **`user@host:path`** as **self-hosted-git**, **200 + empty `files`** as clone trigger alongside **404**, fixed deep-link anchor to [`FILE_FETCHING_INSIGHTS.md` § GRASP cloning](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md#grasp-server-automatic-cloning-mechanism).
@@ -68,6 +72,9 @@ Each snippet folder contains its own README with detailed documentation, code ex
 - Event creation utilities (`code-snippet-events.ts`) for creating and parsing kind:1337 events
 - React renderer component (`code-snippet-renderer.tsx`) for displaying snippets with syntax highlighting
 - Support for linking snippets to source repositories using NIP-34 format
+
+### gittr line permalinks vs NIP-C0 (2026-05)
+- Documented in [`snippets/nip-c0-code-snippets/README.md`](./snippets/nip-c0-code-snippets/README.md): permalinks (`?file=…#L6-L10`) vs kind `1337` snippets; **View Code** for markdown; grid line layout
 - Full documentation with usage examples and tag reference
 
 ### Markdown Media Handling (2025-11-28)

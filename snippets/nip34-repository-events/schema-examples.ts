@@ -1,8 +1,12 @@
 /**
  * NIP-34 Repository Events - Schema Examples
- * 
+ *
  * Complete request/response examples showing the exact structure of
  * NIP-34 repository events for developers of other Nostr clients.
+ *
+ * Tag shape reflects **gittr production (2026):** multi-value `clone` and `relays`
+ * rows (`["clone", url1, url2]`), not repeated `["clone", url]` rows. Parsers must
+ * read every value after index 0.
  */
 
 /**
@@ -18,10 +22,8 @@ export const REQUEST_SCHEMA_EXAMPLE = {
     ["d", "my-repo"],             // REQUIRED: Repository identifier
     ["name", "My Repository"],     // Human-readable name
     ["description", "A cool repository"], // Description
-    ["clone", "https://github.com/user/repo.git"], // Git clone URL
-    ["clone", "git@github.com:user/repo.git"],     // Multiple clone URLs
-    ["relays", "wss://relay.example.com"], // Nostr relay
-    ["relays", "wss://relay2.example.com"], // Multiple relays
+    ["clone", "https://git.example.com/npub1aaaa/my-repo.git", "https://ngit-relay.nostrver.se/npub1aaaa/my-repo.git"],
+    ["relays", "wss://relay.example.com", "wss://ngit-relay.nostrver.se"],
     ["maintainers", "npub1abc123..."],     // Maintainer (npub format)
     ["maintainers", "npub1def456..."],     // Multiple maintainers
     ["source", "https://github.com/user/repo"], // Source URL
@@ -50,10 +52,8 @@ export const RESPONSE_SCHEMA_EXAMPLE = {
     ["d", "my-repo"],
     ["name", "My Repository"],
     ["description", "A cool repository"],
-    ["clone", "https://github.com/user/repo.git"],
-    ["clone", "git@github.com:user/repo.git"],
-    ["relays", "wss://relay.example.com"],
-    ["relays", "wss://relay2.example.com"],
+    ["clone", "https://git.example.com/npub1aaaa/my-repo.git", "https://ngit-relay.nostrver.se/npub1aaaa/my-repo.git"],
+    ["relays", "wss://relay.example.com", "wss://ngit-relay.nostrver.se"],
     ["maintainers", "npub1abc123..."],
     ["maintainers", "npub1def456..."],
     ["source", "https://github.com/user/repo"],
@@ -79,13 +79,13 @@ export const PARSED_DATA_EXAMPLE = {
   repositoryName: "my-repo",      // From "d" tag
   name: "My Repository",          // From "name" tag
   description: "A cool repository", // From "description" tag
-  clone: [                        // All "clone" tags
-    "https://github.com/user/repo.git",
-    "git@github.com:user/repo.git"
+  clone: [
+    "https://git.example.com/npub1aaaa/my-repo.git",
+    "https://ngit-relay.nostrver.se/npub1aaaa/my-repo.git",
   ],
-  relays: [                       // All "relays" tags
+  relays: [
     "wss://relay.example.com",
-    "wss://relay2.example.com"
+    "wss://ngit-relay.nostrver.se",
   ],
   maintainers: [                  // All "maintainers" tags (normalized to hex)
     "abc123...",

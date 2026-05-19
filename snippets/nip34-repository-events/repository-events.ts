@@ -12,6 +12,36 @@
 import { getEventHash, getPublicKey, signEvent, nip19 } from "nostr-tools";
 
 /**
+ * Values for tags like `clone` / `relays` may span indices 1..n on one tag row,
+ * e.g. `["clone", "https://a/x.git", "https://b/x.git"]`. Older tools emitted one row per URL;
+ * parsers should accept both shapes (matches gittr production + `nip34-tag-values` helpers).
+ */
+function collectTagRowValues(tag: string[]): string[] {
+  const out: string[] = [];
+  for (let i = 1; i < tag.length; i++) {
+    const raw = String(tag[i] ?? "").trim();
+    if (!raw) continue;
+    if (raw.includes(",")) {
+      raw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .forEach((s) => out.push(s));
+    } else {
+      out.push(raw);
+    }
+  }
+  return out;
+}
+
+function normalizeRelayWssUrl(relay: string): string {
+  const t = relay.trim();
+  if (!t) return "";
+  if (t.startsWith("wss://") || t.startsWith("ws://")) return t;
+  return `wss://${t}`;
+}
+
+/**
  * Event kind for NIP-34 repository announcements
  */
 export const KIND_REPOSITORY_NIP34 = 30617;
@@ -71,7 +101,7 @@ export interface ParsedRepository {
  *   repositoryName: "my-repo",
  *   name: "My Repository",
  *   description: "A cool repository",
- *   clone: ["https://github.com/user/repo.git"],
+ *   clone: ["https://git.example.com/npub1…/my-repo.git"],
  *   relays: ["wss://relay.example.com"],
  *   contributors: [{ pubkey: "abc123..." }]
  * };
@@ -103,23 +133,25 @@ export function createRepositoryEvent(
     tags.push(["description", description]);
   }
   
-  // NIP-34: Add clone tags (REQUIRED for interoperability)
+  // NIP-34: clone — prefer one row with multiple HTTPS URLs (gittr production shape).
+  // Avoid git@ SSH in announcements meant for browser/ngit clients; expose SSH via UI/env instead.
   if (repo.clone && repo.clone.length > 0) {
-    repo.clone.forEach(url => {
-      if (url && typeof url === "string" && url.trim().length > 0) {
-        tags.push(["clone", url.trim()]);
-      }
-    });
+    const trimmed = repo.clone
+      .map((u) => (typeof u === "string" ? u.trim() : ""))
+      .filter(Boolean);
+    if (trimmed.length > 0) {
+      tags.push(["clone", ...trimmed]);
+    }
   }
-  
-  // NIP-34: Add relays tags (each relay in separate tag per spec)
+
+  // NIP-34: relays — same multi-value row shape as gittr (see nostr-protocol/nips 34.md examples).
   if (repo.relays && repo.relays.length > 0) {
-    repo.relays.forEach(relay => {
-      const normalizedRelay = relay.startsWith("wss://") || relay.startsWith("ws://") 
-        ? relay 
-        : `wss://${relay}`;
-      tags.push(["relays", normalizedRelay]);
-    });
+    const normalizedRelays = repo.relays
+      .map((r) => normalizeRelayWssUrl(String(r).trim()))
+      .filter(Boolean);
+    if (normalizedRelays.length > 0) {
+      tags.push(["relays", ...normalizedRelays]);
+    }
   }
   
   // NIP-34: Add topics/tags
@@ -265,36 +297,20 @@ export function parseNIP34Repository(event: {
         // Repository description
         repoData.description = tagValue;
         break;
-      case "clone":
-        // Git clone URL (can repeat)
-        if (tagValue) repoData.clone.push(tagValue);
-        break;
-      case "relays":
-        // Nostr relay URL (can repeat)
-        // Handle both formats: separate tags and comma-separated (backward compat)
-        if (tagValue) {
-          if (tagValue.includes(",")) {
-            // Comma-separated format (backward compat)
-            const relayUrls = tagValue.split(",").map((r: string) => r.trim()).filter((r: string) => r.length > 0);
-            relayUrls.forEach((relayUrl: string) => {
-              const normalized = relayUrl.startsWith("wss://") || relayUrl.startsWith("ws://") 
-                ? relayUrl 
-                : `wss://${relayUrl}`;
-              if (!repoData.relays.includes(normalized)) {
-                repoData.relays.push(normalized);
-              }
-            });
-          } else {
-            // Single relay per tag (per spec)
-            const normalized = tagValue.startsWith("wss://") || tagValue.startsWith("ws://") 
-              ? tagValue 
-              : `wss://${tagValue}`;
-            if (!repoData.relays.includes(normalized)) {
-              repoData.relays.push(normalized);
-            }
-          }
+      case "clone": {
+        const urls = collectTagRowValues(tag);
+        for (const u of urls) {
+          if (u && !repoData.clone.includes(u)) repoData.clone.push(u);
         }
         break;
+      }
+      case "relays": {
+        const relays = collectTagRowValues(tag).map(normalizeRelayWssUrl).filter(Boolean);
+        for (const normalized of relays) {
+          if (!repoData.relays.includes(normalized)) repoData.relays.push(normalized);
+        }
+        break;
+      }
       case "web":
         // Website URL (can repeat)
         if (tagValue) repoData.web.push(tagValue);
