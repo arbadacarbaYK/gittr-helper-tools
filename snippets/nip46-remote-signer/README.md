@@ -1,7 +1,5 @@
 # NIP-46 Remote Signer Integration
 
-> **Other clients & agents:** NIP-46 patterns are portable for **browser clients**; the **git server / bridge does not implement NIP-46**. [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
-
 Code snippets for implementing **NIP-46** (remote signing) in a Nostr **web client**, so users can pair **Amber**, **Nowser**, **LNbits remote signer**, self-hosted **bunker**, etc., without putting the user’s **nsec** in the page.
 
 **Canonical docs (keep in sync with production):**

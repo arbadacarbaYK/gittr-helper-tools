@@ -22,7 +22,7 @@ NIP-34 defines `kind:30617` events for announcing Git repositories on Nostr. Unl
 - **`repository-events.ts`** - Event creation and parsing utilities
 - **`schema-examples.ts`** - Request/response schema examples
 
-## Production alignment (gittr / ngit / gitworkshop beta)
+## Production alignment (gittr)
 
 Recent interoperability lessons from gittr.space production pushes:
 
@@ -271,7 +271,7 @@ Maintainer pubkeys should be in **npub format** (bech32-encoded) per best practi
 ### Clone URLs
 
 - Prefer **HTTPS** GRASP URLs so browser-oriented clients can fetch trees and blobs.
-- **`git@host:path` SSH URLs:** Fine for git CLI workflows, but gittr **does not place SSH URLs on kind 30617 `clone`** anymore — keep SSH out of tag data when targeting gitworkshop/ngit-style readers, or duplicate HTTPS alongside SSH if your ecosystem requires both shapes (know your consumers).
+- **`git@host:path` SSH URLs:** Fine for git CLI; gittr **does not place SSH on kind 30617 `clone`** — use HTTPS on the event and expose SSH in the UI if needed.
 
 Try clone URLs in published order (first usable HTTPS wins for web).
 

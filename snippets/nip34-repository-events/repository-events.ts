@@ -4,7 +4,7 @@
  * Utilities for creating and parsing NIP-34 (kind:30617) repository announcement events on Nostr.
  * 
  * NIP-34 uses tags-only format with empty content for spec compliance and interoperability
- * with other Nostr clients (e.g., gitworkshop.dev, ngit clients).
+ * with other Nostr Git clients (e.g. gitworkshop.dev).
  * 
  * @see https://github.com/nostrability/schemata/tree/master/nips/nip-34
  */
@@ -134,7 +134,7 @@ export function createRepositoryEvent(
   }
   
   // NIP-34: clone — prefer one row with multiple HTTPS URLs (gittr production shape).
-  // Avoid git@ SSH in announcements meant for browser/ngit clients; expose SSH via UI/env instead.
+  // Avoid git@ SSH in announcements meant for browser clients; expose SSH via UI/env instead.
   if (repo.clone && repo.clone.length > 0) {
     const trimmed = repo.clone
       .map((u) => (typeof u === "string" ? u.trim() : ""))

@@ -1,7 +1,5 @@
 # NIP-34 Push Paywall Interop (`push_cost_sats`)
 
-> **Other clients & agents:** Portable **discovery** via `push_cost_sats` on kind `30617`; **enforcement** is host-specific. [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
-
 This snippet documents a practical, interoperable way to implement **pay-to-push** using existing Nostr primitives.
 
 The goal is simple:

@@ -2,7 +2,7 @@
 
 > **Other clients & agents:** What is portable vs gittr-only, and where this lives in the main app — [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
 
-Code snippets for parsing and handling Git clone URLs from NIP-34 events. The parser and encoding rules are **reusable**; API routes, OAuth, and bridge clone orchestration are **gittr-specific** (see gittr `FILE_FETCHING_INSIGHTS.md`).
+Code snippets for parsing and handling Git clone URLs from NIP-34 events.
 
 ## `git-source-parser.ts`
 

@@ -1,7 +1,5 @@
 # URL Normalization Snippets
 
-> **Other clients & agents:** Fully portable — no gittr dependencies. Porting index: [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
-
 Code snippets for normalizing Git URLs to HTTPS format.
 
 ## `normalize-git-url.ts`

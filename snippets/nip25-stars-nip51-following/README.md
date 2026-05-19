@@ -258,7 +258,7 @@ useEffect(() => {
 
 ## NIP-51: Followed repositories (kind 10018)
 
-Canonical behavior matches **gittr / ngit** `ui/src/lib/nostr/events.ts` and repo layout watch publish.
+Canonical behavior matches **gittr** `ui/src/lib/nostr/events.ts` and repo layout watch publish.
 
 ### Event structure
 
@@ -330,7 +330,7 @@ allowed_kinds = [0, 1, 7, 50, 51, 52, 10018, 30617, 30618, 9735, 9803, 9804]
 
 ## Example Implementation
 
-See upstream gittr/ngit:
+See upstream gittr:
 
 - **Star reactions**: `ui/src/lib/nostr/repo-stars.ts`
 - **Kind 10018**: `ui/src/lib/nostr/events.ts` (`createGitRepositoriesListEvent`, `parseGitRepositoriesListEvent`)
