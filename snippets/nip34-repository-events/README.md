@@ -28,7 +28,7 @@ Recent interoperability lessons from gittr.space production pushes:
 
 2. **HTTPS GRASP clones:** Some GRASP relays (notably **`ngit-relay.nostrver.se`**) validate that the announcement lists **their own HTTPS git URL** on the `clone` row before accepting kind **30617**. Listing the relay under `relays` alone is not enough.
 
-3. **Avoid `git@` SSH in `clone` for web-focused announcements:** Browser clients (e.g. beta gitworkshop) cannot use SSH transports — they surface **`UnknownTransportError`** when SSH is the only viable line. Gittr keeps **`git@` URLs out of kind 30617 `clone`** and exposes SSH separately (sidebar / env such as `NEXT_PUBLIC_GIT_SSH_BASE`). CLI users still clone over SSH using that UI or their own remotes.
+3. **Avoid `git@` SSH in `clone` for web-focused announcements:** Many browser-based Nostr Git clients cannot use SSH transports. Gittr keeps **`git@` URLs out of kind 30617 `clone`** and exposes SSH separately (sidebar / env such as `NEXT_PUBLIC_GIT_SSH_BASE`). CLI users still clone over SSH using that UI or their own remotes.
 
 4. **`relays` row:** Match the NIP-34 multi-value style: `["relays", "wss://a", "wss://b"]` (gittr emission). Older per-relay repeated tags remain valid; parse all forms.
 
@@ -269,7 +269,7 @@ Maintainer pubkeys should be in **npub format** (bech32-encoded) per best practi
 ### Clone URLs
 
 - Prefer **HTTPS** GRASP URLs so browser-oriented clients can fetch trees and blobs.
-- **`git@host:path` SSH URLs:** Fine for git CLI workflows, but gittr **does not place SSH URLs on kind 30617 `clone`** anymore — keep SSH out of tag data when targeting gitworkshop/ngit-style readers, or duplicate HTTPS alongside SSH if your ecosystem requires both shapes (know your consumers).
+- **`git@host:path` SSH URLs:** Fine for git CLI; gittr **does not place SSH on kind 30617 `clone`** — use HTTPS on the event and expose SSH in the UI if needed.
 
 Try clone URLs in published order (first usable HTTPS wins for web).
 

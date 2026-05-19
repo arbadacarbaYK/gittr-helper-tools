@@ -4,7 +4,7 @@
  * Utilities for creating and parsing NIP-34 (kind:30617) repository announcement events on Nostr.
  * 
  * NIP-34 uses tags-only format with empty content for spec compliance and interoperability
- * with other Nostr Git clients (e.g. gitworkshop.dev).
+ * with other Nostr Git clients.
  * 
  * @see https://github.com/nostrability/schemata/tree/master/nips/nip-34
  */
