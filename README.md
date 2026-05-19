@@ -14,8 +14,6 @@ Each folder is **self-contained** where possible. What is **portable** (standard
 
 These are **actual snippets** we run in production, not sample tutorials. When gittr changes, we sync the relevant folders here.
 
-**gittr.space sidebar:** Use the short text in [`docs/GITTR_REPO_ABOUT.md`](./docs/GITTR_REPO_ABOUT.md) in **Settings → Description** (1–2 sentences). The long README stays on the repo page; do not paste the full About section into Description.
-
 **Forking / docs hygiene:** Examples use **placeholders** (e.g. `lnbits.example.com`). Do not commit real **server IPs**, **SSH key paths**, **OAuth secrets**, **LNbits admin keys**, or **nsecs** into public docs. Use `.env.example` and keep operator deploy secrets private.
 
 ## What's in here
@@ -96,7 +94,6 @@ Each snippet README documents **what is reusable**, **what is gittr-only**, and 
 ### Porting guide for other clients (2026-05)
 - Added [`docs/FOR_OTHER_CLIENTS.md`](./docs/FOR_OTHER_CLIENTS.md) — reusability matrix, agent workflow, standard vs gittr-only behaviour
 - README **About** section for developers and coding agents extending Nostr Git clients
-- [`docs/GITTR_REPO_ABOUT.md`](./docs/GITTR_REPO_ABOUT.md) — text to paste into gittr **Settings → Description** for the sidebar
 - Each snippet README links to the porting guide
 
 ### Markdown Media Handling (2025-11-28)
