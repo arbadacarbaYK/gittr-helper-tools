@@ -1,7 +1,5 @@
 # NIP-34 Repository Events
 
-> **Other clients & agents:** Core interop for any Nostr Git client — parsers and emission rules below match gittr/ngit-relay production. [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
-
 Code snippets for implementing **NIP-34** (Replaceable Events) repository announcements in a Nostr client. This shows the complete request/response cycle: what you send, what you receive, and how to handle it.
 
 ## What is NIP-34?
@@ -252,7 +250,7 @@ const unsub = subscribe(
 
 ## Important Notes
 
-### Cross-Client Interoperability (ngit/gitworkshop)
+### Cross-client interoperability
 
 For full interop, repository announcements (`30617`) should be paired with repository state events (`30618`) for the same `d` identifier. Collaborative events that reference a repository (issues `1621`, pull requests `1618`, PR updates `1619`, patches `1617`) should include `r` (earliest unique commit/root commit) so clients can anchor history consistently.
 
@@ -271,7 +269,7 @@ Maintainer pubkeys should be in **npub format** (bech32-encoded) per best practi
 ### Clone URLs
 
 - Prefer **HTTPS** GRASP URLs so browser-oriented clients can fetch trees and blobs.
-- **`git@host:path` SSH URLs:** Fine for git CLI; gittr **does not place SSH on kind 30617 `clone`** — use HTTPS on the event and expose SSH in the UI if needed.
+- **`git@host:path` SSH URLs:** Fine for git CLI workflows, but gittr **does not place SSH URLs on kind 30617 `clone`** anymore — keep SSH out of tag data when targeting gitworkshop/ngit-style readers, or duplicate HTTPS alongside SSH if your ecosystem requires both shapes (know your consumers).
 
 Try clone URLs in published order (first usable HTTPS wins for web).
 

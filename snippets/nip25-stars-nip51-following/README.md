@@ -1,7 +1,5 @@
 # NIP-25 Stars & NIP-51 Following Implementation
 
-> **Other clients & agents:** Standard NIP-25 / NIP-51 — reusable with your relay filters and UI. [`docs/FOR_OTHER_CLIENTS.md`](../../docs/FOR_OTHER_CLIENTS.md).
-
 Code snippets for implementing repository starring and following using **NIP-25** (Reactions) and **NIP-51** (Lists) in a Nostr-based Git hosting platform.
 
 ## `repo-stars.ts`
@@ -330,7 +328,7 @@ allowed_kinds = [0, 1, 7, 50, 51, 52, 10018, 30617, 30618, 9735, 9803, 9804]
 
 ## Example Implementation
 
-See upstream gittr:
+See upstream gittr/ngit:
 
 - **Star reactions**: `ui/src/lib/nostr/repo-stars.ts`
 - **Kind 10018**: `ui/src/lib/nostr/events.ts` (`createGitRepositoriesListEvent`, `parseGitRepositoriesListEvent`)
