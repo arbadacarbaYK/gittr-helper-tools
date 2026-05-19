@@ -12,6 +12,8 @@ We publish **copy-pasteable modules** and **interop notes** taken from [gittr.sp
 
 Each folder is **self-contained** where possible. What is **portable** (standard NIP behaviour) vs **gittr-specific** (URLs, API routes, domain lists) is spelled out in that folder’s README and in **[`docs/FOR_OTHER_CLIENTS.md`](./docs/FOR_OTHER_CLIENTS.md)** — start there if you are an agent planning a port.
 
+**gittr sidebar About:** The section under **## About — who this repo is for** (above) is what gittr shows when the Nostr description is still the default `Repository: …` placeholder. To store it on relays, paste [`docs/GITTR_REPO_ABOUT.md`](./docs/GITTR_REPO_ABOUT.md) into **Settings → Description** on gittr.space.
+
 These are **actual snippets** we run in production, not sample tutorials. When gittr changes, we sync the relevant folders here.
 
 **Forking / docs hygiene:** Examples use **placeholders** (e.g. `lnbits.example.com`). Do not commit real **server IPs**, **SSH key paths**, **OAuth secrets**, **LNbits admin keys**, or **nsecs** into public docs. Use `.env.example` and keep operator deploy secrets private.
@@ -94,6 +96,7 @@ Each snippet README documents **what is reusable**, **what is gittr-only**, and 
 ### Porting guide for other clients (2026-05)
 - Added [`docs/FOR_OTHER_CLIENTS.md`](./docs/FOR_OTHER_CLIENTS.md) — reusability matrix, agent workflow, standard vs gittr-only behaviour
 - README **About** section for developers and coding agents extending Nostr Git clients
+- [`docs/GITTR_REPO_ABOUT.md`](./docs/GITTR_REPO_ABOUT.md) — text to paste into gittr **Settings → Description** for the sidebar
 - Each snippet README links to the porting guide
 
 ### Markdown Media Handling (2025-11-28)
