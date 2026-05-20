@@ -53,15 +53,25 @@ This ensures files with non-ASCII characters (Cyrillic, Chinese, accented charac
 
 The API endpoints automatically decode these and handle UTF-8 correctly on the backend.
 
+## GRASP file trees (gittr behaviour)
+
+GRASP mirrors usually have **no** REST “list files” API. gittr’s `fetchFromNostrGit` (see main repo) does this **per clone URL**, often **in parallel**:
+
+1. `GET /api/nostr/repo/files` — read bare repo on the gittr bridge disk  
+2. `GET /api/git/repo-files?sourceUrl=<HTTPS clone URL>` — shallow clone into a **temp** dir and return the tree (**works even when step 1 is empty**)  
+3. `POST /api/nostr/repo/clone` — bare mirror onto disk, **await** bridge read, then background poll  
+
+`fetchFilesFromMultipleSources` races sources: **first non-empty tree wins**. A broken mirror (502) must not block a good one.
+
+**Newest metadata:** latest kind **30617** on relays (`created_at`).  
+**Newest commit across all GRASP mirrors:** not fully compared yet — first successful mirror, not max `HEAD` / 30618.
+
 ## Performance Notes
 
-This parser is used as part of a larger file fetching system that includes performance optimizations:
+- **Bridge API cache** (client): dedupe `GET /api/nostr/repo/files` per repo/branch where implemented  
+- **Clone trigger cache**: avoid duplicate bare-clone POSTs for the same repo  
+- **Upstream first**: GitHub / `source` URLs tried before GRASP when `prioritizeUpstreamCloneUrls` applies  
+- **Parallel GRASP**: every `clone[]` HTTPS GRASP URL is tried; race returns on first success  
+- **GitLab pagination**: GitLab API max 100 items per page — gittr paginates for large trees  
 
-- **Bridge API Cache**: Deduplicates API calls to `git-nostr-bridge` (reduces from 7+ calls to 1 per repo/branch)
-- **Clone Trigger Cache**: Prevents duplicate clone triggers for the same repository
-- **Source Prioritization**: Known-good sources (GitHub, Codeberg, GitLab) are tried first
-- **Nostr-Git Optimization**: Only the first nostr-git source is tried since they all hit the same bridge API
-- **GitLab Pagination**: GitLab API returns max 100 items per page - gittr implements pagination using `X-Total-Pages` and `X-Page` headers to fetch ALL files (critical for repos with >100 files)
-
-For full implementation details, see [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md#grasp-server-automatic-cloning-mechanism) in the gittr repository (GRASP clone triggers, empty `files` on 200, bridge `repo` normalization, and related behavior).
-
+For full implementation details, see [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md) in the gittr repository.
