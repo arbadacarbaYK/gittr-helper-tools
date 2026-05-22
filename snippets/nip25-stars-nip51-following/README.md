@@ -190,7 +190,7 @@ export async function queryRepoStars(
       {
         kinds: [KIND_REACTION], // 7
         "#e": [repoEventId], // Reactions to this repo event
-        "#k": ["30617"], // Reactions to Kind 30617 events
+        // Prefer #e only; many relays do not index #k on kind 7. Filter k=30617 client-side.
       },
     ];
 
