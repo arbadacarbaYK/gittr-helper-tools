@@ -27,6 +27,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 
 ## More on gittr
 
+- [Nostr schemata (NIPs / kinds)](https://gittr.space/npub1zafcms4xya5ap9zr7xxr0jlrtrattwlesytn2s42030lzu0dwlzqpd26k5/schemata?file=README.md) · [NIP-34](https://gittr.space/npub1zafcms4xya5ap9zr7xxr0jlrtrattwlesytn2s42030lzu0dwlzqpd26k5/schemata?file=README.md&path=nips%2Fnip-34)
 - [NIPS_AND_EVENT_KINDS.md](https://gittr.space/arbadacarbaYK/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main)
 - [NIP46_REMOTE_SIGNER_INTEGRATION.md](https://gittr.space/arbadacarbaYK/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main)
 - [gitnostr bridge docs](https://gittr.space/arbadacarbaYK/gitnostr?branch=main)
