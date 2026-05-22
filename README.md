@@ -1,6 +1,6 @@
 # gittr helper tools & snippets
 
-Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [github.com/arbadacarbaYK/gittr](https://github.com/arbadacarbaYK/gittr).
+Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/arbadacarbaYK/gittr?branch=main).
 
 Do not commit secrets into examples; use placeholders in `.env.example`.
 
@@ -23,13 +23,13 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 
 1. Open the snippet folder you need; read its README.
 2. Copy the `.ts` / `.tsx` files into your project (MIT, keep attribution).
-3. For full file-fetch / bridge behaviour see gittr [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md).
+3. For full file-fetch / bridge behaviour see gittr [FILE_FETCHING_INSIGHTS.md](https://gittr.space/arbadacarbaYK/gittr?file=docs/FILE_FETCHING_INSIGHTS.md&branch=main).
 
 ## More on gittr
 
-- [NIPS_AND_EVENT_KINDS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/NIPS_AND_EVENT_KINDS.md)
-- [NIP46_REMOTE_SIGNER_INTEGRATION.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/NIP46_REMOTE_SIGNER_INTEGRATION.md)
-- [gitnostr bridge docs](https://github.com/arbadacarbaYK/gitnostr)
+- [NIPS_AND_EVENT_KINDS.md](https://gittr.space/arbadacarbaYK/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main)
+- [NIP46_REMOTE_SIGNER_INTEGRATION.md](https://gittr.space/arbadacarbaYK/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main)
+- [gitnostr bridge docs](https://gittr.space/arbadacarbaYK/gitnostr?branch=main)
 
 ## License
 

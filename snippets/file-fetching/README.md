@@ -74,4 +74,4 @@ GRASP mirrors usually have **no** REST “list files” API. gittr’s `fetchFro
 - **Parallel GRASP**: every `clone[]` HTTPS GRASP URL is tried; race returns on first success  
 - **GitLab pagination**: GitLab API max 100 items per page — gittr paginates for large trees  
 
-For full implementation details, see [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md) in the gittr repository.
+For full implementation details, see [FILE_FETCHING_INSIGHTS.md](https://gittr.space/arbadacarbaYK/gittr?file=docs/FILE_FETCHING_INSIGHTS.md&branch=main) in the gittr repository.
