@@ -4,9 +4,9 @@ Code snippets for implementing **NIP-46** (remote signing) in a Nostr **web clie
 
 **Canonical docs (keep in sync with production):**
 
-- [gittr `NIP46_REMOTE_SIGNER_INTEGRATION.md`](https://gittr.space/arbadacarbaYK/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main) — full architecture and URI notes  
-- [gittr `NIPS_AND_EVENT_KINDS.md` § NIP-46](https://gittr.space/arbadacarbaYK/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main) — how gittr lists support  
-- Source of truth: [`gittr/ui/src/lib/nostr/remoteSigner.ts`](https://gittr.space/arbadacarbaYK/gittr?file=ui/src/lib/nostr/remoteSigner.ts&branch=main)
+- [gittr `NIP46_REMOTE_SIGNER_INTEGRATION.md`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main) — full architecture and URI notes  
+- [gittr `NIPS_AND_EVENT_KINDS.md` § NIP-46](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main) — how gittr lists support  
+- Source of truth: [`gittr/ui/src/lib/nostr/remoteSigner.ts`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/src/lib/nostr/remoteSigner.ts&branch=main)
 
 **Not in scope:** the **gitnostr bridge** does not speak NIP-46. Pairing is entirely between **browser ↔ signer** on relays; the bridge only consumes normal signed events.
 

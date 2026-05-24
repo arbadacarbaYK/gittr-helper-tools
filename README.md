@@ -1,6 +1,6 @@
 # gittr helper tools & snippets
 
-Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/arbadacarbaYK/gittr?branch=main).
+Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?branch=main).
 
 Do not commit secrets into examples; use placeholders in `.env.example`.
 
@@ -23,14 +23,14 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 
 1. Open the snippet folder you need; read its README.
 2. Copy the `.ts` / `.tsx` files into your project (MIT, keep attribution).
-3. For full file-fetch / bridge behaviour see gittr [FILE_FETCHING_INSIGHTS.md](https://gittr.space/arbadacarbaYK/gittr?file=docs/FILE_FETCHING_INSIGHTS.md&branch=main).
+3. For full file-fetch / bridge behaviour see gittr [FILE_FETCHING_INSIGHTS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/FILE_FETCHING_INSIGHTS.md&branch=main).
 
 ## More on gittr
 
 - [Nostr schemata (NIPs / kinds)](https://gittr.space/npub1zafcms4xya5ap9zr7xxr0jlrtrattwlesytn2s42030lzu0dwlzqpd26k5/schemata?file=README.md) · [NIP-34](https://gittr.space/npub1zafcms4xya5ap9zr7xxr0jlrtrattwlesytn2s42030lzu0dwlzqpd26k5/schemata?file=README.md&path=nips%2Fnip-34)
-- [NIPS_AND_EVENT_KINDS.md](https://gittr.space/arbadacarbaYK/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main)
-- [NIP46_REMOTE_SIGNER_INTEGRATION.md](https://gittr.space/arbadacarbaYK/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main)
-- [gitnostr bridge docs](https://gittr.space/arbadacarbaYK/gitnostr?branch=main)
+- [NIPS_AND_EVENT_KINDS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main)
+- [NIP46_REMOTE_SIGNER_INTEGRATION.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main)
+- [gitnostr bridge docs](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gitnostr?branch=main)
 
 ## License
 
