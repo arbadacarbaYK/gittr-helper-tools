@@ -1,78 +1,173 @@
 /**
- * Unified signing resolver pattern (extracted from gittr `ui/src/lib/nostr/signer.ts`).
+ * Unified Nostr signing resolver — extracted from gittr.space `ui/src/lib/nostr/signer.ts`.
  *
- * Use this anywhere your app signs events — not only at login. Remote signer users
- * have `pubkey` in context before `window.nostr` is attached (async bootstrap).
+ * WHY THIS EXISTS
+ * ---------------
+ * Login restores the user's pubkey from localStorage immediately, but the
+ * NIP-46 remote adapter attaches to `window.nostr` ASYNCHRONOUSLY during
+ * `bootstrapFromStorage()`. Any code that only checks `window.nostr` (or a
+ * stored nsec) at click time reports "No signing method" even though the user
+ * IS logged in via remote signer.
+ *
+ * Every auth action (push, issues, PRs, profile, SSH keys, import publish, …)
+ * must resolve its signer through `resolveNostrSigner()`:
+ *   1. Awaits `remoteSigner.ensureBootstrapped()` (single-flight, cheap when ready)
+ *   2. Uses `window.nostr` when present (NIP-07 extension OR remote adapter)
+ *   3. Falls back to a stored nsec
+ *
+ * Adapt `getStoredPrivateKey` to your app's (ideally encrypted) key storage.
  */
 import type { Event as NostrEvent, UnsignedEvent } from "nostr-tools";
 
-import type { RemoteSignerManager } from "./remote-signer";
+import {
+  type RemoteSignerManager,
+  loadStoredRemoteSignerSession,
+} from "./remote-signer";
 
 export const NO_SIGNING_METHOD_MESSAGE =
-  "No signing method available. Use NIP-07, pair a remote signer (NIP-46), or configure nsec in Settings.";
+  "No signing method available.\n\nPlease use a NIP-07 extension (like Alby or nos2x), pair with a remote signer (NIP-46 bunker/nostrconnect), or configure a private key in Settings.";
+
+export type NostrSignerSource = "nip07" | "remote" | "nsec";
 
 export interface ResolvedNostrSigner {
-  source: "nip07" | "remote" | "nsec";
+  source: NostrSignerSource;
   signEvent: (event: UnsignedEvent | NostrEvent) => Promise<NostrEvent>;
   getPublicKey: () => Promise<string>;
-  usesWindowNostr: boolean;
+  /** Set when signing via stored nsec */
   privateKey?: string;
+  /** True when `window.nostr` is the active signing backend */
+  usesWindowNostr: boolean;
 }
 
-export async function resolveNostrSigner(options: {
-  remoteSigner?: RemoteSignerManager | null;
-  getStoredPrivateKey?: () => Promise<string | null>;
-  maxWaitMs?: number;
-}): Promise<ResolvedNostrSigner | null> {
-  const { remoteSigner, getStoredPrivateKey, maxWaitMs = 8000 } = options;
+/** Replace with your app's (encrypted) private-key storage. */
+async function getStoredPrivateKey(): Promise<string | null> {
+  return null;
+}
 
-  if (remoteSigner?.ensureBootstrapped) {
-    try {
-      await Promise.race([
-        remoteSigner.ensureBootstrapped(),
-        new Promise<void>((resolve) => setTimeout(resolve, maxWaitMs)),
-      ]);
-    } catch {
-      // Continue — adapter may still be ready.
+export function isRemoteSignerReady(
+  remoteSigner?: RemoteSignerManager | null
+): boolean {
+  return !!(
+    remoteSigner?.getSession()?.userPubkey &&
+    remoteSigner?.getState() === "ready"
+  );
+}
+
+export function hasStoredRemoteSignerSession(): boolean {
+  if (typeof window === "undefined") return false;
+  return !!loadStoredRemoteSignerSession()?.userPubkey;
+}
+
+/**
+ * Wait for a stored remote signer session to finish bootstrapping
+ * (`window.nostr` adapter attached and ready).
+ */
+export async function waitForRemoteSigner(
+  remoteSigner?: RemoteSignerManager | null,
+  maxWaitMs = 20000
+): Promise<boolean> {
+  if (!remoteSigner || !hasStoredRemoteSignerSession()) {
+    return false;
+  }
+
+  if (isRemoteSignerReady(remoteSigner)) {
+    return true;
+  }
+
+  try {
+    await Promise.race([
+      remoteSigner.ensureBootstrapped(),
+      new Promise<void>((resolve) => setTimeout(resolve, maxWaitMs)),
+    ]);
+  } catch {
+    // Fall through to polling.
+  }
+
+  const start = Date.now();
+  while (Date.now() - start < maxWaitMs) {
+    if (isRemoteSignerReady(remoteSigner)) {
+      return true;
     }
+    if (typeof window !== "undefined" && window.nostr) {
+      try {
+        await window.nostr.getPublicKey();
+        return true;
+      } catch {
+        // Keep waiting.
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+
+  return (
+    isRemoteSignerReady(remoteSigner) ||
+    (typeof window !== "undefined" && !!window.nostr)
+  );
+}
+
+export interface ResolveSignerOptions {
+  remoteSigner?: RemoteSignerManager | null;
+  /** Wait for remote signer bootstrap when a session exists (default true) */
+  waitForRemote?: boolean;
+  maxWaitMs?: number;
+}
+
+/**
+ * Resolve the best available signing method for the current session.
+ */
+export async function resolveNostrSigner(
+  options: ResolveSignerOptions = {}
+): Promise<ResolvedNostrSigner | null> {
+  const { remoteSigner, waitForRemote = true, maxWaitMs = 8000 } = options;
+
+  if (hasStoredRemoteSignerSession() && waitForRemote) {
+    await waitForRemoteSigner(remoteSigner, maxWaitMs);
   }
 
   if (typeof window !== "undefined" && window.nostr) {
+    const remoteReady = isRemoteSignerReady(remoteSigner);
     try {
-      await window.nostr.getPublicKey();
+      const getPublicKey = () => window.nostr!.getPublicKey();
+      await getPublicKey();
       return {
-        source: remoteSigner?.getState?.() === "ready" ? "remote" : "nip07",
-        getPublicKey: () => window.nostr!.getPublicKey(),
+        source: remoteReady ? "remote" : "nip07",
+        getPublicKey,
         signEvent: (event) => window.nostr!.signEvent(event),
         usesWindowNostr: true,
       };
-    } catch {
-      // Fall through.
+    } catch (error) {
+      console.warn("[Signer] window.nostr is present but not usable:", error);
     }
   }
 
-  if (remoteSigner?.getState?.() === "ready" && remoteSigner.getUserPubkey?.()) {
+  if (remoteSigner && isRemoteSignerReady(remoteSigner)) {
     return {
       source: "remote",
       getPublicKey: async () => {
-        const pk = remoteSigner.getUserPubkey?.();
-        if (!pk) throw new Error("Remote signer not paired");
-        return pk;
+        const pubkey = remoteSigner.getUserPubkey();
+        if (!pubkey) {
+          throw new Error("Remote signer not paired");
+        }
+        return pubkey;
       },
-      signEvent: (event) => remoteSigner.signEvent(event),
+      signEvent: (event) => remoteSigner.signEvent(event as UnsignedEvent),
       usesWindowNostr: false,
     };
   }
 
-  const privateKey = getStoredPrivateKey ? await getStoredPrivateKey() : null;
+  const privateKey = await getStoredPrivateKey();
   if (privateKey) {
-    const { getEventHash, getPublicKey, signEvent } = await import("nostr-tools");
+    const {
+      getEventHash,
+      getPublicKey: ntoolsGetPublicKey,
+      signEvent: ntoolsSignEvent,
+    } = await import("nostr-tools");
     return {
       source: "nsec",
       privateKey,
-      getPublicKey: async () => getPublicKey(privateKey),
+      getPublicKey: async () => ntoolsGetPublicKey(privateKey),
       signEvent: async (event) => {
-        const pubkey = event.pubkey || getPublicKey(privateKey);
+        const pubkey = event.pubkey || ntoolsGetPublicKey(privateKey);
         const unsigned = { ...event, pubkey } as UnsignedEvent;
         const id =
           "id" in event && typeof event.id === "string"
@@ -81,7 +176,7 @@ export async function resolveNostrSigner(options: {
         const toSign = { ...unsigned, id, sig: "" };
         return {
           ...toSign,
-          sig: signEvent(toSign as UnsignedEvent, privateKey),
+          sig: ntoolsSignEvent(toSign as UnsignedEvent, privateKey),
         } as NostrEvent;
       },
       usesWindowNostr: false,
@@ -89,4 +184,14 @@ export async function resolveNostrSigner(options: {
   }
 
   return null;
+}
+
+export async function requireNostrSigner(
+  options: ResolveSignerOptions = {}
+): Promise<ResolvedNostrSigner> {
+  const signer = await resolveNostrSigner(options);
+  if (!signer) {
+    throw new Error(NO_SIGNING_METHOD_MESSAGE);
+  }
+  return signer;
 }

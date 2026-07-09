@@ -90,7 +90,8 @@ The resolver:
 ### `bunker://`
 
 - **Host** = **remote signer** pubkey (64-hex).
-- Client generates a **new** ephemeral keypair for the session.
+- **Reuse the client key per bunker URI** (persist it in `localStorage` keyed by `remotePubkey:secret`). Signers identify your app by the client key on the kind-`24133` event: a fresh key per “Pair” press creates a **new app entry in Amber every time** and breaks silent-ack re-login. Only generate a new keypair on first pairing.
+- The `secret` is **single-use**: consumed on the first successful pairing. A rejected re-pair returns `invalid secret` — the user must mint a fresh bunker token in the signer app.
 
 ### `nostrconnect://`
 
@@ -104,14 +105,22 @@ Wrong mental model (breaks Amber / QR): treating `nostrconnect` host as the sign
 
 ## QR / pairing relays (`getNip46PairingRelays`)
 
-**Do not hardcode** a random relay list in the nostrconnect URI (e.g. only `oxtr` / `primal`). Login may work briefly; **`sign_event` then times out** because Amber listens on different relays.
+**Never put GRASP/git relays in NIP-46 URIs.** Relays like `relay.ngit.dev`, `gitnostr.com`, `ngit-relay.nostrver.se` only accept NIP-34 repo events. Kind `24133` (NIP-46) gets rejected — Amber shows: *"Event must reference an accepted repository or accepted event"*.
+
+Use **general** nostr relays only for login / remote signing:
+
+- `wss://relay.damus.io`
+- `wss://nos.lol`
+- (optional) other non-GRASP relays from env
+
+Repo browse/push still uses GRASP relays from `NEXT_PUBLIC_NOSTR_RELAYS`; that list is separate from NIP-46 transport.
 
 Production pattern (gittr `remoteSigner.ts`):
 
-1. Take **`NEXT_PUBLIC_NOSTR_RELAYS`** (operator relays first — e.g. `wss://git.shakespeare.diy`)
-2. Add signer-friendly fallbacks (`wss://relay.damus.io`, `wss://nos.lol`)
-3. Cap at ~8 relays so QR URIs stay scannable
-4. After `connect`, call NIP-46 **`switch_relays`** with the merged list so client and signer agree where `24133` traffic flows
+1. Filter `isGraspServer(url)` out of every NIP-46 relay list
+2. Add damus/nos.lol fallbacks
+3. Cap at ~6 relays in the nostrconnect QR
+4. **Never call `switch_relays` with your own relay list.** Per Amber's source the signer *ignores* your params, answers with *its* relays and rebinds the app to those — both sides desync and every later `sign_event` times out. NIP-46 transport stays on the URI relays; publish the signed events to your app relays yourself.
 
 ```typescript
 // Pseudocode — see gittr getNip46PairingRelays()
@@ -133,17 +142,31 @@ Without `sign_event:30617` / `30618`, Amber may reject or hang on repo push.
 
 ---
 
-## NIP-46 `connect` params
+## NIP-46 `connect` params — ONE canonical layout
 
-Signers disagree on JSON-RPC param layout. Production gittr tries, in order:
+There is exactly **one** layout every real signer parses (verified against Amber/quartz `BunkerRequestConnect.parse`, bunker46 `bunker-rpc.handler.ts`, and nostr-tools `nip46.ts`):
 
-- **nip46** spec: `[secret?, perms, metadata]` — client identity is the **event pubkey**, not a connect param
-- **client-first** (Amber): `[clientPubkey, secret?, perms]`
-- **remote-first**: `[remotePubkey, secret?, perms]`
+```
+[remote-signer-pubkey, optional_secret, optional_requested_perms, optional_client_metadata]
+```
 
-**Bug to avoid:** passing `{ includeSecret: true }` as the “format” argument — that silently breaks connect on reload.
+- `params[0]` = remote signer pubkey (the bunker host)
+- `params[1]` = the pairing **secret** — back-fill with `""` when absent so later slots don't shift
+- `params[2]` = comma-joined permissions
+- `params[3]` = JSON metadata `{"name": "your-app", "url": "https://…"}` — this is what Amber shows as the app name
+- Client identity is the **event pubkey** on the kind-`24133` envelope, never a connect param
 
-After page reload, many signers need a fresh **`connect`** RPC before `sign_event` works (`reestablishConnection`).
+**Do NOT rotate through alternate layouts.** If the secret is not at `params[1]`, Amber reads whatever is there as the secret and answers **`invalid secret`**. (An earlier gittr build tried `[secret, perms, metadata]` first — that was the root cause of every `invalid secret` failure.)
+
+Connect result handling:
+
+- `"ack"` **or an echo of the pairing secret** = success (bunker46 and nostrconnect responses echo the secret per spec)
+- error `"already connected"` = success (Amber: this client key is already paired)
+- error `"invalid secret"` = the single-use secret was consumed — user needs a fresh bunker token
+
+After page reload, re-send **`connect`** before `sign_event` — with a stable client key Amber answers a **silent ack** (no popup).
+
+**Encryption:** modern signers (Amber, nak) reply **NIP-44**. Encrypt requests with NIP-44 and keep NIP-04 only as a legacy decrypt fallback.
 
 ---
 
@@ -151,8 +174,7 @@ After page reload, many signers need a fresh **`connect`** RPC before `sign_even
 
 | RPC | Suggested timeout | Notes |
 |-----|-------------------|--------|
-| `connect` / `get_public_key` | ~25s | Retries with backoff |
-| `switch_relays` | ~8s | Can run in background after login |
+| `connect` / `get_public_key` | ~25s | Retries only cover relay flakiness — never alternate param layouts |
 | **`sign_event`** | **~120s** | User must approve on phone; repo events are large |
 
 **Repo push = two signatures** (NIP-34 kind `30617` announcement + kind `30618` state). Amber “auto-allow” / “always approve” often still shows **one prompt per `sign_event`** — that is normal.
@@ -165,11 +187,11 @@ Use **`ensureBootstrapped()`** with a single in-flight promise so push does not 
 
 ## Connection flow (simplified)
 
-1. Parse URI → relays, mode (`bunker` | `nostrconnect`), keys.
+1. Parse URI → relays, mode (`bunker` | `nostrconnect`), keys (reuse stored client key for bunker).
 2. **Add relays** and **subscribe** to `kind: 24133` with `#p` = **client** pubkey (for nostrconnect, before you know the signer).
-3. Send **`connect`** inside encrypted **`24133`** payloads (correct param layout).
-4. **`switch_relays`** to merged app + signer relays.
-5. Complete handshake → `userPubkey`, then replace `window.nostr` with adapter.
+3. Send **`connect`** inside encrypted **`24133`** payloads (canonical param layout, NIP-44).
+4. `get_public_key` → `userPubkey`, then replace `window.nostr` with adapter.
+5. Keep NIP-46 transport on the **URI relays** — no `switch_relays`, no merging in app relays.
 6. On every signing action → **`resolveNostrSigner()`**, not raw `window.nostr` checks alone.
 
 ---
@@ -193,14 +215,20 @@ These are the issues that show up as “I approved on the phone and **nothing ha
 5. **JSON-RPC `id` mismatches**  
    Fuzzy-match pending `connect` when decrypt succeeds but `id` differs.
 
-6. **`connect` without permissions / wrong format**  
-   Yields `no permission` on `sign_event` until reconnect.
+6. **`connect` without permissions / wrong param layout**  
+   Wrong layout = `invalid secret`; missing perms = `no permission` on `sign_event` until reconnect.
 
-7. **Signing only via `getNostrPrivateKey()`**  
+7. **Fresh client key per Pair press**  
+   Creates a new (undeletable) app entry in Amber every time and prevents silent-ack re-login. Persist the client key per bunker URI.
+
+8. **`switch_relays` after login**  
+   Signer ignores your list, rebinds to its own relays, and every later `sign_event` times out (~5-minute “eventually logs in” symptom).
+
+9. **Signing only via `getNostrPrivateKey()`**  
    Breaks remote-signer users who have no local nsec.
 
-8. **Security**  
-   Never place client private keys in the URI. `secret` is a one-time challenge.
+10. **Security**  
+    Never place client private keys in the URI. `secret` is a one-time challenge.
 
 ---
 
@@ -225,7 +253,7 @@ Preserve the previous `window.nostr` and restore it on disconnect so extension u
 
 ## Compatibility
 
-Targets **NIP-46** signers that use **`bunker://`** or **`nostrconnect://`** and kind **`24133`** on common relays. Tested with **Amber** (nostrconnect + bunker) on gittr.space production.
+Targets **NIP-46** signers that use **`bunker://`** or **`nostrconnect://`** and kind **`24133`** on common relays. Tested with **Amber** (nostrconnect + bunker) on gittr.space production, and this snippet end-to-end against fiatjaf's **`nak bunker`** over live relays (pair, sign, stable client-key re-pair).
 
 ---
 
