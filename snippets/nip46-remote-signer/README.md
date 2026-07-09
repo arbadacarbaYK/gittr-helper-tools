@@ -230,6 +230,15 @@ These are the issues that show up as “I approved on the phone and **nothing ha
 10. **Security**  
     Never place client private keys in the URI. `secret` is a one-time challenge.
 
+11. **Dead sockets = "push fails silently"**  
+    `nostr-tools` v1 relay sockets never auto-reconnect. After a silent drop, `trySend` discards outgoing messages and the 24133 subscription is dead — every RPC "times out" even though the signer is online and would approve. Before each request: re-dial sockets that are CLOSED (status 3) and re-run the subscription after any reconnect (v1 relays do not re-send REQ on reconnect).
+
+12. **Never `connect()` a CONNECTING socket**  
+    `nostr-relaypool`'s `connect()` replaces the WebSocket whenever `readyState !== OPEN`. Calling it once per request (e.g. inside `addRelay`) kills every in-flight connection — the relay never reaches OPEN. Only dial when the socket is CLOSED.
+
+13. **Fail loudly on `sign_event` timeout**  
+    A silent second 120s retry only hides the failure. Throw an actionable error ("open your signer app, make sure it is online") so the UI can show it, and repair transport in the background for the next attempt.
+
 ---
 
 ## NIP-07 adapter
