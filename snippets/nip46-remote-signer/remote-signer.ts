@@ -1,18 +1,27 @@
 /**
- * NIP-46 Remote Signer Integration
- * 
- * Extracted from gittr.space - implements NIP-46 (Remote Signing) for pairing with hardware signers
- * (LNbits Remote Nostr Signer, Nowser bunker, etc.) without exposing private keys to the browser.
- * 
+ * NIP-46 Remote Signer Integration (simplified reference extract)
+ *
+ * For production behaviour (pairing relays, switch_relays, 120s sign_event timeout,
+ * ensureBootstrapped, kind-specific permissions), use the canonical source:
+ *   gittr/ui/src/lib/nostr/remoteSigner.ts
+ *
+ * For signing in every UI action (not only login), also use:
+ *   gittr/ui/src/lib/nostr/signer.ts  — see signer-resolver.ts in this folder
+ *
  * NIP-46: https://nips.nostr.com/46
- * 
+ *
  * Key Features:
  * - Session persistence: Once paired, users stay logged in across page reloads
  * - Automatic login: Session is restored from localStorage on app load
  * - NIP-07 compatible: Exposes window.nostr adapter for seamless integration
  * - NIP-44 support: Includes nip44_encrypt/decrypt methods
  * - QR code scanning: Works with html5-qrcode for pairing
- * 
+ *
+ * Production notes (Jul 2026):
+ * - REQUEST_TIMEOUT_MS below is legacy; sign_event should use ~120000 ms in production
+ * - QR relays: operator NEXT_PUBLIC_NOSTR_RELAYS first, not hardcoded oxtr/primal only
+ * - Permissions: sign_event:30617, sign_event:30618 for NIP-34 repo push
+ *
  * Usage:
  * ```typescript
  * import { RemoteSignerManager, parseRemoteSignerUri } from './remote-signer';

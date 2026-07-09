@@ -11,7 +11,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | [`snippets/file-fetching/`](./snippets/file-fetching) | Parse NIP-34 `clone` URLs, source types, encoding |
 | [`snippets/url-normalization/`](./snippets/url-normalization) | SSH / `git://` → HTTPS |
 | [`snippets/grasp-detection/`](./snippets/grasp-detection) | GRASP servers vs normal relays |
-| [`snippets/nip46-remote-signer/`](./snippets/nip46-remote-signer) | NIP-46 in the **browser** (bridge does not do NIP-46) |
+| [`snippets/nip46-remote-signer/`](./snippets/nip46-remote-signer) | NIP-46 pairing + **unified signer resolver** (browser; bridge does not do NIP-46) |
 | [`snippets/nip25-stars-nip51-following/`](./snippets/nip25-stars-nip51-following) | Stars (NIP-25) and repo lists (NIP-51) |
 | [`snippets/markdown-media-handling/`](./snippets/markdown-media-handling) | Markdown images, embeds, relative links |
 | [`snippets/nip-c0-code-snippets/`](./snippets/nip-c0-code-snippets) | NIP-C0 kind `1337` events + renderer |
