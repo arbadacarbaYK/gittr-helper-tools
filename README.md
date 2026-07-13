@@ -17,6 +17,8 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | [`snippets/nip-c0-code-snippets/`](./snippets/nip-c0-code-snippets) | NIP-C0 kind `1337` events + renderer |
 | [`snippets/nip34-repository-events/`](./snippets/nip34-repository-events) | NIP-34 kind `30617` / `30618` schemas and parsers |
 | [`snippets/nip34-push-paywall/`](./snippets/nip34-push-paywall) | Optional `push_cost_sats` on `30617` |
+| [`snippets/wot-trust-badges/`](./snippets/wot-trust-badges) | Viewer-relative Web of Trust badges (extension → kind 3 → optional oracle) |
+| [`snippets/nip34-issue-bounties/`](./snippets/nip34-issue-bounties) | Kind `9806` issue bounties on NIP-34 (LNURL-withdraw profile) |
 | `cmd/` | (Future) standalone tools |
 
 ## Getting started
@@ -29,6 +31,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 
 - [Nostr schemata (NIPs / kinds)](https://gittr.space/npub1zafcms4xya5ap9zr7xxr0jlrtrattwlesytn2s42030lzu0dwlzqpd26k5/schemata?file=README.md) · [NIP-34](https://gittr.space/npub1zafcms4xya5ap9zr7xxr0jlrtrattwlesytn2s42030lzu0dwlzqpd26k5/schemata?file=README.md&path=nips%2Fnip-34)
 - [NIPS_AND_EVENT_KINDS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main)
+- [WOT.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/WOT.md) (Web of Trust on gittr)
 - [NIP46_REMOTE_SIGNER_INTEGRATION.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main)
 - [gitnostr bridge docs](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gitnostr?branch=main)
 
