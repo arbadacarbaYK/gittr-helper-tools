@@ -1,23 +1,23 @@
 /**
  * Git Source Parser
- * 
- * Extracted from gittr.space - handles parsing clone URLs and determining source types
- * according to NIP-34: https://github.com/nostr-protocol/nips/blob/master/34.md
- * 
- * This utility parses clone URLs from NIP-34 events and identifies:
- * - Nostr git servers (GRASP servers): https://relay.ngit.dev/npub/.../repo.git
- * - GitHub: https://github.com/user/repo.git
- * - Codeberg: https://codeberg.org/user/repo.git
- * - GitLab: https://gitlab.com/user/repo.git
- * - Other git servers
+ *
+ * Teaching extract from gittr.space — parse NIP-34 clone URLs and classify source type.
+ * Source: gittr/ui/src/lib/utils/git-source-fetcher.ts (parseGitSource + helpers)
+ * Synced: 2026-07-18
+ *
+ * MIT — keep this attribution when copying into your project.
+ *
+ * Pass `knownGraspDomains` yourself (e.g. from the grasp-detection snippet).
+ * Do not require() app-local modules.
  */
 
-export type GitSourceType = 
-  | "nostr-git"      // Nostr git server (grasp): https://relay.ngit.dev/npub/.../repo.git
-  | "github"         // GitHub: https://github.com/user/repo.git
-  | "codeberg"       // Codeberg: https://codeberg.org/user/repo.git
-  | "gitlab"         // GitLab: https://gitlab.com/user/repo.git
-  | "unknown";       // Unknown git server
+export type GitSourceType =
+  | "nostr-git" // GRASP: https://relay.ngit.dev/npub/.../repo.git
+  | "github"
+  | "codeberg"
+  | "gitlab"
+  | "self-hosted-git" // Gitea/Forgejo / generic user@host:path
+  | "unknown";
 
 export interface GitSource {
   type: GitSourceType;
@@ -25,147 +25,199 @@ export interface GitSource {
   displayName: string;
   owner?: string;
   repo?: string;
-  npub?: string; // For nostr-git sources (can be npub, NIP-05, or hex pubkey)
+  npub?: string;
 }
 
 /**
- * Parse a clone URL and determine its source type
- * 
- * Handles:
- * - SSH URLs (git@host:owner/repo) → normalized to https://
- * - git:// URLs → normalized to https://
- * - GRASP server detection
- * - GitHub/Codeberg/GitLab pattern matching
+ * True for https(s) remotes that look like host/owner/repo where owner is not an npub path.
  */
-export function parseGitSource(cloneUrl: string, knownGraspDomains: string[] = []): GitSource {
-  // Validate input
+export function isGenericHttpsGitRemoteUrl(raw: string): boolean {
+  if (!raw || typeof raw !== "string") return false;
+  try {
+    let u = raw.trim();
+    const sshMatch = u.match(/^git@([^:]+):(.+)$/);
+    if (sshMatch) {
+      const [, host, path] = sshMatch;
+      u = `https://${host}/${path}`;
+    } else if (u.startsWith("git://")) {
+      u = u.replace(/^git:\/\//, "https://");
+    }
+    if (!/^https?:\/\//i.test(u)) {
+      u = `https://${u}`;
+    }
+    const parsed = new URL(u);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return false;
+    }
+    const host = parsed.hostname.toLowerCase();
+    if (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host.endsWith(".local") ||
+      host === "0.0.0.0"
+    ) {
+      return false;
+    }
+    const parts = parsed.pathname.split("/").filter(Boolean);
+    if (parts.length < 2) return false;
+    const ownerSeg = parts[0];
+    if (!ownerSeg || /^npub1[a-z0-9]+$/i.test(ownerSeg)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Upstream URLs refetchable via server-side git (GitHub/GitLab/Codeberg or generic HTTPS). */
+export function isRefetchableUpstreamSourceUrl(raw: string): boolean {
+  if (!raw || typeof raw !== "string") return false;
+  const t = raw.trim();
+  if (
+    t.includes("github.com") ||
+    t.includes("gitlab.com") ||
+    t.includes("codeberg.org")
+  ) {
+    return true;
+  }
+  return isGenericHttpsGitRemoteUrl(t);
+}
+
+/**
+ * Parse a clone URL and determine its source type.
+ *
+ * @param knownGraspDomains - Inject GRASP hostnames (no hard dependency on grasp-servers).
+ */
+export function parseGitSource(
+  cloneUrl: string,
+  knownGraspDomains: string[] = []
+): GitSource {
   if (!cloneUrl || typeof cloneUrl !== "string") {
-    console.warn("⚠️ [Git Source] Invalid cloneUrl:", cloneUrl);
     return {
       type: "unknown",
       url: String(cloneUrl || ""),
       displayName: "Invalid URL",
     };
   }
-  
-  // CRITICAL: Convert SSH URLs (git@host:owner/repo) to https:// for processing
-  // SSH format: git@github.com:owner/repo or git@github.com:owner/repo.git
-  // We'll convert it to https:// for API calls
+
   let normalizedUrl = cloneUrl;
-  let originalProtocol = "https";
   const sshMatch = cloneUrl.match(/^git@([^:]+):(.+)$/);
   if (sshMatch) {
     const [, host, path] = sshMatch;
     normalizedUrl = `https://${host}/${path}`;
-    originalProtocol = "ssh";
-    console.log(`🔄 [Git Source] Converting SSH URL to HTTPS for processing: ${normalizedUrl}`);
   } else if (cloneUrl.startsWith("git://")) {
-    // CRITICAL: Convert git:// URLs to https:// for processing
-    // git:// protocol is used by some git servers (e.g., git://jb55.com/damus)
-    // We'll convert it to https:// for the clone API, but preserve original for display
     normalizedUrl = cloneUrl.replace(/^git:\/\//, "https://");
-    originalProtocol = "git";
-    console.log(`🔄 [Git Source] Converting git:// to https:// for processing: ${normalizedUrl}`);
+  } else if (cloneUrl.startsWith("nostr://")) {
+    // nostr://npub@domain/repo or nostr://npub/repo
+    const nostrMatch = cloneUrl.match(
+      /^nostr:\/\/([^\/@]+)(?:@([^\/]+))?\/(.+)$/
+    );
+    if (nostrMatch) {
+      const [, npub, domain, repo] = nostrMatch;
+      if (npub && repo) {
+        const targetDomain =
+          domain ||
+          (knownGraspDomains.length > 0
+            ? knownGraspDomains[0]
+            : "git.gittr.space");
+        normalizedUrl = `https://${targetDomain}/${npub}/${repo}`;
+      }
+    }
+  } else if (
+    /^[^@\s]+@[^:]+:.+$/.test(cloneUrl.trim()) &&
+    !cloneUrl.includes("://")
+  ) {
+    // Generic SSH remote (not only git@): e.g. ubuntu@host:path/to/repo
+    const m = cloneUrl.trim().match(/^([^@\s]+)@([^:]+):(.+)$/);
+    if (m) {
+      const sshUser = m[1];
+      const sshHost = m[2];
+      const sshPath = m[3];
+      if (sshUser && sshHost && sshPath) {
+        const repoLeaf =
+          sshPath
+            .replace(/\/+$/, "")
+            .replace(/\.git$/i, "")
+            .split("/")
+            .filter(Boolean)
+            .pop() || sshPath;
+        return {
+          type: "self-hosted-git",
+          url: cloneUrl.trim(),
+          displayName: sshHost,
+          owner: sshUser,
+          repo: repoLeaf,
+        };
+      }
+    }
   }
-  
-  // Remove .git suffix if present
+
   const url = normalizedUrl.replace(/\.git$/, "");
-  
-  // Known git server domains (GRASP servers + custom git servers)
+
   const knownGitServers = [
     ...knownGraspDomains,
     "git.vanderwarker.family",
-    "jb55.com", // Custom git server (not GRASP, but supports git)
+    "jb55.com",
   ];
-  
-  // Nostr git server (grasp) pattern: https://relay.ngit.dev/npub.../repo
-  // or: https://ngit.danconwaydev.com/npub.../repo
-  // or: https://git.gittr.space/geek@primal.net/repo (NIP-05 format)
-  // or: https://git.gittr.space/daa41bedb68591363bf4407f687cb9789cc543ed024bb77c22d2c84d88f54153/repo (hex pubkey)
-  // or: https://git.vanderwarker.family/nostr/repo (without npub in path)
-  
-  // Pattern 1: npub format (recommended, per NIP-34)
-  const nostrGitNpubMatch = url.match(/^https?:\/\/([^\/]+)\/(npub[a-z0-9]+)\/([^\/]+)$/i);
-  if (nostrGitNpubMatch) {
-    const [, domain, npub, repo] = nostrGitNpubMatch;
+
+  const nostrGitMatch = url.match(
+    /^https?:\/\/([^\/]+)\/(npub[a-z0-9]+)\/([^\/]+)$/i
+  );
+  if (nostrGitMatch) {
+    const [, domain, npub, repo] = nostrGitMatch;
     if (domain && npub && repo) {
       return {
         type: "nostr-git",
-        url: normalizedUrl, // Use normalized URL (https://) for API calls
+        url: normalizedUrl,
         displayName: domain,
         npub,
         repo,
       };
     }
   }
-  
-  // Pattern 2: NIP-05 format (e.g., geek@primal.net)
-  const nostrGitNip05Match = url.match(/^https?:\/\/([^\/]+)\/([^@]+@[^\/]+)\/([^\/]+)$/i);
-  if (nostrGitNip05Match) {
-    const [, domain, nip05, repo] = nostrGitNip05Match;
-    if (domain && nip05 && repo) {
-      return {
-        type: "nostr-git",
-        url: normalizedUrl, // Use normalized URL (https://) for API calls
-        displayName: domain,
-        npub: nip05, // Store NIP-05 as npub field (will be resolved by caller if needed)
-        repo,
-      };
-    }
-  }
-  
-  // Pattern 3: hex pubkey format (64-char)
-  const nostrGitHexMatch = url.match(/^https?:\/\/([^\/]+)\/([0-9a-f]{64})\/([^\/]+)$/i);
-  if (nostrGitHexMatch) {
-    const [, domain, hexPubkey, repo] = nostrGitHexMatch;
-    if (domain && hexPubkey && repo) {
-      return {
-        type: "nostr-git",
-        url: normalizedUrl, // Use normalized URL (https://) for API calls
-        displayName: domain,
-        npub: hexPubkey, // Store hex as npub field (will be encoded to npub by caller if needed)
-        repo,
-      };
-    }
-  }
-  
-  // Alternative pattern for git servers without npub in path (e.g., git.vanderwarker.family/nostr/repo)
-  // or custom git servers like git://jb55.com/damus
-  // These are still considered nostr-git servers if they're known git server domains
-  const gitServerMatch = url.match(/^https?:\/\/([^\/]+)\/([^\/]+)\/([^\/]+)$/i);
+
+  const gitServerMatch = url.match(
+    /^https?:\/\/([^\/]+)\/([^\/]+)\/([^\/]+)$/i
+  );
   if (gitServerMatch) {
     const [, domain, pathSegment, repo] = gitServerMatch;
-    // Check if this is a known git server domain
-    if (domain && knownGitServers.some(server => domain.includes(server) || server.includes(domain))) {
+    if (
+      domain &&
+      knownGitServers.some(
+        (server) => domain.includes(server) || server.includes(domain)
+      )
+    ) {
       return {
         type: "nostr-git",
-        url: normalizedUrl, // Use normalized URL (https://) for API calls
+        url: normalizedUrl,
         displayName: domain,
-        npub: "", // No npub in path
-        repo: `${pathSegment}/${repo}`, // Include path segment in repo name
+        npub: "",
+        repo: `${pathSegment}/${repo}`,
       };
     }
   }
-  
-  // Pattern for simple git://domain/repo or https://domain/repo (single path segment)
-  // e.g., git://jb55.com/damus or https://jb55.com/damus
+
   const simpleGitMatch = url.match(/^https?:\/\/([^\/]+)\/([^\/]+)$/i);
   if (simpleGitMatch) {
     const [, domain, repo] = simpleGitMatch;
-    // Check if this is a known git server domain
-    if (domain && knownGitServers.some(server => domain.includes(server) || server.includes(domain))) {
+    if (
+      domain &&
+      knownGitServers.some(
+        (server) => domain.includes(server) || server.includes(domain)
+      )
+    ) {
       return {
         type: "nostr-git",
-        url: normalizedUrl, // Use normalized URL (https://) for API calls
+        url: normalizedUrl,
         displayName: domain,
-        npub: "", // No npub in path
-        repo: repo,
+        npub: "",
+        repo,
       };
     }
   }
-  
-  // GitHub pattern: https://github.com/owner/repo or https://github.com/owner/repo.git
-  const githubMatch = url.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/i);
+
+  const githubMatch = url.match(
+    /^https?:\/\/github\.com\/([^\/]+)\/([^\/]+?)(?:\.git)?$/i
+  );
   if (githubMatch) {
     const [, owner, repo] = githubMatch;
     if (!owner || !repo) {
@@ -180,12 +232,13 @@ export function parseGitSource(cloneUrl: string, knownGraspDomains: string[] = [
       url: cloneUrl,
       displayName: "github.com",
       owner,
-      repo: repo.replace(/\.git$/, ""), // Remove .git suffix if present
+      repo: repo.replace(/\.git$/, ""),
     };
   }
-  
-  // Codeberg pattern: https://codeberg.org/owner/repo
-  const codebergMatch = url.match(/^https?:\/\/codeberg\.org\/([^\/]+)\/([^\/]+)$/i);
+
+  const codebergMatch = url.match(
+    /^https?:\/\/codeberg\.org\/([^\/]+)\/([^\/]+)$/i
+  );
   if (codebergMatch) {
     const [, owner, repo] = codebergMatch;
     return {
@@ -196,9 +249,10 @@ export function parseGitSource(cloneUrl: string, knownGraspDomains: string[] = [
       repo,
     };
   }
-  
-  // GitLab pattern: https://gitlab.com/owner/repo
-  const gitlabMatch = url.match(/^https?:\/\/gitlab\.com\/([^\/]+)\/([^\/]+)$/i);
+
+  const gitlabMatch = url.match(
+    /^https?:\/\/gitlab\.com\/([^\/]+)\/([^\/]+)$/i
+  );
   if (gitlabMatch) {
     const [, owner, repo] = gitlabMatch;
     return {
@@ -209,8 +263,31 @@ export function parseGitSource(cloneUrl: string, knownGraspDomains: string[] = [
       repo,
     };
   }
-  
-  // Unknown source
+
+  const selfHostedMatch = url.match(
+    /^https?:\/\/([^\/]+)\/([^\/]+)\/([^\/]+)$/i
+  );
+  if (selfHostedMatch) {
+    const [, host, ownerSeg, repoSeg] = selfHostedMatch;
+    if (
+      host &&
+      ownerSeg &&
+      repoSeg &&
+      !/^github\.com$/i.test(host) &&
+      !/^gitlab\.com$/i.test(host) &&
+      !/^codeberg\.org$/i.test(host) &&
+      !/^npub1[a-z0-9]+$/i.test(ownerSeg)
+    ) {
+      return {
+        type: "self-hosted-git",
+        url: normalizedUrl,
+        displayName: host,
+        owner: ownerSeg,
+        repo: repoSeg.replace(/\.git$/i, ""),
+      };
+    }
+  }
+
   try {
     const urlObj = new URL(cloneUrl);
     return {
@@ -218,9 +295,7 @@ export function parseGitSource(cloneUrl: string, knownGraspDomains: string[] = [
       url: cloneUrl,
       displayName: urlObj.hostname || "Unknown Git Source",
     };
-  } catch (e) {
-    // Invalid URL - return safe fallback
-    console.warn("⚠️ [Git Source] Invalid URL format:", cloneUrl);
+  } catch {
     return {
       type: "unknown",
       url: String(cloneUrl || ""),
@@ -228,4 +303,3 @@ export function parseGitSource(cloneUrl: string, knownGraspDomains: string[] = [
     };
   }
 }
-

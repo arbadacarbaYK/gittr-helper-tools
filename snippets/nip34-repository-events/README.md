@@ -2,6 +2,9 @@
 
 Code snippets for implementing **NIP-34** (Replaceable Events) repository announcements in a Nostr client. This shows the complete request/response cycle: what you send, what you receive, and how to handle it.
 
+**Synced:** 2026-07-18 — aligned with gittr `buildUnsignedRepositoryEvent` (multi-value tags, hex maintainers, optional `push_cost_sats` / `public-read` / `public-write`).  
+**Host-only clones:** never publish bare hosts — see [`../clone-url-quality/`](../clone-url-quality).
+
 ## What is NIP-34?
 
 NIP-34 defines `kind:30617` events for announcing Git repositories on Nostr. Unlike legacy `kind:51` events that use JSON content, NIP-34 uses **tags only** with **empty content** for spec compliance.
@@ -56,8 +59,7 @@ yarn add nostr-tools
     ["description", "A cool repo"], // Description
     ["clone", "https://git.example.com/npub1…/repo.git", "https://ngit-relay.nostrver.se/npub1…/repo.git"],
     ["relays", "wss://relay1.com", "wss://relay2.com"],
-    ["maintainers", "npub1..."],   // Maintainer pubkey (npub format, can repeat)
-    ["maintainers", "npub1..."],
+    ["maintainers", "<hex64>", "<hex64>"], // Multi-value hex pubkeys (gittr / ngit)
     ["source", "https://github.com/user/repo"], // Source URL (optional)
     ["forkedFrom", "30617:pubkey:repo-name"], // Fork reference (optional)
     ["web", "https://example.com"], // Website URL (can repeat)

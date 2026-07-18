@@ -1,21 +1,11 @@
 /**
- * Unified Nostr signing resolver — extracted from gittr.space `ui/src/lib/nostr/signer.ts`.
+ * Unified Nostr signing resolver.
+ * Supports NIP-07 extensions, NIP-46 remote signers, and stored nsec keys.
  *
- * WHY THIS EXISTS
- * ---------------
- * Login restores the user's pubkey from localStorage immediately, but the
- * NIP-46 remote adapter attaches to `window.nostr` ASYNCHRONOUSLY during
- * `bootstrapFromStorage()`. Any code that only checks `window.nostr` (or a
- * stored nsec) at click time reports "No signing method" even though the user
- * IS logged in via remote signer.
+ * Source: gittr/ui/src/lib/nostr/signer.ts
+ * Synced: 2026-07-18
  *
- * Every auth action (push, issues, PRs, profile, SSH keys, import publish, …)
- * must resolve its signer through `resolveNostrSigner()`:
- *   1. Awaits `remoteSigner.ensureBootstrapped()` (single-flight, cheap when ready)
- *   2. Uses `window.nostr` when present (NIP-07 extension OR remote adapter)
- *   3. Falls back to a stored nsec
- *
- * Adapt `getStoredPrivateKey` to your app's (ideally encrypted) key storage.
+ * MIT — keep this attribution when copying into your project.
  */
 import type { Event as NostrEvent, UnsignedEvent } from "nostr-tools";
 
@@ -23,6 +13,15 @@ import {
   type RemoteSignerManager,
   loadStoredRemoteSignerSession,
 } from "./remote-signer";
+
+/**
+ * STUB: replace with your app's secure key storage.
+ * gittr uses encryptedStorage.getNostrPrivateKey() — do not copy that coupling here.
+ */
+async function getStoredPrivateKey(): Promise<string | null> {
+  // Integrator: return hex/nsec private key from your vault, or null.
+  return null;
+}
 
 export const NO_SIGNING_METHOD_MESSAGE =
   "No signing method available.\n\nPlease use a NIP-07 extension (like Alby or nos2x), pair with a remote signer (NIP-46 bunker/nostrconnect), or configure a private key in Settings.";
@@ -39,18 +38,15 @@ export interface ResolvedNostrSigner {
   usesWindowNostr: boolean;
 }
 
-/** Replace with your app's (encrypted) private-key storage. */
-async function getStoredPrivateKey(): Promise<string | null> {
-  return null;
-}
-
 export function isRemoteSignerReady(
   remoteSigner?: RemoteSignerManager | null
 ): boolean {
-  return !!(
-    remoteSigner?.getSession()?.userPubkey &&
-    remoteSigner?.getState() === "ready"
-  );
+  if (!remoteSigner?.getSession()?.userPubkey) return false;
+  // Prefer live RPC health when available (cached pubkey alone is not enough).
+  if (typeof (remoteSigner as any).isRpcHealthy === "function") {
+    return (remoteSigner as any).isRpcHealthy();
+  }
+  return remoteSigner.getState() === "ready";
 }
 
 export function hasStoredRemoteSignerSession(): boolean {
@@ -80,29 +76,10 @@ export async function waitForRemoteSigner(
       new Promise<void>((resolve) => setTimeout(resolve, maxWaitMs)),
     ]);
   } catch {
-    // Fall through to polling.
+    // Bootstrap may leave session cached but unhealthy — that is OK.
   }
 
-  const start = Date.now();
-  while (Date.now() - start < maxWaitMs) {
-    if (isRemoteSignerReady(remoteSigner)) {
-      return true;
-    }
-    if (typeof window !== "undefined" && window.nostr) {
-      try {
-        await window.nostr.getPublicKey();
-        return true;
-      } catch {
-        // Keep waiting.
-      }
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-
-  return (
-    isRemoteSignerReady(remoteSigner) ||
-    (typeof window !== "undefined" && !!window.nostr)
-  );
+  return isRemoteSignerReady(remoteSigner);
 }
 
 export interface ResolveSignerOptions {
@@ -114,30 +91,17 @@ export interface ResolveSignerOptions {
 
 /**
  * Resolve the best available signing method for the current session.
+ * Prefer manager API over window.nostr when a remote session exists.
  */
 export async function resolveNostrSigner(
   options: ResolveSignerOptions = {}
 ): Promise<ResolvedNostrSigner | null> {
   const { remoteSigner, waitForRemote = true, maxWaitMs = 8000 } = options;
 
-  if (hasStoredRemoteSignerSession() && waitForRemote) {
-    await waitForRemoteSigner(remoteSigner, maxWaitMs);
-  }
+  const hasRemoteSession = hasStoredRemoteSignerSession();
 
-  if (typeof window !== "undefined" && window.nostr) {
-    const remoteReady = isRemoteSignerReady(remoteSigner);
-    try {
-      const getPublicKey = () => window.nostr!.getPublicKey();
-      await getPublicKey();
-      return {
-        source: remoteReady ? "remote" : "nip07",
-        getPublicKey,
-        signEvent: (event) => window.nostr!.signEvent(event),
-        usesWindowNostr: true,
-      };
-    } catch (error) {
-      console.warn("[Signer] window.nostr is present but not usable:", error);
-    }
+  if (hasRemoteSession && waitForRemote) {
+    await waitForRemoteSigner(remoteSigner, maxWaitMs);
   }
 
   if (remoteSigner && isRemoteSignerReady(remoteSigner)) {
@@ -150,9 +114,56 @@ export async function resolveNostrSigner(
         }
         return pubkey;
       },
-      signEvent: (event) => remoteSigner.signEvent(event as UnsignedEvent),
-      usesWindowNostr: false,
+      signEvent: (event) => remoteSigner.signEvent(event),
+      usesWindowNostr: true,
     };
+  }
+
+  if (hasRemoteSession && remoteSigner) {
+    const pubkey = remoteSigner.getUserPubkey();
+    if (pubkey) {
+      return {
+        source: "remote",
+        getPublicKey: async () => pubkey,
+        signEvent: (event) => remoteSigner.signEvent(event),
+        usesWindowNostr: true,
+      };
+    }
+  }
+
+  if (hasRemoteSession && typeof window !== "undefined" && window.nostr) {
+    try {
+      const getPublicKey = () => window.nostr!.getPublicKey();
+      const pubkey = await getPublicKey();
+      if (pubkey) {
+        return {
+          source: "remote",
+          getPublicKey,
+          signEvent: (event) => window.nostr!.signEvent(event),
+          usesWindowNostr: true,
+        };
+      }
+    } catch (error) {
+      console.warn(
+        "[Signer] Remote session present but window.nostr adapter not usable:",
+        error
+      );
+    }
+  }
+
+  if (typeof window !== "undefined" && window.nostr && !hasRemoteSession) {
+    try {
+      const getPublicKey = () => window.nostr!.getPublicKey();
+      await getPublicKey();
+      return {
+        source: "nip07",
+        getPublicKey,
+        signEvent: (event) => window.nostr!.signEvent(event),
+        usesWindowNostr: true,
+      };
+    } catch (error) {
+      console.warn("[Signer] window.nostr is present but not usable:", error);
+    }
   }
 
   const privateKey = await getStoredPrivateKey();
@@ -194,4 +205,25 @@ export async function requireNostrSigner(
     throw new Error(NO_SIGNING_METHOD_MESSAGE);
   }
   return signer;
+}
+
+/**
+ * Back-compat helper for UI code that branches on `hasNip07` + `privateKey`.
+ */
+export async function resolveSigningCredentials(
+  options: ResolveSignerOptions = {}
+): Promise<{
+  hasNip07: boolean;
+  privateKey?: string;
+  signer: ResolvedNostrSigner;
+} | null> {
+  const signer = await resolveNostrSigner(options);
+  if (!signer) {
+    return null;
+  }
+  return {
+    hasNip07: signer.usesWindowNostr,
+    privateKey: signer.privateKey,
+    signer,
+  };
 }

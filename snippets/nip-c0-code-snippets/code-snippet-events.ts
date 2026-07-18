@@ -1,11 +1,11 @@
 /**
  * NIP-C0 Code Snippets - Event Creation
- * 
- * Utilities for creating and parsing NIP-C0 (kind:1337) code snippet events on Nostr.
- * 
- * NIP-C0 allows sharing code snippets as standalone Nostr events that can be discovered
- * across the network. Snippets can optionally link back to source repositories.
- * 
+ *
+ * Source: gittr/ui/src/lib/nostr/events.ts (createCodeSnippetEvent, KIND_CODE_SNIPPET=1337)
+ * Synced: 2026-07-18
+ *
+ * MIT — keep this attribution when copying into your project.
+ *
  * @see https://github.com/nostr-protocol/nips/blob/master/C0.md
  */
 

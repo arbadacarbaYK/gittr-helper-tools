@@ -2,9 +2,19 @@
 
 Code snippets for implementing repository starring and following using **NIP-25** (Reactions) and **NIP-51** (Lists) in a Nostr-based Git hosting platform.
 
+**Synced:** 2026-07-18 from gittr `repo-stars.ts` + `events.ts` (kind 10018).
+
+## Files
+
+| File | Role |
+| --- | --- |
+| `repo-stars.ts` | NIP-25 star aggregate / query / publish (`KIND_REACTION=7`, `KIND_REPOSITORY_NIP34=30617` local constants) |
+| `git-repositories-list.ts` | NIP-51 kind **10018** build + parse (`30617:pubkey:d` `a` tags) |
+
 ## `repo-stars.ts`
 
 Functions for querying, publishing, and removing star reactions (NIP-25) for repositories.
+SessionStorage / CustomEvent announcement-id cache helpers from production are **stripped** — add your own if needed.
 
 **What it does:**
 
@@ -89,9 +99,7 @@ When a user stars a repository, publish a **Kind 7** event:
 ### Publishing a Star
 
 ```typescript
-// ui/src/lib/nostr/repo-stars.ts
-
-import { KIND_REACTION } from "./events";
+import { KIND_REACTION } from "./repo-stars";
 
 export async function publishStarReaction(
   repoEventId: string,

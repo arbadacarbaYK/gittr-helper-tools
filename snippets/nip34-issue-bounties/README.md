@@ -2,6 +2,7 @@
 
 Implementation profile for **Lightning bounties on git issues** — portable discovery on relays, settlement on the **host** (not relays).
 
+**Synced:** 2026-07-18 — content JSON includes `invoice` + `paymentHash` (legacy) alongside LNURL-withdraw fields.  
 **Production reference:** [gittr `NIPS_AND_EVENT_KINDS.md` §9806](https://github.com/arbadacarbaYK/gittr/blob/main/docs/NIPS_AND_EVENT_KINDS.md) · [help / bounty flow](https://gittr.space/help) · [gittr.space/bounty-hunt](https://gittr.space/bounty-hunt)
 
 ## Relationship to other NIPs

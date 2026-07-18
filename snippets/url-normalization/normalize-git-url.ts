@@ -1,96 +1,107 @@
 /**
  * Git URL Normalization
- * 
- * Extracted from gittr.space - handles converting various Git URL formats to HTTPS
- * 
- * This utility normalizes:
- * - SSH URLs (git@host:path) → https://host/path
- * - git:// URLs → https://
- * - Preserves original URL for display while providing normalized version for API calls
+ *
+ * Teaching extract of the URL-normalization branches used by gittr's parseGitSource.
+ * Source: gittr/ui/src/lib/utils/git-source-fetcher.ts (not a standalone normalize-git-url.ts)
+ * Synced: 2026-07-18
+ *
+ * MIT — keep this attribution when copying into your project.
  */
 
 export interface NormalizedUrl {
   original: string;
   normalized: string;
-  protocol: 'https' | 'ssh' | 'git' | 'http';
+  protocol: "https" | "ssh" | "git" | "http" | "nostr";
 }
 
 /**
- * Normalize a Git URL to HTTPS format
- * 
+ * Normalize a Git URL toward HTTPS for API / clone processing.
+ *
  * Handles:
  * - git@host:path → https://host/path
  * - git://host/path → https://host/path
- * - Already HTTPS/HTTP URLs → unchanged
- * 
- * @param url - Git URL in any format
- * @returns Normalized URL object with original and normalized versions
+ * - nostr://npub@domain/repo → https://domain/npub/repo (or fallback domain)
+ * - Already HTTPS/HTTP → unchanged
+ *
+ * @param fallbackGraspDomain - Used when nostr:// omits @domain
  */
-export function normalizeGitUrl(url: string): NormalizedUrl {
+export function normalizeGitUrl(
+  url: string,
+  fallbackGraspDomain = "git.gittr.space"
+): NormalizedUrl {
   if (!url || typeof url !== "string") {
     return {
       original: url || "",
       normalized: url || "",
-      protocol: 'https',
+      protocol: "https",
     };
   }
 
-  // SSH format: git@host:path
   const sshMatch = url.match(/^git@([^:]+):(.+)$/);
   if (sshMatch) {
     const [, host, path] = sshMatch;
-    const normalized = `https://${host}/${path}`;
     return {
       original: url,
-      normalized,
-      protocol: 'ssh',
+      normalized: `https://${host}/${path}`,
+      protocol: "ssh",
     };
   }
 
-  // git:// protocol
   if (url.startsWith("git://")) {
-    const normalized = url.replace(/^git:\/\//, "https://");
     return {
       original: url,
-      normalized,
-      protocol: 'git',
+      normalized: url.replace(/^git:\/\//, "https://"),
+      protocol: "git",
     };
   }
 
-  // Already HTTPS or HTTP
+  if (url.startsWith("nostr://")) {
+    const nostrMatch = url.match(
+      /^nostr:\/\/([^\/@]+)(?:@([^\/]+))?\/(.+)$/
+    );
+    if (nostrMatch) {
+      const [, npub, domain, repo] = nostrMatch;
+      if (npub && repo) {
+        const targetDomain = domain || fallbackGraspDomain;
+        return {
+          original: url,
+          normalized: `https://${targetDomain}/${npub}/${repo}`,
+          protocol: "nostr",
+        };
+      }
+    }
+    return {
+      original: url,
+      normalized: url,
+      protocol: "nostr",
+    };
+  }
+
   if (url.startsWith("https://") || url.startsWith("http://")) {
     return {
       original: url,
       normalized: url,
-      protocol: url.startsWith("https://") ? 'https' : 'http',
+      protocol: url.startsWith("https://") ? "https" : "http",
     };
   }
 
-  // Unknown format - return as-is
   return {
     original: url,
     normalized: url,
-    protocol: 'https',
+    protocol: "https",
   };
 }
 
-/**
- * Normalize multiple Git URLs to HTTPS format
- * 
- * @param urls - Array of Git URLs in any format
- * @returns Array of normalized URL objects
- */
-export function normalizeGitUrls(urls: string[]): NormalizedUrl[] {
-  return urls.map(normalizeGitUrl);
+export function normalizeGitUrls(
+  urls: string[],
+  fallbackGraspDomain?: string
+): NormalizedUrl[] {
+  return urls.map((u) => normalizeGitUrl(u, fallbackGraspDomain));
 }
 
-/**
- * Extract normalized URLs only (for API calls)
- * 
- * @param urls - Array of Git URLs in any format
- * @returns Array of normalized HTTPS URLs
- */
-export function getNormalizedUrls(urls: string[]): string[] {
-  return normalizeGitUrls(urls).map(n => n.normalized);
+export function getNormalizedUrls(
+  urls: string[],
+  fallbackGraspDomain?: string
+): string[] {
+  return normalizeGitUrls(urls, fallbackGraspDomain).map((n) => n.normalized);
 }
-

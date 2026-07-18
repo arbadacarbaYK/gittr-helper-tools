@@ -2,6 +2,9 @@
 
 Code snippets for parsing and handling Git clone URLs from NIP-34 events.
 
+**Synced:** 2026-07-18 — `parseGitSource` + `isGenericHttpsGitRemoteUrl` from `git-source-fetcher.ts`.  
+Pass injectable `knownGraspDomains` (do not require grasp-servers).
+
 ## `git-source-parser.ts`
 
 Parses clone URLs and identifies the source type (GitHub, GitLab, Codeberg, GRASP servers, etc.).

@@ -2,6 +2,8 @@
 
 Code snippets for identifying GRASP (Git-Nostr-Bridge) servers vs regular Nostr relays.
 
+**Synced:** 2026-07-18 from `gittr/ui/src/lib/utils/grasp-servers.ts`
+
 ## `grasp-servers.ts`
 
 Detects GRASP servers (git servers that are also Nostr relays) and filters relay lists.

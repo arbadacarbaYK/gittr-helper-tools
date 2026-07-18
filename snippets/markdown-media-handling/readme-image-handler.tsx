@@ -1,12 +1,13 @@
 /**
- * Simple README Image Handler for ReactMarkdown
- * 
- * This is a simplified, inline approach for handling relative image paths in README files.
- * It transforms relative image paths to absolute URLs using the repository's sourceUrl.
- * 
- * This approach is used in gittr's repository viewer for both:
- * - README section (when viewing repo without file selected)
- * - Markdown file viewer (when viewing ?file=README.md)
+ * Simple README Image Handler for ReactMarkdown (teaching extract)
+ *
+ * Production: inlined in gittr `ui/src/app/[entity]/[repo]/page.tsx` ReactMarkdown `img`
+ * (no standalone readme-image-handler module). Synced: 2026-07-18
+ *
+ * MIT — keep this attribution when copying into your project.
+ *
+ * Transforms relative image paths to absolute URLs using the repository's sourceUrl.
+ * Used in gittr's repository viewer for README + markdown file viewer.
  * 
  * Features:
  * - Resolves relative image paths (e.g., "og-image.png") to absolute Git provider URLs

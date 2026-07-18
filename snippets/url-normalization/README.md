@@ -1,14 +1,16 @@
 # URL Normalization Snippets
 
-Code snippets for normalizing Git URLs to HTTPS format.
+Normalize Git URLs toward HTTPS for API / clone processing.
+
+**Source:** `gittr/ui/src/lib/utils/git-source-fetcher.ts` (URL branches inside `parseGitSource` — there is no standalone `normalize-git-url.ts` in gittr)  
+**Synced:** 2026-07-18
 
 ## `normalize-git-url.ts`
-
-Converts various Git URL formats (SSH, git://, etc.) to HTTPS for consistent API calls.
 
 **What it does:**
 - Converts `git@host:path` → `https://host/path`
 - Converts `git://host/path` → `https://host/path`
+- Converts `nostr://npub@domain/repo` → `https://domain/npub/repo` (fallback domain when `@domain` omitted)
 - Preserves original URL for display
 - Handles batch normalization
 
@@ -16,18 +18,11 @@ Converts various Git URL formats (SSH, git://, etc.) to HTTPS for consistent API
 ```typescript
 import { normalizeGitUrl, normalizeGitUrls } from './normalize-git-url';
 
-// Single URL
 const normalized = normalizeGitUrl('git@github.com:user/repo.git');
 // { original: 'git@github.com:user/repo.git', normalized: 'https://github.com/user/repo.git', protocol: 'ssh' }
 
-// Multiple URLs
-const urls = ['git@github.com:user/repo.git', 'git://jb55.com/damus'];
-const normalized = normalizeGitUrls(urls);
-// [{ original: '...', normalized: 'https://...', protocol: 'ssh' }, ...]
+const nostr = normalizeGitUrl('nostr://npub1abc@relay.ngit.dev/my-repo');
+// { protocol: 'nostr', normalized: 'https://relay.ngit.dev/npub1abc/my-repo', ... }
 ```
 
-**Why this exists:**
-Different git servers use different URL formats. When making API calls (e.g., to GitHub API, bridge clone endpoint), we need HTTPS URLs. This utility normalizes them while preserving the original for display.
-
-**Extracted from:** `gittr/ui/src/lib/utils/git-source-fetcher.ts`
-
+For full source-type classification (including `self-hosted-git` and generic `user@host:path`), see [`../file-fetching/git-source-parser.ts`](../file-fetching/git-source-parser.ts).

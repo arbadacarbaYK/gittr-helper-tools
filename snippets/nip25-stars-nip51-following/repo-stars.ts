@@ -1,7 +1,20 @@
-// NIP-25: Repository star reactions and NIP-51: Following lists
-import { type Event as NostrEvent, type Filter } from "nostr-tools";
+/**
+ * NIP-25: Repository star reactions
+ *
+ * Source: gittr/ui/src/lib/nostr/repo-stars.ts
+ * Synced: 2026-07-18
+ *
+ * MIT — keep this attribution when copying into your project.
+ *
+ * Browser-local cache helpers (sessionStorage / CustomEvent) are omitted —
+ * wire your own announcement-id cache if you need it.
+ */
+import { type Filter, type Event as NostrEvent } from "nostr-tools";
 
-import { KIND_REACTION, KIND_REPOSITORY_NIP34 } from "./events";
+/** NIP-25: Reactions */
+export const KIND_REACTION = 7;
+/** NIP-34: Repository announcements */
+export const KIND_REPOSITORY_NIP34 = 30617;
 
 export type RelaySubscribeFn = (
   filters: Filter[],
@@ -113,10 +126,16 @@ export async function queryRepoAnnouncementEventId(
   relays: string[],
   ownerPubkey: string,
   repositoryName: string,
-  opts?: { timeoutMs?: number; repo?: Parameters<typeof repoAnnouncementDTagCandidates>[1] }
+  opts?: {
+    timeoutMs?: number;
+    repo?: Parameters<typeof repoAnnouncementDTagCandidates>[1];
+  }
 ): Promise<string | null> {
   const author = ownerPubkey.trim().toLowerCase();
-  const dCandidates = repoAnnouncementDTagCandidates(repositoryName, opts?.repo);
+  const dCandidates = repoAnnouncementDTagCandidates(
+    repositoryName,
+    opts?.repo
+  );
   if (!/^[0-9a-f]{64}$/.test(author) || dCandidates.length === 0) return null;
 
   let latest: NostrEvent | null = null;
@@ -139,9 +158,7 @@ export async function queryRepoAnnouncementEventId(
         /* ignore */
       }
       const id = latest?.id;
-      resolve(
-        typeof id === "string" && /^[0-9a-f]{64}$/i.test(id) ? id : null
-      );
+      resolve(typeof id === "string" && /^[0-9a-f]{64}$/i.test(id) ? id : null);
     };
 
     const unsub = subscribe(
@@ -163,7 +180,7 @@ export async function queryRepoAnnouncementEventId(
   });
 }
 
-/** True when a kind-7 reaction targets this repo announcement (NIP-25 + gittr `#k` 30617). */
+/** True when a kind-7 reaction targets this repo announcement (NIP-25 + `#k` 30617). */
 export function isRepoStarReaction(
   event: NostrEvent,
   repoEventId: string
@@ -186,7 +203,6 @@ export async function queryRepoStars(
   opts?: { timeoutMs?: number }
 ): Promise<{ count: number; starers: string[] }> {
   const collected: NostrEvent[] = [];
-  // Many relays index `#e` but not `#k` on kind 7 — filter `k=30617` client-side.
   const filters: Filter[] = [
     {
       kinds: [KIND_REACTION],
@@ -224,9 +240,6 @@ export async function queryRepoStars(
   });
 }
 
-/**
- * Publish a star reaction (NIP-25) for a repository
- */
 export async function publishStarReaction(
   repoEventId: string,
   repoOwnerPubkey: string,
@@ -240,8 +253,6 @@ export async function publishStarReaction(
 }> {
   try {
     const signer = await getSigner();
-
-    // Create unsigned event
     const unsignedEvent = {
       kind: KIND_REACTION,
       created_at: Math.floor(Date.now() / 1000),
@@ -251,22 +262,16 @@ export async function publishStarReaction(
         ["p", repoOwnerPubkey.toLowerCase()],
       ],
       content: "+",
-      pubkey: "", // Will be set by signer
+      pubkey: "",
     };
-
-    // Sign the event
     const signedEvent = await signer.signEvent(unsignedEvent);
-
-    // Publish to relays
     await publish(signedEvent);
-
     return {
       success: true,
       eventId: signedEvent.id,
       signedEvent: signedEvent as NostrEvent,
     };
   } catch (error: any) {
-    console.error("[Repo Stars] Failed to publish star reaction:", error);
     return {
       success: false,
       error: error?.message || "Failed to publish star reaction",
@@ -274,10 +279,6 @@ export async function publishStarReaction(
   }
 }
 
-/**
- * Remove a star reaction (publish a negative reaction or delete)
- * NIP-25: Use "-" content to unstar, or publish a deletion event
- */
 export async function removeStarReaction(
   repoEventId: string,
   repoOwnerPubkey: string,
@@ -286,8 +287,6 @@ export async function removeStarReaction(
 ): Promise<{ success: boolean; signedEvent?: NostrEvent; error?: string }> {
   try {
     const signer = await getSigner();
-
-    // Create negative reaction (NIP-25: "-" means remove reaction)
     const unsignedEvent = {
       kind: KIND_REACTION,
       created_at: Math.floor(Date.now() / 1000),
@@ -296,16 +295,13 @@ export async function removeStarReaction(
         ["k", "30617"],
         ["p", repoOwnerPubkey.toLowerCase()],
       ],
-      content: "-", // Negative reaction (unstar)
-      pubkey: "", // Will be set by signer
+      content: "-",
+      pubkey: "",
     };
-
     const signedEvent = await signer.signEvent(unsignedEvent);
     await publish(signedEvent);
-
     return { success: true, signedEvent: signedEvent as NostrEvent };
   } catch (error: any) {
-    console.error("[Repo Stars] Failed to remove star reaction:", error);
     return {
       success: false,
       error: error?.message || "Failed to remove star reaction",

@@ -1,5 +1,7 @@
 # NIP-34 Push Paywall Interop (`push_cost_sats`)
 
+**Synced:** 2026-07-18 — tag still emitted by gittr `buildUnsignedRepositoryEvent` when `pushCostSats >= 0`. Docs-only (no `.ts` in this folder).
+
 This snippet documents a practical, interoperable way to implement **pay-to-push** using existing Nostr primitives.
 
 The goal is simple:

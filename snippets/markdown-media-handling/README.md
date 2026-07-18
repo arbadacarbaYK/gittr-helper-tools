@@ -2,17 +2,24 @@
 
 Utilities and React components for handling images, videos, and other media files in markdown content within repository viewers.
 
-## Two Approaches
+**Synced:** 2026-07-18
 
-This folder contains two implementations:
+## Production sources in gittr
 
-1. **`readme-image-handler.tsx`** - Simple inline approach (currently used in gittr)
+- **Relative links / `?path=` / `?file=`:** [`ui/src/lib/utils/markdown-anchor.tsx`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/src/lib/utils/markdown-anchor.tsx&branch=main) → extract in this folder as **`markdown-anchor.ts`** (`normalizeRepoPath`, `resolveRepoMarkdownHref`).
+- **README images:** inlined in the repo page ReactMarkdown `img` component (no standalone `readme-image-handler` in gittr). The teaching extract `readme-image-handler.tsx` mirrors that logic.
+
+## Approaches in this folder
+
+1. **`markdown-anchor.ts`** — pure path helpers from production `markdown-anchor.tsx` (no React, no `@/` imports)
+
+2. **`readme-image-handler.tsx`** - Simple inline approach (teaching extract of gittr repo-page `img` handling)
    - Direct URL transformation for relative image paths
    - Works with GitHub, GitLab, Codeberg raw URLs
    - Minimal dependencies, easy to integrate
    - Best for: Simple use cases where you have `sourceUrl` available
 
-2. **`markdown-media.tsx`** - Full-featured component-based approach
+3. **`markdown-media.tsx`** - Full-featured component-based approach
    - API endpoint support with base64 conversion
    - URL caching and retry logic
    - Supports Nostr-native repos via API endpoints

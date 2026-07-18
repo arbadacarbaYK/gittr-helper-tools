@@ -2,6 +2,7 @@
 
 Implementation profile for showing **hop distance** next to Nostr identities in a Nostr Git client.
 
+**Synced:** 2026-07-18 — labels from `gittr/ui/src/lib/nostr/wot.ts`  
 **Production reference:** [gittr `docs/WOT.md`](https://github.com/arbadacarbaYK/gittr/blob/main/docs/WOT.md) · [gittr.space](https://gittr.space)
 
 ## Problem

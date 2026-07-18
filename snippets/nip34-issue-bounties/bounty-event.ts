@@ -1,6 +1,11 @@
 /**
  * Minimal kind 9806 bounty event builder (reference extract from gittr).
  * Sign with your app's NIP-07 / NIP-46 resolver before publish.
+ *
+ * Source: gittr/ui/src/lib/nostr/events.ts (createBountyEvent)
+ * Synced: 2026-07-18
+ *
+ * MIT — keep this attribution when copying into your project.
  */
 
 import { getEventHash, getPublicKey, signEvent } from "nostr-tools";
@@ -20,6 +25,9 @@ export interface BountyEventInput {
   withdrawId?: string;
   lnurl?: string;
   withdrawUrl?: string;
+  /** Legacy bolt11 / payment fields (still emitted by gittr). */
+  invoice?: string;
+  paymentHash?: string;
   createdAt?: number;
   releasedAt?: number;
   claimedAt?: number;
@@ -50,6 +58,8 @@ export function buildUnsignedBountyEvent(
       withdrawId: bounty.withdrawId,
       lnurl: bounty.lnurl,
       withdrawUrl: bounty.withdrawUrl,
+      invoice: bounty.invoice,
+      paymentHash: bounty.paymentHash,
       releasedAt: bounty.releasedAt,
       claimedAt: bounty.claimedAt,
     }),

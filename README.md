@@ -2,30 +2,38 @@
 
 Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?branch=main).
 
+**Last sync:** 2026-07-18 from gittr `main`.
+
 Do not commit secrets into examples; use placeholders in `.env.example`.
 
 ## What's in here
 
 | Folder | What it does |
 | --- | --- |
-| [`snippets/file-fetching/`](./snippets/file-fetching) | Parse NIP-34 `clone` URLs, source types, encoding |
-| [`snippets/url-normalization/`](./snippets/url-normalization) | SSH / `git://` → HTTPS |
+| [`snippets/file-fetching/`](./snippets/file-fetching) | Parse NIP-34 `clone` URLs, source types (`self-hosted-git`, `nostr://`, …) |
+| [`snippets/url-normalization/`](./snippets/url-normalization) | SSH / `git://` / `nostr://` → HTTPS (from `git-source-fetcher.ts`) |
 | [`snippets/grasp-detection/`](./snippets/grasp-detection) | GRASP servers vs normal relays |
+| [`snippets/grasp-list/`](./snippets/grasp-list) | NIP-34 kind `10317` GRASP preference lists (`g` tags) |
+| [`snippets/clone-url-quality/`](./snippets/clone-url-quality) | Host-only / unusable clone detection + announce normalize |
+| [`snippets/repair-host-only-clones/`](./snippets/repair-host-only-clones) | “Please republish” predicates (no push coupling) |
+| [`snippets/repo-status/`](./snippets/repo-status) | Local → live_soon → live status helpers |
+| [`snippets/filter-display-clone-urls/`](./snippets/filter-display-clone-urls) | Sidebar: hide extra GRASP mirrors when primary host present |
+| [`snippets/filter-grasp-mirror-pollution/`](./snippets/filter-grasp-mirror-pollution) | Strip mirror `npub`/`hex` roots from file trees |
 | [`snippets/nip46-remote-signer/`](./snippets/nip46-remote-signer) | NIP-46 pairing + **unified signer resolver** (browser; bridge does not do NIP-46) |
-| [`snippets/nip25-stars-nip51-following/`](./snippets/nip25-stars-nip51-following) | Stars (NIP-25) and repo lists (NIP-51) |
-| [`snippets/markdown-media-handling/`](./snippets/markdown-media-handling) | Markdown images, embeds, relative links |
+| [`snippets/nip25-stars-nip51-following/`](./snippets/nip25-stars-nip51-following) | Stars (NIP-25) + git repos list (NIP-51 kind `10018`) |
+| [`snippets/markdown-media-handling/`](./snippets/markdown-media-handling) | Markdown images, embeds, relative links (`markdown-anchor.ts`) |
 | [`snippets/nip-c0-code-snippets/`](./snippets/nip-c0-code-snippets) | NIP-C0 kind `1337` events + renderer |
-| [`snippets/nip34-repository-events/`](./snippets/nip34-repository-events) | NIP-34 kind `30617` / `30618` schemas and parsers |
+| [`snippets/nip34-repository-events/`](./snippets/nip34-repository-events) | NIP-34 kind `30617` / `30618` schemas and builders |
 | [`snippets/nip34-push-paywall/`](./snippets/nip34-push-paywall) | Optional `push_cost_sats` on `30617` |
-| [`snippets/wot-trust-badges/`](./snippets/wot-trust-badges) | Viewer-relative Web of Trust badges (extension → kind 3 → optional oracle) |
-| [`snippets/nip34-issue-bounties/`](./snippets/nip34-issue-bounties) | Kind `9806` issue bounties on NIP-34 (LNURL-withdraw profile) |
-| `cmd/` | (Future) standalone tools |
+| [`snippets/wot-trust-badges/`](./snippets/wot-trust-badges) | Viewer-relative Web of Trust badges |
+| [`snippets/nip34-issue-bounties/`](./snippets/nip34-issue-bounties) | Kind `9806` issue bounties on NIP-34 |
 
 ## Getting started
 
 1. Open the snippet folder you need; read its README.
 2. Copy the `.ts` / `.tsx` files into your project (MIT, keep attribution).
-3. For full file-fetch / bridge behaviour see gittr [FILE_FETCHING_INSIGHTS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/FILE_FETCHING_INSIGHTS.md&branch=main).
+3. Snippets are self-contained: no `@/` imports. Stub private-key storage yourself where noted.
+4. For full file-fetch / bridge behaviour see gittr [FILE_FETCHING_INSIGHTS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/FILE_FETCHING_INSIGHTS.md&branch=main).
 
 ## More on gittr
 

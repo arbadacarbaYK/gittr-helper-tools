@@ -1,17 +1,11 @@
 /**
- * NIP-C0 Code Snippets - Renderer Component
- * 
- * React component for displaying NIP-C0 code snippet events with syntax highlighting,
- * metadata display, and actions (copy, download, view source).
- * 
- * @example
- * ```tsx
- * import { CodeSnippetRenderer } from './code-snippet-renderer';
- * 
- * function MyComponent({ event }) {
- *   return <CodeSnippetRenderer event={event} showAuthor={true} />;
- * }
- * ```
+ * NIP-C0 Code Snippets - Renderer Component (teaching extract)
+ *
+ * Source: gittr/ui/src/components/ui/code-snippet-renderer.tsx
+ * Synced: 2026-07-18
+ *
+ * MIT — keep this attribution when copying into your project.
+ * Optional peer: lucide-react (icons). Swap for your icon set if preferred.
  */
 
 "use client";

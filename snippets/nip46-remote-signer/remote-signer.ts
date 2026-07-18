@@ -1,9 +1,12 @@
 /**
- * NIP-46 Remote Signer Integration
+ * NIP-46 Remote Signer Integration (teaching extract)
  *
  * Extracted from gittr.space - implements NIP-46 (Remote Signing) for pairing with
  * Amber, nak bunker, bunker46, LNbits Remote Nostr Signer, etc. without exposing
  * private keys to the browser.
+ *
+ * Source: gittr/ui/src/lib/nostr/remoteSigner.ts (trimmed — production is ~1792 lines)
+ * Synced: 2026-07-18
  *
  * NIP-46: https://nips.nostr.com/46
  *
@@ -81,11 +84,54 @@ const HEX_64_RE = /^[0-9a-f]{64}$/i;
 export const DEFAULT_REMOTE_PERMISSIONS = [
   "get_public_key",
   "sign_event",
+  "sign_event:30617",
+  "sign_event:30618",
+  "sign_event:10317",
+  "sign_event:5",
   "nip04_encrypt",
   "nip04_decrypt",
   "nip44_encrypt",
   "nip44_decrypt",
 ];
+
+/** Relays signers like Amber reliably use for NIP-46 (pairing + sign_event). */
+const NIP46_PAIRING_RELAY_FALLBACKS = ["wss://relay.damus.io", "wss://nos.lol"];
+
+/** Amber bunker default relays — must overlap QR pairing when user has no prior session. */
+const NIP46_SIGNER_DEFAULT_RELAYS = [
+  "wss://relay.primal.net",
+  "wss://theforest.nostr1.com",
+  "wss://nostr.oxtr.dev",
+];
+
+const normalizeRelayUrl = (url: string) =>
+  url.trim().toLowerCase().replace(/\/+$/, "");
+
+/**
+ * Relays embedded in nostrconnect QR — must NOT include GRASP/git relays
+ * (they reject kind 24133). Pass `isGrasp` from the grasp-detection snippet.
+ */
+export function getNip46PairingRelays(
+  appRelays: string[],
+  max = 5,
+  isGrasp: (url: string) => boolean = () => false
+): string[] {
+  const merged: string[] = [];
+  const add = (url: string) => {
+    const normalized = normalizeRelayUrl(url);
+    if (
+      normalized.startsWith("wss://") &&
+      !merged.includes(normalized) &&
+      !isGrasp(normalized)
+    ) {
+      merged.push(normalized);
+    }
+  };
+  NIP46_SIGNER_DEFAULT_RELAYS.forEach(add);
+  NIP46_PAIRING_RELAY_FALLBACKS.forEach(add);
+  appRelays.filter((r) => !isGrasp(r)).forEach(add);
+  return merged.slice(0, max);
+}
 
 export interface RemoteSignerConfig {
   remotePubkey: string; // Remote signer's pubkey (bunker://) or client pubkey (nostrconnect:// — see parse notes!)
@@ -382,6 +428,8 @@ export class RemoteSignerManager {
   private deps: RemoteSignerDeps;
   private session: RemoteSignerSession | null = null;
   private state: RemoteSignerState = "idle";
+  /** Set true after a successful NIP-46 RPC; false after hard failures. */
+  private rpcHealthy = false;
   private pending = new Map<string, PendingRequest>();
   private unsubscribe?: () => void;
   private originalNostr: typeof window.nostr | undefined;
@@ -413,13 +461,22 @@ export class RemoteSignerManager {
     return this.session?.userPubkey;
   }
 
+  /** Cached bunker/nostrconnect session exists and last NIP-46 RPC succeeded. */
+  isRpcHealthy() {
+    return !!(
+      this.session?.userPubkey &&
+      this.rpcHealthy &&
+      this.state === "ready"
+    );
+  }
+
   /**
    * Single-flight bootstrap — safe to call from any auth action (push, issue,
    * profile save, …) while page load may still be pairing. This is what the
    * signer-resolver relies on so `window.nostr` is attached before signing.
    */
   ensureBootstrapped(): Promise<void> {
-    if (this.state === "ready" && this.session?.userPubkey) {
+    if (this.state === "ready" && this.session?.userPubkey && this.rpcHealthy) {
       return Promise.resolve();
     }
     if (this.bootstrapInFlight) {
@@ -457,6 +514,7 @@ export class RemoteSignerManager {
         const msg = err instanceof Error ? err.message : String(err);
         if (!/already connected|timed out/i.test(msg)) throw err;
       }
+      this.rpcHealthy = true;
       this.notifyState("ready");
     } catch (error: any) {
       console.error("[RemoteSigner] Failed to resume session:", error);
@@ -542,6 +600,7 @@ export class RemoteSignerManager {
       session.lastConnected = Date.now();
 
       await this.activateSession(session);
+      this.rpcHealthy = true;
       this.notifyState("ready");
 
       return {
@@ -626,6 +685,7 @@ export class RemoteSignerManager {
   }
 
   private clearSession() {
+    this.rpcHealthy = false;
     this.session = null;
     persistRemoteSignerSession(null);
     this.unsubscribe?.();

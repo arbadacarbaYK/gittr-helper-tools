@@ -2,6 +2,9 @@
 
 Code snippets for implementing **NIP-46** (remote signing) in a Nostr **web client**, so users can pair **Amber**, **Nowser**, **LNbits remote signer**, self-hosted **bunker**, etc., without putting the user’s **nsec** in the page.
 
+**Synced:** 2026-07-18 — teaching extract (not the full ~1792-line production file).  
+APIs of note: `getNip46PairingRelays` (never put GRASP in NIP-46 URIs), `isRpcHealthy`, kind-scoped `DEFAULT_REMOTE_PERMISSIONS`, `waitForRemoteSigner` (20s), prefer manager over `window.nostr` when a remote session exists.
+
 **Canonical docs (keep in sync with production):**
 
 - [gittr `NIP46_REMOTE_SIGNER_INTEGRATION.md`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main) — full architecture and URI notes  

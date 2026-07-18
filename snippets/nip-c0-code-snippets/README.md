@@ -184,18 +184,16 @@ The optional third parameter is a recommended relay for fetching the repository 
 ```typescript
 import { createCodeSnippetEvent } from './code-snippet-events';
 import { getPublicKey } from 'nostr-tools';
-import { getNostrPrivateKey } from './security/encryptedStorage';
+// Integrator: load privateKey from your own secure storage (not gittr encryptedStorage)
 
 async function shareCodeAsSnippet(
   selectedCode: string,
   filePath: string,
   entity: string,
-  repoName: string
+  repoName: string,
+  privateKey: string
 ) {
-  // Extract file extension
   const extension = filePath.split('.').pop() || '';
-  
-  // Map extension to language (simplified)
   const languageMap: Record<string, string> = {
     'js': 'javascript',
     'ts': 'typescript',
@@ -204,11 +202,7 @@ async function shareCodeAsSnippet(
     'go': 'go',
   };
   const language = languageMap[extension] || extension;
-  
-  // Create NIP-34 repo reference
   const repoRef = `30617:${entity}:${repoName}`;
-  
-  // Create snippet
   const snippet = {
     content: selectedCode,
     language,
@@ -217,13 +211,8 @@ async function shareCodeAsSnippet(
     description: `Code snippet from ${filePath}`,
     repo: repoRef,
   };
-  
-  // Get private key and create signed event
-  const privateKey = await getNostrPrivateKey();
   const pubkey = getPublicKey(privateKey);
   const event = createCodeSnippetEvent(snippet, pubkey, privateKey);
-  
-  // Publish
   await publish(event, relays);
 }
 ```
