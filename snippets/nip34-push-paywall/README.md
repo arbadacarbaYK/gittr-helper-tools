@@ -16,6 +16,13 @@ This is an **extension on top of NIP-34** repository metadata:
 
 It does **not** define a new NIP event kind for pull requests or payments.
 
+**Same `30617` / Push also carries** (documented in [`../nip34-repository-events/`](../nip34-repository-events) — no extra snippet):
+
+- **Documentation / social links** — `["link", "docs"|…, "<url>", "<label>?"]` (+ folded into `web`)
+- **Private vs public** — `["public-read","true|false"]`, `["public-write","true|false"]` (gittr extension; host enforces ACL)
+
+Treat paywall, links, and privacy as **optional parameters on the repository announce**, not separate snapshots.
+
 ## Canonical Event Surface
 
 Publish push policy on the same replaceable repository event:

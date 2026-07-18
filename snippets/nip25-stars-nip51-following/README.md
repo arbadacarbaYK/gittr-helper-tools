@@ -1,15 +1,20 @@
-# NIP-25 Stars & NIP-51 Following Implementation
+# Stars (NIP-25) & Watch (NIP-51 kind 10018)
 
-Code snippets for implementing repository starring and following using **NIP-25** (Reactions) and **NIP-51** (Lists) in a Nostr-based Git hosting platform.
+Code snippets for **Star** and **Watch** on Nostr git repos.
 
-**Synced:** 2026-07-18 from gittr `repo-stars.ts` + `events.ts` (kind 10018).
+| UI action | Kind | Spec |
+| --- | --- | --- |
+| **Star** / unstar | `7` | NIP-25 reaction on the repo’s `30617` event |
+| **Watch** / unwatch | `10018` | NIP-51 *Git repositories list* (full replaceable `a` list) |
+
+**Synced:** 2026-07-18 from gittr `repo-stars.ts` + `events.ts` (kind 10018) + `layout-client.tsx` `handleWatch`.
 
 ## Files
 
 | File | Role |
 | --- | --- |
 | `repo-stars.ts` | NIP-25 star aggregate / query / publish (`KIND_REACTION=7`, `KIND_REPOSITORY_NIP34=30617` local constants) |
-| `git-repositories-list.ts` | NIP-51 kind **10018** build + parse (`30617:pubkey:d` `a` tags) |
+| `git-repositories-list.ts` | NIP-51 kind **10018** build + parse (`30617:pubkey:d` `a` tags) — this is **Watch** |
 
 ## `repo-stars.ts`
 
@@ -262,13 +267,15 @@ useEffect(() => {
 }, [repo, subscribe]);
 ```
 
-## NIP-51: Followed repositories (kind 10018)
+## Watch (NIP-51 kind 10018)
 
-Canonical behavior matches **gittr** `ui/src/lib/nostr/events.ts` and repo layout watch publish.
+**Watch** = the user’s replaceable **git repositories list**. It is **not** kind 3 (people follow) and **not** Star (kind 7).
+
+Canonical behavior matches gittr `createGitRepositoriesListEvent` / `parseGitRepositoriesListEvent` and repo header **Watch**.
 
 ### Event structure
 
-Tags are **`a` only**, each value `30617:<64-hex-owner-pubkey>:<repositoryName>`. Each user publish carries the **full** current list (replaceable standard list — not per-click relay patches).
+Tags are **`a` only**, each value `30617:<64-hex-owner-pubkey>:<repositoryName>` (use the NIP-34 `d` / repositoryName). Each publish carries the **full** current watched set (standard replaceable list — merge locally, then republish once).
 
 ```typescript
 {
@@ -276,18 +283,26 @@ Tags are **`a` only**, each value `30617:<64-hex-owner-pubkey>:<repositoryName>`
   created_at: Math.floor(Date.now() / 1000),
   tags: [
     ["a", "30617:<hex64>:<repoId>"],
-    // ... all watched repos
+    // ... all watched repos for this user
   ],
   content: "",
   pubkey: userPubkey,
 }
 ```
 
-Use **`createGitRepositoriesListEvent`** / **`parseGitRepositoriesListEvent`** in upstream `events.ts` when copying snippets.
+Snippet helpers: `git-repositories-list.ts` (`buildGitRepositoriesListEvent` / parse).
+
+### Client flow (Watch / Unwatch)
+
+1. Load latest `10018` for the signed-in user (`kinds: [10018]`, `authors: [hex]`).
+2. Parse `a` tags → set of `30617:owner:repo`.
+3. On **Watch**: add address if missing. On **Unwatch**: remove it.
+4. Publish a **new** `10018` with the full updated `a` list (signed).
+5. Optional local cache (gittr uses `gittr_watched_repos`) for snappy UI; relays remain canonical.
 
 ### Querying
 
-`kinds: [10018]`, `authors: [<pubkey>]`, then read **`a`** tags from the latest event (no `#d` filter in the shipped gittr watch list).
+`kinds: [10018]`, `authors: [<watcher-hex>]`, then read **`a`** tags from the **latest** event (no `#d` filter in gittr).
 
 ## Implementation Notes
 

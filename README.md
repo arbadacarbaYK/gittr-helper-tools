@@ -20,13 +20,24 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | [`snippets/filter-display-clone-urls/`](./snippets/filter-display-clone-urls) | Sidebar: hide extra GRASP mirrors when primary host present |
 | [`snippets/filter-grasp-mirror-pollution/`](./snippets/filter-grasp-mirror-pollution) | Strip mirror `npub`/`hex` roots from file trees |
 | [`snippets/nip46-remote-signer/`](./snippets/nip46-remote-signer) | NIP-46 pairing + **unified signer resolver** (browser; bridge does not do NIP-46) |
-| [`snippets/nip25-stars-nip51-following/`](./snippets/nip25-stars-nip51-following) | Stars (NIP-25) + git repos list (NIP-51 kind `10018`) |
+| [`snippets/nip25-stars-nip51-following/`](./snippets/nip25-stars-nip51-following) | **Star** (NIP-25) + **Watch** (NIP-51 kind `10018`) |
+| [`snippets/nip34-issue-bounties/`](./snippets/nip34-issue-bounties) | Bounties **offer / take** (kind `9806` + LNURL-withdraw) |
+| [`snippets/nip5a-gittr-pages/`](./snippets/nip5a-gittr-pages) | **Make a Page** — NIP-5A named sites (`35128` + Blossom) |
 | [`snippets/markdown-media-handling/`](./snippets/markdown-media-handling) | Markdown images, embeds, relative links (`markdown-anchor.ts`) |
 | [`snippets/nip-c0-code-snippets/`](./snippets/nip-c0-code-snippets) | NIP-C0 kind `1337` events + renderer |
-| [`snippets/nip34-repository-events/`](./snippets/nip34-repository-events) | NIP-34 kind `30617` / `30618` schemas and builders |
-| [`snippets/nip34-push-paywall/`](./snippets/nip34-push-paywall) | Optional `push_cost_sats` on `30617` |
+| [`snippets/nip34-repository-events/`](./snippets/nip34-repository-events) | NIP-34 `30617` / `30618` — clone, **docs `link`**, **private `public-read`**, paywall tags |
+| [`snippets/nip34-push-paywall/`](./snippets/nip34-push-paywall) | Optional `push_cost_sats` on `30617` (links + private documented in repository-events) |
 | [`snippets/wot-trust-badges/`](./snippets/wot-trust-badges) | Viewer-relative Web of Trust badges |
-| [`snippets/nip34-issue-bounties/`](./snippets/nip34-issue-bounties) | Kind `9806` issue bounties on NIP-34 |
+
+### Product features → snippet map
+
+| Feature | Where |
+| --- | --- |
+| Watch a repo | [`nip25-stars-nip51-following`](./snippets/nip25-stars-nip51-following) (kind `10018`) |
+| Offer / take bounty | [`nip34-issue-bounties`](./snippets/nip34-issue-bounties) |
+| Make a Page | [`nip5a-gittr-pages`](./snippets/nip5a-gittr-pages) |
+| Push: docs links + private repo | Same `30617` announce — [`nip34-repository-events`](./snippets/nip34-repository-events) (no extra snapshot) |
+| Push: pay-to-push | [`nip34-push-paywall`](./snippets/nip34-push-paywall) |
 
 ## Getting started
 

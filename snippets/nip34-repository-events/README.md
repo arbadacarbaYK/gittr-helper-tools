@@ -83,12 +83,14 @@ yarn add nostr-tools
 ### Optional Tags
 
 - **`relays`** - Nostr relay URLs (recommended for discoverability)
-- **`maintainers`** - Maintainer pubkeys in npub format (for access control)
-- **`source`** - Source repository URL (for imported repos)
+- **`maintainers`** - Maintainer pubkeys (hex multi-value preferred)
+- **`source`** - Upstream forge URL (for imported repos)
 - **`forkedFrom`** - NIP-34 format reference to forked repo
-- **`web`** - Website URLs
+- **`web`** - Website / logo / link URLs
 - **`t`** - Topics/tags for categorization
-- **`link`** - Structured links with type and label
+- **`link`** - Documentation & social links (`docs`, `github`, …) — same Push as announce
+- **`public-read` / `public-write`** - Private vs public (gittr extension; host enforces)
+- **`push_cost_sats`** - Pay-to-push (see push-paywall snippet)
 
 ## Response Schema (What You Receive)
 
@@ -243,12 +245,15 @@ const unsub = subscribe(
 | `description` | ✅ Yes | String | Repository description | `["description", "A cool repo"]` |
 | `clone` | ✅ Yes | String+ | Git clone URL(s); **preferred:** one row, multiple HTTPS values | `["clone", "https://a/npub…/r.git", "https://ngit-relay…/npub…/r.git"]` |
 | `relays` | No | String+ | Relay URL(s); **preferred:** one row, multiple `wss://` values | `["relays", "wss://a", "wss://b"]` |
-| `maintainers` | No | String | Maintainer pubkey (npub format, can repeat) | `["maintainers", "npub1abc..."]` |
-| `source` | No | String | Source repository URL | `["source", "https://github.com/user/repo"]` |
-| `forkedFrom` | No | String | NIP-34 format fork reference | `["forkedFrom", "30617:pubkey:repo"]` |
-| `web` | No | String | Website URL (can repeat) | `["web", "https://example.com"]` |
+| `maintainers` | No | String+ | Maintainer **hex** pubkeys (multi-value preferred) | `["maintainers", "<hex64>", "<hex64>"]` |
+| `source` | No | String | Upstream forge URL (import source) | `["source", "https://github.com/user/repo"]` |
+| `forkedFrom` | No | String | NIP-34 fork reference | `["forkedFrom", "30617:pubkey:repo"]` |
+| `web` | No | String+ | Logo + link URLs folded into one/multi-value row | `["web", "https://logo…", "https://docs…"]` |
 | `t` | No | String | Topic/tag (can repeat) | `["t", "javascript"]` |
-| `link` | No | Array | Structured link: `[type, url, label?]` | `["link", "docs", "https://docs.com", "Docs"]` |
+| `link` | No | Array | Docs / social links (see below) | `["link", "docs", "https://docs.com", "Docs"]` |
+| `public-read` | No* | `"true"`\|`"false"` | gittr privacy extension (*always emitted by gittr builder) | `["public-read", "false"]` |
+| `public-write` | No* | `"true"`\|`"false"` | gittr privacy extension | `["public-write", "false"]` |
+| `push_cost_sats` | No | String | Pay-to-push — see [`../nip34-push-paywall/`](../nip34-push-paywall) | `["push_cost_sats", "2"]` |
 
 ## Important Notes
 
@@ -266,7 +271,7 @@ For merge flows, do not stop at publishing a PR status update. After merge statu
 
 ### Maintainers Format
 
-Maintainer pubkeys should be in **npub format** (bech32-encoded) per best practices, but parsers should accept both npub and hex formats for compatibility.
+gittr emits **hex** pubkeys on a multi-value `maintainers` row. Parsers should accept hex and npub for compatibility.
 
 ### Clone URLs
 
@@ -290,13 +295,41 @@ Try clone URLs in published order (first usable HTTPS wins for web).
 [["relays", "wss://relay1.com,wss://relay2.com"]]
 ```
 
-### Privacy
+### Documentation & other links (`link`)
 
-**Privacy is NOT encoded in NIP-34 events**. Privacy is determined by:
-- The `maintainers` tag (who has access)
-- Bridge access control (server-side permissions)
+These are **parameters on the same `30617` announce / Push** — no separate event kind.
 
-Do not add custom `public-read`/`public-write` tags - they are not in the spec and break interoperability.
+```
+["link", "<type>", "<url>", "<label>?"]
+```
+
+gittr UI types: `docs` | `discord` | `slack` | `youtube` | `twitter` | `github` | `other`.
+
+Example — documentation URL on the repo:
+
+```
+["link", "docs", "https://docs.example.com/my-repo", "Documentation"]
+```
+
+The same HTTPS URLs are also folded into the multi-value **`web`** tag (with optional logo). Settings → Repository Links → Push / publish updates the announce.
+
+### Privacy / private repos (`public-read` / `public-write`)
+
+gittr extension tags on **the same `30617`** (emitted by `buildUnsignedRepositoryEvent` / Settings publish):
+
+```
+["public-read", "true"|"false"]   // Private repo → "false" (default public = "true")
+["public-write", "true"|"false"]  // Usually "false"; open write is rare
+```
+
+| Setting (gittr UI) | Tags |
+| --- | --- |
+| Public | `public-read=true`, `public-write=false` |
+| Private | `public-read=false`, `public-write=false` |
+
+**Important:** Relays still store the announce (name/description may be discoverable). **Enforcement** is on the git host / bridge / SSH / HTTPS ACL — treat tags as discovery + policy signal for clients and hosts. They are **not** part of core NIP-34, but gittr and interop clients should parse them when present.
+
+Also see pay-to-push: [`../nip34-push-paywall/`](../nip34-push-paywall) (`push_cost_sats` on the same event).
 
 ## Example: Complete Request/Response Cycle
 
