@@ -28,6 +28,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | [`snippets/nip34-repository-events/`](./snippets/nip34-repository-events) | NIP-34 `30617` / `30618` — clone, **docs `link`**, **private `public-read`**, paywall tags |
 | [`snippets/nip34-push-paywall/`](./snippets/nip34-push-paywall) | Optional `push_cost_sats` on `30617` (links + private documented in repository-events) |
 | [`snippets/wot-trust-badges/`](./snippets/wot-trust-badges) | Viewer-relative Web of Trust badges |
+| [`snippets/github-oauth-writeback/`](./snippets/github-oauth-writeback) | **Plan:** GH OAuth write-back for ToDo/Discussions (not a NIP; identity + forge bridge) |
 
 ### Product features → snippet map
 
@@ -38,6 +39,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | Make a Page | [`nip5a-gittr-pages`](./snippets/nip5a-gittr-pages) |
 | Push: docs links + private repo | Same `30617` announce — [`nip34-repository-events`](./snippets/nip34-repository-events) (no extra snapshot) |
 | Push: pay-to-push | [`nip34-push-paywall`](./snippets/nip34-push-paywall) |
+| GitHub write-back (ToDo / Discussions) | [`github-oauth-writeback`](./snippets/github-oauth-writeback) (planned; OAuth bridge, not a kind) |
 
 ## Getting started
 
