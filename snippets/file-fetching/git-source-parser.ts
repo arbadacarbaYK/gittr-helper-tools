@@ -3,7 +3,7 @@
  *
  * Teaching extract from gittr.space — parse NIP-34 clone URLs and classify source type.
  * Source: gittr/ui/src/lib/utils/git-source-fetcher.ts (parseGitSource + helpers)
- * Synced: 2026-07-18
+ * Synced: 2026-07-26
  *
  * MIT — keep this attribution when copying into your project.
  *
@@ -29,9 +29,14 @@ export interface GitSource {
 }
 
 /**
- * True for https(s) remotes that look like host/owner/repo where owner is not an npub path.
+ * True for https(s) remotes that look like host/owner/repo.
+ * Allows `/npub1…/repo` on hosts that are **not** in `knownGraspDomains`
+ * (home Freebox, NAS) so callers can use `/api/git/repo-files`.
  */
-export function isGenericHttpsGitRemoteUrl(raw: string): boolean {
+export function isGenericHttpsGitRemoteUrl(
+  raw: string,
+  knownGraspDomains: string[] = []
+): boolean {
   if (!raw || typeof raw !== "string") return false;
   try {
     let u = raw.trim();
@@ -61,7 +66,13 @@ export function isGenericHttpsGitRemoteUrl(raw: string): boolean {
     const parts = parsed.pathname.split("/").filter(Boolean);
     if (parts.length < 2) return false;
     const ownerSeg = parts[0];
-    if (!ownerSeg || /^npub1[a-z0-9]+$/i.test(ownerSeg)) return false;
+    if (!ownerSeg) return false;
+    if (/^npub1[a-z0-9]+$/i.test(ownerSeg)) {
+      const isKnownGrasp = knownGraspDomains.some(
+        (server) => host.includes(server) || server.includes(host)
+      );
+      if (isKnownGrasp) return false;
+    }
     return true;
   } catch {
     return false;
@@ -69,7 +80,10 @@ export function isGenericHttpsGitRemoteUrl(raw: string): boolean {
 }
 
 /** Upstream URLs refetchable via server-side git (GitHub/GitLab/Codeberg or generic HTTPS). */
-export function isRefetchableUpstreamSourceUrl(raw: string): boolean {
+export function isRefetchableUpstreamSourceUrl(
+  raw: string,
+  knownGraspDomains: string[] = []
+): boolean {
   if (!raw || typeof raw !== "string") return false;
   const t = raw.trim();
   if (
@@ -79,7 +93,7 @@ export function isRefetchableUpstreamSourceUrl(raw: string): boolean {
   ) {
     return true;
   }
-  return isGenericHttpsGitRemoteUrl(t);
+  return isGenericHttpsGitRemoteUrl(t, knownGraspDomains);
 }
 
 /**
@@ -164,7 +178,13 @@ export function parseGitSource(
   );
   if (nostrGitMatch) {
     const [, domain, npub, repo] = nostrGitMatch;
-    if (domain && npub && repo) {
+    const isKnownGrasp =
+      domain &&
+      knownGraspDomains.some(
+        (server) => domain.includes(server) || server.includes(domain)
+      );
+    // Only known GRASP hosts → nostr-git. Home Freebox/NAS /npub/ paths fall through to self-hosted.
+    if (domain && npub && repo && isKnownGrasp) {
       return {
         type: "nostr-git",
         url: normalizedUrl,
@@ -275,8 +295,7 @@ export function parseGitSource(
       repoSeg &&
       !/^github\.com$/i.test(host) &&
       !/^gitlab\.com$/i.test(host) &&
-      !/^codeberg\.org$/i.test(host) &&
-      !/^npub1[a-z0-9]+$/i.test(ownerSeg)
+      !/^codeberg\.org$/i.test(host)
     ) {
       return {
         type: "self-hosted-git",

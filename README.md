@@ -2,7 +2,7 @@
 
 Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?branch=main).
 
-**Last sync:** 2026-07-18 from gittr `main`.
+**Last sync:** 2026-07-26 from gittr `main`.
 
 Do not commit secrets into examples; use placeholders in `.env.example`.
 
@@ -10,7 +10,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 
 | Folder | What it does |
 | --- | --- |
-| [`snippets/file-fetching/`](./snippets/file-fetching) | Parse NIP-34 `clone` URLs, source types (`self-hosted-git`, `nostr://`, …) |
+| [`snippets/file-fetching/`](./snippets/file-fetching) | Parse NIP-34 `clone` URLs — GRASP vs **self-hosted `/npub/`** (Freebox), EOSE-gated GRASP inference |
 | [`snippets/url-normalization/`](./snippets/url-normalization) | SSH / `git://` / `nostr://` → HTTPS (from `git-source-fetcher.ts`) |
 | [`snippets/grasp-detection/`](./snippets/grasp-detection) | GRASP servers vs normal relays |
 | [`snippets/grasp-list/`](./snippets/grasp-list) | NIP-34 kind `10317` GRASP preference lists (`g` tags) |

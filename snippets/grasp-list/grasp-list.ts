@@ -154,8 +154,9 @@ export function graspRelayUrlsToDomains(graspRelayUrls: string[]): string[] {
 }
 
 /**
- * When a NIP-34 repo event has no `clone` tags, try well-known GRASP git hosts
- * using the standard npub/{repo}.git path.
+ * When a NIP-34 repo event has no `clone` tags **after Nostr EOSE**, try
+ * well-known GRASP git hosts using the standard npub/{repo}.git path.
+ * Do not infer before the announcement arrives (see gittr FILE_FETCHING_INSIGHTS.md).
  */
 export function buildGraspHttpsCloneCandidates(
   entityRoute: string,
