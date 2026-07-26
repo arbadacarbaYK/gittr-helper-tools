@@ -17,7 +17,7 @@ When a Nostr repo owner has a **known GitHub identity** (NIP-39 `i` / claim, or 
 | --- | --- |
 | **Nostr (NIP-34 + future board drafts)** | Source of truth for *Nostr-native* git collaboration: issues `1621`, PRs `1618`, status kinds, eventual kanban drafts (#1665 / #1804 / Headway). |
 | **GitHub OAuth + REST/GraphQL** | *Bridge* to an external forge. Same class as today’s soft-sync *from* GitHub — just bidirectional for owners who opt in. |
-| **NIP-39 identities** | How we *know* “this npub ↔ this GitHub user” so we only offer write-back when the claim matches the upstream owner/collaborator. |
+| **NIP-39 identities** | How we *know* “this npub ↔ this GitHub user” so we only offer write-back when the claim matches the upstream owner/collaborator. Prefer kind **10011**; also read legacy `i` on kind **0** (union). Kind **0** name/picture is unrelated profile metadata — keep both layers. |
 
 Inventing a “kind that means push this card to GitHub” would couple every client to GitHub’s API shape and auth. Prefer:
 
