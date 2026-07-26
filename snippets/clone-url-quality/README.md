@@ -28,3 +28,8 @@ Some announces publish **host-only** clone URLs like `https://git.gittr.space` w
 
 - [`../repair-host-only-clones/`](../repair-host-only-clones) — UI badge predicates (“Please republish”)
 - [`../nip34-repository-events/`](../nip34-repository-events) — build kind 30617 using multi-value `clone` rows
+
+## SSH vs HTTPS
+
+- **HTTPS / MCP / agents:** prefer `https://git.gittr.space/<npub-or-hex>/<repo>.git` (never host-only).
+- **SSH (terminal):** `git@git.gittr.space:<npub>/<repo>.git` — host is **`git.gittr.space`**, not `gittr.space`. Keys are Nostr kind 52 on the bridge.
