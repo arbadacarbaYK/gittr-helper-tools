@@ -13,6 +13,8 @@ APIs of note: `getNip46PairingRelays` (never put GRASP in NIP-46 URIs), `isRpcHe
 
 **Not in scope:** the **gitnostr bridge** does not speak NIP-46. Pairing is entirely between **browser ↔ signer** on relays; the bridge only consumes normal signed events.
 
+**Not the same as NWC:** Lightning wallet control is **NIP-47** (`nostr+walletconnect://`, kinds `23194`/`23195`). See [`nip47-nwc`](../nip47-nwc). LNbits can offer both a remote signer and an NWC connection — still two protocols, two secrets.
+
 ---
 
 ## Files in this snippet

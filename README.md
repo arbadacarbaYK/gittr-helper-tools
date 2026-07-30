@@ -2,7 +2,7 @@
 
 Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?branch=main).
 
-**Last sync:** 2026-07-26 from gittr `main`.
+**Last sync:** 2026-07-30 from gittr `main`.
 
 Do not commit secrets into examples; use placeholders in `.env.example`.
 
@@ -20,6 +20,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | [`snippets/filter-display-clone-urls/`](./snippets/filter-display-clone-urls) | Sidebar: hide extra GRASP mirrors when primary host present |
 | [`snippets/filter-grasp-mirror-pollution/`](./snippets/filter-grasp-mirror-pollution) | Strip mirror `npub`/`hex` roots from file trees |
 | [`snippets/nip46-remote-signer/`](./snippets/nip46-remote-signer) | NIP-46 pairing + **unified signer resolver** (browser; bridge does not do NIP-46) |
+| [`snippets/nip47-nwc/`](./snippets/nip47-nwc) | NIP-47 **Nostr Wallet Connect** — `pay_invoice` / balance (browser; not NIP-46) |
 | [`snippets/nip25-stars-nip51-following/`](./snippets/nip25-stars-nip51-following) | **Star** (NIP-25) + **Watch** (NIP-51 kind `10018`) |
 | [`snippets/nip34-issue-bounties/`](./snippets/nip34-issue-bounties) | Bounties **offer / take** (kind `9806` + LNURL-withdraw) |
 | [`snippets/nip5a-gittr-pages/`](./snippets/nip5a-gittr-pages) | **Make a Page** — NIP-5A named sites (`35128` + Blossom) |
@@ -29,6 +30,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | [`snippets/nip34-push-paywall/`](./snippets/nip34-push-paywall) | Optional `push_cost_sats` on `30617` (links + private documented in repository-events) |
 | [`snippets/wot-trust-badges/`](./snippets/wot-trust-badges) | Viewer-relative Web of Trust badges |
 | [`snippets/github-oauth-writeback/`](./snippets/github-oauth-writeback) | **Plan:** GH OAuth write-back for ToDo/Discussions (not a NIP; identity + forge bridge) |
+| [`snippets/todos-discussions-kanban/`](./snippets/todos-discussions-kanban) | How gittr handles ToDo / Kanban / Discussions today + future NIP notes |
 
 ### Product features → snippet map
 
@@ -39,7 +41,10 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | Make a Page | [`nip5a-gittr-pages`](./snippets/nip5a-gittr-pages) |
 | Push: docs links + private repo | Same `30617` announce — [`nip34-repository-events`](./snippets/nip34-repository-events) (no extra snapshot) |
 | Push: pay-to-push | [`nip34-push-paywall`](./snippets/nip34-push-paywall) |
+| Pay invoice / NWC wallet | [`nip47-nwc`](./snippets/nip47-nwc) (NIP-47; separate from remote signer) |
+| Pair remote signer (auth) | [`nip46-remote-signer`](./snippets/nip46-remote-signer) (NIP-46) |
 | GitHub write-back (ToDo / Discussions) | [`github-oauth-writeback`](./snippets/github-oauth-writeback) (planned; OAuth bridge, not a kind) |
+| ToDo / Kanban / Discussions (NIP prep) | [`todos-discussions-kanban`](./snippets/todos-discussions-kanban) |
 
 ## Getting started
 
@@ -54,6 +59,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 - [NIPS_AND_EVENT_KINDS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main)
 - [WOT.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/WOT.md) (Web of Trust on gittr)
 - [NIP46_REMOTE_SIGNER_INTEGRATION.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main)
+- [NWC_IMPLEMENTATION_NOTES.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/NWC_IMPLEMENTATION_NOTES.md&branch=main)
 - [gitnostr bridge docs](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gitnostr?branch=main)
 
 ## License
