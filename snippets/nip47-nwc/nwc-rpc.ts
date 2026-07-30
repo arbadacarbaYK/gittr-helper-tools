@@ -68,6 +68,10 @@ const defaultDecrypt: DecryptFn = (sk, pk, text) => nip04.decrypt(sk, pk, text);
 /**
  * Low-level NIP-47 RPC over a single relay WebSocket.
  * Subscribe first, then publish the request; wait for kind 23195 with matching `e`.
+ *
+ * Relay policy (gittr): ALWAYS use `parsed.relay` from the NWC URI.
+ * Do not substitute the app's Nostr relay pool. Clients that only talk to a
+ * fixed pool (and skip/ignore URI `relay=`) lock out wallets on uncommon relays.
  */
 export async function nwcRpc(options: {
   nwcUri: string;

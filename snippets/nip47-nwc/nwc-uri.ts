@@ -20,7 +20,9 @@
 export type ParsedNwcUri = {
   /** Wallet service pubkey (64-hex) — host of the URI */
   walletPubkey: string;
-  /** Relay the wallet listens on for kind 23194 */
+  /** Relay the wallet listens on for kind 23194 — ALWAYS use this URL for NWC
+   *  WebSockets. Do not replace with the app's social relay pool; ignoring URI
+   *  `relay=` is how many clients lock out self-hosted / uncommon NWC wallets. */
   relay: string;
   /** Client secret (hex) — derives the client pubkey used to sign requests */
   secret: string;
