@@ -37,7 +37,7 @@ Docs-first folder — copy the tag shapes; wire Blossom + your gateway.
     ["title", "My site"],
     ["description", "Optional"],
     ["source", "https://github.com/…"],
-    ["relay", "wss://relay.example"]
+    ["relay", "wss://relay.gittr.space"]
   ]
 }
 ```

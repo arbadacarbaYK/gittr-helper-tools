@@ -21,8 +21,8 @@ import { normalizeGitUrl, normalizeGitUrls } from './normalize-git-url';
 const normalized = normalizeGitUrl('git@github.com:user/repo.git');
 // { original: 'git@github.com:user/repo.git', normalized: 'https://github.com/user/repo.git', protocol: 'ssh' }
 
-const nostr = normalizeGitUrl('nostr://npub1abc@relay.ngit.dev/my-repo');
-// { protocol: 'nostr', normalized: 'https://relay.ngit.dev/npub1abc/my-repo', ... }
+const nostr = normalizeGitUrl('nostr://npub1abc@relay.gittr.space/my-repo');
+// { protocol: 'nostr', normalized: 'https://relay.gittr.space/npub1abc/my-repo', ... }
 ```
 
 For full source-type classification (including `self-hosted-git` and generic `user@host:path`), see [`../file-fetching/git-source-parser.ts`](../file-fetching/git-source-parser.ts).

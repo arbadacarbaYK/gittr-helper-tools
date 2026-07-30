@@ -27,9 +27,9 @@ NIP-34 defines `kind:30617` events for announcing Git repositories on Nostr. Unl
 
 Recent interoperability lessons from gittr.space production pushes:
 
-1. **`clone` row shape:** Prefer **one `clone` tag with multiple HTTPS values**, e.g. `["clone", "https://primary/npub/repo.git", "https://ngit-relay.nostrver.se/npub/repo.git"]`. Parsers must read **every value after index 0**, not only `tag[1]`. Repeated `["clone", url]` rows still appear on older relays — accept both.
+1. **`clone` row shape:** Prefer **one `clone` tag with multiple HTTPS values**, e.g. `["clone", "https://git.gittr.space/npub/repo.git", "https://relay.gittr.space/npub/repo.git"]`. Parsers must read **every value after index 0**, not only `tag[1]`. Repeated `["clone", url]` rows still appear on older relays — accept both.
 
-2. **HTTPS GRASP clones:** Some GRASP relays (notably **`ngit-relay.nostrver.se`**) validate that the announcement lists **their own HTTPS git URL** on the `clone` row before accepting kind **30617**. Listing the relay under `relays` alone is not enough.
+2. **HTTPS GRASP clones:** Some GRASP relays validate that the announcement lists **their own HTTPS git URL** on the `clone` row before accepting kind **30617** (historically `ngit-relay.nostrver.se`; gittr examples use `git.gittr.space` + `relay.gittr.space`). Listing the relay under `relays` alone is not enough.
 
 3. **Avoid `git@` SSH in `clone` for web-focused announcements:** Many browser-based Nostr Git clients cannot use SSH transports. Gittr keeps **`git@` URLs out of kind 30617 `clone`** and exposes SSH separately (sidebar / env such as `NEXT_PUBLIC_GIT_SSH_BASE`). CLI users still clone over SSH using that UI or their own remotes.
 
@@ -57,7 +57,7 @@ yarn add nostr-tools
     ["d", "my-repo"],             // REQUIRED: Repository identifier (replaceable event)
     ["name", "My Repository"],     // Human-readable name
     ["description", "A cool repo"], // Description
-    ["clone", "https://git.example.com/npub1…/repo.git", "https://ngit-relay.nostrver.se/npub1…/repo.git"],
+    ["clone", "https://git.gittr.space/npub1…/repo.git", "https://relay.gittr.space/npub1…/repo.git"],
     ["relays", "wss://relay1.com", "wss://relay2.com"],
     ["maintainers", "<hex64>", "<hex64>"], // Multi-value hex pubkeys (gittr / ngit)
     ["source", "https://github.com/user/repo"], // Source URL (optional)
@@ -104,7 +104,7 @@ yarn add nostr-tools
     ["d", "my-repo"],
     ["name", "My Repository"],
     ["description", "A cool repo"],
-    ["clone", "https://git.example.com/npub1…/repo.git", "https://ngit-relay.nostrver.se/npub1…/repo.git"],
+    ["clone", "https://git.gittr.space/npub1…/repo.git", "https://relay.gittr.space/npub1…/repo.git"],
     ["relays", "wss://relay1.com", "wss://relay2.com"],
     ["maintainers", "npub1abc..."],
     ["maintainers", "npub1def..."],
@@ -131,8 +131,8 @@ After parsing, you get:
   name: "My Repository",          // From "name" tag
   description: "A cool repo",     // From "description" tag
   clone: [
-    "https://git.example.com/npub1…/repo.git",
-    "https://ngit-relay.nostrver.se/npub1…/repo.git",
+    "https://git.gittr.space/npub1…/repo.git",
+    "https://relay.gittr.space/npub1…/repo.git",
   ],
   relays: [                       // All "relays" tags
     "wss://relay1.com",
@@ -175,11 +175,11 @@ const repo = {
   name: "My Repository",
   description: "A cool repository",
   clone: [
-    "https://git.example.com/npub1…/repo.git",
-    "https://ngit-relay.nostrver.se/npub1…/repo.git",
+    "https://git.gittr.space/npub1…/repo.git",
+    "https://relay.gittr.space/npub1…/repo.git",
   ],
   relays: [
-    "wss://relay.example.com"
+    "wss://relay.gittr.space"
   ],
   contributors: [
     { pubkey: "abc123..." },
@@ -243,7 +243,7 @@ const unsub = subscribe(
 | `d` | ✅ Yes | String | Repository identifier (for replaceable events) | `["d", "my-repo"]` |
 | `name` | ✅ Yes | String | Human-readable repository name | `["name", "My Repository"]` |
 | `description` | ✅ Yes | String | Repository description | `["description", "A cool repo"]` |
-| `clone` | ✅ Yes | String+ | Git clone URL(s); **preferred:** one row, multiple HTTPS values | `["clone", "https://a/npub…/r.git", "https://ngit-relay…/npub…/r.git"]` |
+| `clone` | ✅ Yes | String+ | Git clone URL(s); **preferred:** one row, multiple HTTPS values | `["clone", "https://git.gittr.space/npub…/r.git", "https://relay.gittr.space/npub…/r.git"]` |
 | `relays` | No | String+ | Relay URL(s); **preferred:** one row, multiple `wss://` values | `["relays", "wss://a", "wss://b"]` |
 | `maintainers` | No | String+ | Maintainer **hex** pubkeys (multi-value preferred) | `["maintainers", "<hex64>", "<hex64>"]` |
 | `source` | No | String | Upstream forge URL (import source) | `["source", "https://github.com/user/repo"]` |
@@ -341,10 +341,10 @@ const repo = {
   name: "My Repository",
   description: "A cool repository",
   clone: [
-    "https://git.example.com/npub1…/my-repo.git",
-    "https://ngit-relay.nostrver.se/npub1…/my-repo.git",
+    "https://git.gittr.space/npub1…/my-repo.git",
+    "https://relay.gittr.space/npub1…/my-repo.git",
   ],
-  relays: ["wss://relay.example.com", "wss://ngit-relay.nostrver.se"],
+  relays: ["wss://relay.gittr.space", "wss://relay.damus.io"],
   contributors: [{ pubkey: "abc123..." }],
   sourceUrl: "https://github.com/user/upstream",
 };
@@ -356,7 +356,7 @@ const event = createRepositoryEvent(repo, privateKey);
 ### 2. Publish to Relay
 
 ```typescript
-await publish(event, ["wss://relay.example.com"]);
+await publish(event, ["wss://relay.gittr.space"]);
 ```
 
 ### 3. Receive Event (Response)
@@ -370,8 +370,8 @@ await publish(event, ["wss://relay.example.com"]);
     ["d", "my-repo"],
     ["name", "My Repository"],
     ["description", "A cool repository"],
-    ["clone", "https://git.example.com/npub1…/my-repo.git", "https://ngit-relay.nostrver.se/npub1…/my-repo.git"],
-    ["relays", "wss://relay.example.com", "wss://ngit-relay.nostrver.se"],
+    ["clone", "https://git.gittr.space/npub1…/my-repo.git", "https://relay.gittr.space/npub1…/my-repo.git"],
+    ["relays", "wss://relay.gittr.space", "wss://relay.damus.io"],
     ["maintainers", "npub1abc..."],
     ["source", "https://github.com/user/upstream"],
   ],
@@ -391,8 +391,8 @@ const repoData = parseNIP34Repository(event);
 //   repositoryName: "my-repo",
 //   name: "My Repository",
 //   description: "A cool repository",
-//   clone: ["https://git.example.com/npub1…/my-repo.git", "https://ngit-relay.nostrver.se/npub1…/my-repo.git"],
-//   relays: ["wss://relay.example.com", "wss://ngit-relay.nostrver.se"],
+//   clone: ["https://git.gittr.space/npub1…/my-repo.git", "https://relay.gittr.space/npub1…/my-repo.git"],
+//   relays: ["wss://relay.gittr.space", "wss://relay.damus.io"],
 //   maintainers: ["abc123..."]
 // }
 ```

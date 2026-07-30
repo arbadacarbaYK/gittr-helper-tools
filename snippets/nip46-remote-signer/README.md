@@ -110,13 +110,15 @@ Wrong mental model (breaks Amber / QR): treating `nostrconnect` host as the sign
 
 ## QR / pairing relays (`getNip46PairingRelays`)
 
-**Never put GRASP/git relays in NIP-46 URIs.** Relays like `relay.ngit.dev`, `gitnostr.com`, `ngit-relay.nostrver.se` only accept NIP-34 repo events. Kind `24133` (NIP-46) gets rejected — Amber shows: *"Event must reference an accepted repository or accepted event"*.
+**Never put GRASP/git relays in NIP-46 URIs.** Relays like `relay.gittr.space`, `relay.ngit.dev`, `gitnostr.com`, `ngit-relay.nostrver.se` accept NIP-34 / forge traffic and often **reject** kind `24133`. Amber shows: *"Event must reference an accepted repository or accepted event"*.
 
 Use **general** nostr relays only for login / remote signing:
 
 - `wss://relay.damus.io`
 - `wss://nos.lol`
 - (optional) other non-GRASP relays from env
+
+(`wss://relay.gittr.space` is gittr’s forge/GRASP relay — great for repo events, **not** for bunker pairing.)
 
 Repo browse/push still uses GRASP relays from `NEXT_PUBLIC_NOSTR_RELAYS`; that list is separate from NIP-46 transport.
 

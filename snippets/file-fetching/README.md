@@ -22,11 +22,28 @@ Parses clone URLs and identifies the source type (GitHub, GitLab, Codeberg, GRAS
 ```typescript
 import { parseGitSource } from './git-source-parser';
 
+const knownGraspDomains = [
+  'relay.gittr.space',
+  'relay.ngit.dev',
+  'gitnostr.com',
+  'git.gittr.space',
+];
+
 const source = parseGitSource('https://github.com/user/repo.git', knownGraspDomains);
 // { type: 'github', ... }
 
-const graspSource = parseGitSource('https://relay.ngit.dev/npub123abc/repo.git', knownGraspDomains);
+// gittr Pyramid GRASP (wss + https git on same host)
+const graspSource = parseGitSource(
+  'https://relay.gittr.space/npub123abc/repo.git',
+  knownGraspDomains
+);
 // { type: 'nostr-git', ... }
+
+// Bridge HTTPS clone host (gitnostr layout — not a wss:// relay)
+const bridgeSource = parseGitSource(
+  'https://git.gittr.space/npub123abc/repo.git',
+  knownGraspDomains
+);
 
 const homeSource = parseGitSource(
   'http://myfreebox.example:7334/npub123abc/repo.git',

@@ -1,13 +1,13 @@
 /**
  * Centralized list of known GRASP (Git-Nostr-Bridge) server domains
  *
- * Source: gittr/ui/src/lib/utils/grasp-servers.ts
- * Synced: 2026-07-18
+ * GRASP servers are BOTH Nostr relays (wss://) AND git servers (git:///http:///https://)
+ * They support the NIP-34 protocol for git repositories on Nostr.
  *
- * MIT — keep this attribution when copying into your project.
- *
- * Push: GRASP_SERVERS_FOR_PUSHING + user kind 10317 via mergeGraspHostsForPush
- * (host-deduped). Exclusions: uid.ovh, jb55, ngit-relay.nostrver.se (when down).
+ * This list is used across the application to:
+ * - Identify GRASP servers vs regular Nostr relays
+ * - Prioritize GRASP servers for repository operations (they have the most repos)
+ * - Display GRASP servers separately in the UI
  */
 
 /**
@@ -22,6 +22,10 @@
  * This list includes ALL known GRASP servers (for reading/fetching repos).
  */
 export const KNOWN_GRASP_DOMAINS = [
+  // gittr: Pyramid adaptation — Nostr + GRASP on same host (prefer in examples)
+  "relay.gittr.space",
+  // gittr: git-nostr-bridge HTTPS/SSH (clone). Not a wss:// Nostr relay.
+  "git.gittr.space",
   // Actual GRASP git servers (verified to serve git repos)
   "relay.ngit.dev",
   "ngit-relay.nostrver.se",
@@ -31,8 +35,6 @@ export const KNOWN_GRASP_DOMAINS = [
   "git-01.uid.ovh",
   "git-02.uid.ovh",
   "git.jb55.com", // Read-only: jb55 hosts repos but only their own, not a public GRASP server for pushing
-  // gittr.space GRASP server (our own server)
-  "git.gittr.space",
 ] as const;
 
 /**
@@ -56,13 +58,20 @@ export const GRASP_DOMAINS_EXCLUDED_FROM_PUSHING = [
  * KNOWN_GRASP_DOMAINS for fetching).
  */
 export const GRASP_SERVERS_FOR_PUSHING = [
+  "relay.gittr.space",
+  "git.gittr.space",
   "relay.ngit.dev",
   "gitnostr.com",
   "ngit.danconwaydev.com",
   "git.shakespeare.diy",
-  // gittr.space GRASP server (our own)
-  "git.gittr.space",
 ] as const;
+
+/**
+ * Hosts that serve bare repos under /<hex-pubkey>/<repo>.git (SSH and/or smart-HTTP)
+ * but are NOT classic ngit GRASP (no WSS relay, no /npub1…/ git paths).
+ * Publishing https://host/npub…/repo.git for these returns 404.
+ */
+export const HEX_PATH_GIT_HOSTS = ["git.gittr.space"] as const;
 
 /** Normalize a relay/git URL or bare host to lowercase hostname. */
 export function normalizeGraspHost(hostOrUrl: string): string {
@@ -126,6 +135,15 @@ export function mergeGraspHostsForPush(
   for (const u of userGraspWssOrHosts) consider(u, true);
   for (const u of defaultGraspWssOrHosts) consider(u, false);
   return out;
+}
+
+/** True when git paths must use 64-char hex owner, not npub (e.g. git.gittr.space). */
+export function isHexPathGitHost(hostOrUrl: string): boolean {
+  const domain = normalizeGraspHost(hostOrUrl);
+  if (!domain) return false;
+  return HEX_PATH_GIT_HOSTS.some(
+    (h) => domain === h || domain.endsWith(`.${h}`)
+  );
 }
 
 /**

@@ -2,7 +2,7 @@
 
 Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?branch=main).
 
-**Last sync:** 2026-07-30 from gittr `main`.
+**Last sync:** 2026-07-30 from gittr `main` (examples prefer `relay.gittr.space` / `git.gittr.space`).
 
 Do not commit secrets into examples; use placeholders in `.env.example`.
 

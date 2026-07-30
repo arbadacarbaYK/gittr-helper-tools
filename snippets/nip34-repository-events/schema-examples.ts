@@ -20,10 +20,10 @@ export const REQUEST_SCHEMA_EXAMPLE = {
     ["description", "A cool repository"],
     [
       "clone",
-      "https://git.example.com/npub1aaaa/my-repo.git",
-      "https://ngit-relay.nostrver.se/npub1aaaa/my-repo.git",
+      "https://git.gittr.space/npub1aaaa/my-repo.git",
+      "https://relay.gittr.space/npub1aaaa/my-repo.git",
     ],
-    ["relays", "wss://relay.example.com", "wss://ngit-relay.nostrver.se"],
+    ["relays", "wss://relay.gittr.space", "wss://relay.damus.io"],
     [
       "maintainers",
       "9a83779e75080556c656d4d418d02a4d7edbe288a2f9e6dd2b48799ec935184c",
@@ -64,10 +64,10 @@ export const PARSED_DATA_EXAMPLE = {
   name: "My Repository",
   description: "A cool repository",
   clone: [
-    "https://git.example.com/npub1aaaa/my-repo.git",
-    "https://ngit-relay.nostrver.se/npub1aaaa/my-repo.git",
+    "https://git.gittr.space/npub1aaaa/my-repo.git",
+    "https://relay.gittr.space/npub1aaaa/my-repo.git",
   ],
-  relays: ["wss://relay.example.com", "wss://ngit-relay.nostrver.se"],
+  relays: ["wss://relay.gittr.space", "wss://relay.damus.io"],
   maintainers: [
     "9a83779e75080556c656d4d418d02a4d7edbe288a2f9e6dd2b48799ec935184c",
     "abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",

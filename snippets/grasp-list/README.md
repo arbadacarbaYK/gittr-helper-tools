@@ -19,13 +19,13 @@ User preference list of GRASP (git + Nostr) servers, similar to NIP-65 relay lis
   "kind": 10317,
   "content": "",
   "tags": [
-    ["g", "wss://relay.ngit.dev"],
-    ["g", "wss://git.gittr.space"]
+    ["g", "wss://relay.gittr.space"],
+    ["g", "wss://relay.ngit.dev"]
   ]
 }
 ```
 
-Order of `g` tags is preference order.
+Order of `g` tags is preference order. Prefer **`wss://`** GRASP relays here (e.g. gittr’s Pyramid `relay.gittr.space`). The bridge HTTPS/SSH host `git.gittr.space` is for **clone URLs**, not a Nostr `wss://` endpoint.
 
 ## Usage
 
@@ -34,7 +34,7 @@ import { parseGraspListEvent, prioritizeGraspServers, KIND_GRASP_LIST } from "./
 import { createGraspListEvent } from "./create-grasp-list-event";
 
 const signed = createGraspListEvent(
-  { graspServers: ["wss://relay.ngit.dev", "wss://git.gittr.space"] },
+  { graspServers: ["wss://relay.gittr.space", "wss://relay.ngit.dev"] },
   privateKeyHex
 );
 ```
