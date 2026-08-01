@@ -61,14 +61,15 @@ Stub storage yourself (gittr uses secure storage / `localStorage` keys `gittr_nw
 
 ## Protocol facts (from production)
 
-1. **Always use the relay in the NWC URI — not your app relay pool.**  
-   Many clients only publish/subscribe NWC traffic on a hard-coded or “known good” relay set, and/or ignore `?relay=` from the connection string. That silently **locks out** wallets whose service only listens on a private/self-hosted/less-common relay (LNbits instances, Umbrel, custom bunkers, etc.).  
-   **gittr does the opposite:** parse `relay` from `nostr+walletconnect://…` and open a **direct WebSocket to that URL** for kind `23194`/`23195`. We do **not** require that relay to be in Settings → Relays, and we do **not** fall back to damus/primal/etc. for payments. The URI is the source of truth for wallet transport (same idea as keeping NIP-46 on bunker URI relays).
-2. **Request kind `23194`**: encrypt `{ method, params }` to the **wallet pubkey**, tag `["p", walletPubkey]`, sign with the URI **`secret`**.
-3. **Response kind `23195`**: from the wallet; must include `["e", <request-event-id>]`. Ignore other responses.
-4. Subscribe **before** publishing the request; filter client-side by `e` (relays often cannot filter `e` well).
-5. Prefer **NIP-04**; if the wallet info event advertises `nip44_v2`, production gittr may use NIP-44 — this extract defaults to NIP-04 for simplicity.
-6. Many wallets only implement **`pay_invoice`**. Treat missing `get_balance` as normal, not a broken URI.
+1. **Always use the relay(s) in the NWC URI — not your app relay pool.**  
+   Many clients only publish/subscribe NWC traffic on a **fixed app relay pool** and/or **ignore `?relay=`**. That locks out wallets that only listen on the URI relay.  
+   **gittr:** parse **all** `relay=` values (`getAll("relay")`) and open a **direct WebSocket** to those URLs for `23194`/`23195`. Alby often emits two (`relay.getalby.com` + `relay2.getalby.com`) — we try them in order. We do **not** require them in Settings → Relays and do **not** fall back to damus/primal for payments.
+2. **NWC ≠ Nostr Connect.** `nostr+walletconnect://` is **payments** (Settings → Account). `bunker://` / `nostrconnect://` is **login** (Pair Remote Signer / Amber). Pasting an Alby NWC string into Amber’s “Nostr Connect” paste shows **“Invalid nostr connect URI”** — correct for Amber; wrong place for NWC.
+3. **Request kind `23194`**: encrypt `{ method, params }` to the **wallet pubkey**, tag `["p", walletPubkey]`, sign with the URI **`secret`**.
+4. **Response kind `23195`**: from the wallet; must include `["e", <request-event-id>]`. Ignore other responses.
+5. Subscribe **before** publishing the request; filter client-side by `e`.
+6. Prefer **NIP-04**; production may use NIP-44 when the wallet advertises it — this extract defaults to NIP-04.
+7. Many wallets only implement **`pay_invoice`**. Treat missing `get_balance` as normal.
 
 ---
 

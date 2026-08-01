@@ -66,12 +66,12 @@ const defaultEncrypt: EncryptFn = (sk, pk, text) => nip04.encrypt(sk, pk, text);
 const defaultDecrypt: DecryptFn = (sk, pk, text) => nip04.decrypt(sk, pk, text);
 
 /**
- * Low-level NIP-47 RPC over a single relay WebSocket.
+ * Low-level NIP-47 RPC over URI relay WebSocket(s).
  * Subscribe first, then publish the request; wait for kind 23195 with matching `e`.
  *
- * Relay policy (gittr): ALWAYS use `parsed.relay` from the NWC URI.
- * Do not substitute the app's Nostr relay pool. Clients that only talk to a
- * fixed pool (and skip/ignore URI `relay=`) lock out wallets on uncommon relays.
+ * Relay policy (gittr): ALWAYS use relays from the NWC URI (`getAll("relay")`).
+ * Try each in order when Alby/etc. list multiple. Do not substitute the app's
+ * Nostr relay pool.
  */
 export async function nwcRpc(options: {
   nwcUri: string;
@@ -109,9 +109,45 @@ export async function nwcRpc(options: {
   requestEvent.id = getEventHash(requestEvent as any);
   requestEvent.sig = signEvent(requestEvent as any, sk);
 
+  let lastError: Error | null = null;
+  for (const relay of parsed.relays) {
+    try {
+      return await nwcRpcOnRelay({
+        relay,
+        walletPubkey: parsed.walletPubkey,
+        requestEvent,
+        decrypt,
+        sk,
+        timeoutMs,
+        method: options.method,
+      });
+    } catch (err: any) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+  throw (
+    lastError ||
+    new Error(
+      `NWC ${options.method} failed on all URI relays: ${parsed.relays.join(", ")}`
+    )
+  );
+}
+
+async function nwcRpcOnRelay(opts: {
+  relay: string;
+  walletPubkey: string;
+  requestEvent: Record<string, unknown>;
+  decrypt: DecryptFn;
+  sk: string;
+  timeoutMs: number;
+  method: NwcMethod;
+}): Promise<NwcRpcResult> {
+  const { relay, walletPubkey, requestEvent, decrypt, sk, timeoutMs, method } =
+    opts;
+
   return new Promise<NwcRpcResult>((resolve, reject) => {
-    const ws = new WebSocket(parsed.relay);
-    const subId = `nwc-${options.method}-${Date.now()}`;
+    const ws = new WebSocket(relay);
+    const subId = `nwc-${method}-${Date.now()}`;
     const since = Math.floor(Date.now() / 1000);
     let settled = false;
 
@@ -131,7 +167,7 @@ export async function nwcRpc(options: {
       finish(() =>
         reject(
           new Error(
-            `NWC ${options.method} timed out after ${timeoutMs}ms (relay=${parsed.relay})`
+            `NWC ${method} timed out after ${timeoutMs}ms (relay=${relay})`
           )
         )
       );
@@ -144,12 +180,11 @@ export async function nwcRpc(options: {
           subId,
           {
             kinds: [23195],
-            authors: [parsed.walletPubkey],
+            authors: [walletPubkey],
             since,
           },
         ])
       );
-      // Brief delay so the subscription is live before the request lands
       setTimeout(() => {
         ws.send(JSON.stringify(["EVENT", requestEvent]));
       }, 300);
@@ -166,7 +201,9 @@ export async function nwcRpc(options: {
           data[2] === false
         ) {
           finish(() =>
-            reject(new Error(`Relay rejected NWC request: ${data[3] || "unknown"}`))
+            reject(
+              new Error(`Relay rejected NWC request: ${data[3] || "unknown"}`)
+            )
           );
           return;
         }
@@ -176,29 +213,30 @@ export async function nwcRpc(options: {
         }
 
         const event = data[2];
-        if (!event || event.kind !== 23195 || event.pubkey !== parsed.walletPubkey) {
+        if (!event || event.kind !== 23195 || event.pubkey !== walletPubkey) {
           return;
         }
 
-        // NIP-47: response MUST reference the request id via `e` tag
         const eTag = event.tags?.find((t: string[]) => t[0] === "e");
         if (!eTag || eTag[1] !== requestEvent.id) {
-          return; // not our response
+          return;
         }
 
-        const decrypted = await decrypt(sk, parsed.walletPubkey, event.content);
+        const decrypted = await decrypt(sk, walletPubkey, event.content);
         const response = JSON.parse(decrypted) as NwcRpcResult;
 
         finish(() => resolve(response));
       } catch (err: any) {
         finish(() =>
-          reject(new Error(`Failed to handle NWC response: ${err?.message || err}`))
+          reject(
+            new Error(`Failed to handle NWC response: ${err?.message || err}`)
+          )
         );
       }
     };
 
     ws.onerror = () => {
-      finish(() => reject(new Error(`WebSocket error talking to ${parsed.relay}`)));
+      finish(() => reject(new Error(`WebSocket error talking to ${relay}`)));
     };
   });
 }
