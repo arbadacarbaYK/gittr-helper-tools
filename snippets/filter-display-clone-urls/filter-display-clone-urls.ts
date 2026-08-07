@@ -1,13 +1,17 @@
 /**
- * Filter clone URLs shown in a repo sidebar when older announces list many
- * GRASP mirrors but the repo only lives on the primary git host.
+ * Filter clone URLs shown in a repo sidebar.
+ *
+ * Keep forge `source` + primary git host + every host on the Push allowlist
+ * (GRASP_SERVERS_FOR_PUSHING). Hide bare IPs and random third-party GRASP hosts
+ * that are not on that allowlist.
  *
  * Source: gittr/ui/src/lib/utils/filter-display-clone-urls.ts
- * Synced: 2026-07-18
+ * Synced: 2026-08-07
  *
  * MIT — keep this attribution when copying into your project.
  *
- * Pass `isGraspServer` from the grasp-detection snippet (injectable).
+ * Pass `isGraspServer` / `isGraspDomainForPushing` from the grasp-detection /
+ * grasp-servers snippets (injectable).
  */
 
 const UPSTREAM_HOSTS = ["github.com", "gitlab.com", "codeberg.org"] as const;
@@ -38,6 +42,18 @@ export function primaryGitHostFromEnv(
   return h || null;
 }
 
+/** Bare IPv4 / IPv6 hosts — fine for fetch, noisy for sidebar clone lists. */
+export function isIpLiteralHostname(host: string): boolean {
+  const h = String(host || "")
+    .trim()
+    .toLowerCase()
+    .replace(/^\[|\]$/g, "");
+  if (!h) return false;
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(h)) return true;
+  if (h.includes(":")) return true;
+  return false;
+}
+
 function isKnownUpstreamHost(host: string): boolean {
   return UPSTREAM_HOSTS.some((d) => host === d || host.endsWith(`.${d}`));
 }
@@ -55,9 +71,8 @@ function sourceMatchesUpstreamClone(
 }
 
 /**
- * When the list already includes the primary host, hide other GRASP hosts for
- * sidebar display. If the announcement does not mention the primary host, keep
- * all URLs (avoid breaking repos that only advertise a third-party GRASP host).
+ * Sidebar clone list: keep primary + forge source + pushable GRASP mirrors.
+ * Do NOT collapse to primary-only when primary is present (Aug 2026 regression).
  */
 export function filterDisplayCloneUrlsForSidebar(
   urls: string[],
@@ -66,24 +81,39 @@ export function filterDisplayCloneUrlsForSidebar(
     sourceUrl?: string;
     /** Inject from grasp-detection snippet — default treats nothing as GRASP. */
     isGraspServer?: (url: string) => boolean;
+    /** Inject from grasp-servers snippet — push allowlist. */
+    isGraspDomainForPushing?: (hostOrUrl: string) => boolean;
   }
 ): string[] {
   const isGrasp = options.isGraspServer ?? (() => false);
+  const isPushable = options.isGraspDomainForPushing ?? (() => false);
+
+  const withoutEmpty = urls
+    .map((u) => String(u || "").trim())
+    .filter(Boolean);
+
+  const hasNamedHost = withoutEmpty.some((u) => {
+    if (u.startsWith("nostr://")) return true;
+    const h = gitUrlHostname(u);
+    return !!h && !isIpLiteralHostname(h);
+  });
+  const withoutBareIps = hasNamedHost
+    ? withoutEmpty.filter((u) => {
+        if (u.startsWith("nostr://")) return true;
+        return !isIpLiteralHostname(gitUrlHostname(u));
+      })
+    : withoutEmpty;
+
   const primary = primaryGitHostFromEnv(options.primaryGitServerEnv);
   const src = options.sourceUrl?.trim();
-  if (!primary) return urls;
 
-  const hasPrimary = urls.some((u) => gitUrlHostname(u) === primary);
-  if (!hasPrimary) return urls;
-
-  return urls.filter((u) => {
-    const t = String(u || "").trim();
-    if (!t) return false;
-    if (t.startsWith("nostr://")) return true;
-    if (src && sourceMatchesUpstreamClone(t, src)) return true;
-    const h = gitUrlHostname(t);
-    if (h === primary) return true;
-    if (isGrasp(t) && h !== primary) return false;
+  return withoutBareIps.filter((u) => {
+    if (u.startsWith("nostr://")) return true;
+    if (src && sourceMatchesUpstreamClone(u, src)) return true;
+    const h = gitUrlHostname(u);
+    if (primary && h === primary) return true;
+    if (isPushable(h) || isPushable(u)) return true;
+    if (isGrasp(u)) return false;
     return true;
   });
 }

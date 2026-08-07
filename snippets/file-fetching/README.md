@@ -2,8 +2,23 @@
 
 Code snippets for parsing and handling Git clone URLs from NIP-34 events.
 
-**Synced:** 2026-07-26 — `parseGitSource` + `isGenericHttpsGitRemoteUrl` from `git-source-fetcher.ts`.  
+**Synced:** 2026-08-07 — `parseGitSource` + `isGenericHttpsGitRemoteUrl` from `git-source-fetcher.ts`.  
 Pass injectable `knownGraspDomains` (do not require grasp-servers).
+
+Also keep in sync with gittr docs:
+
+- [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md) — Code tab order, timestamps, tip fidelity, clone sidebar
+- Sibling snippet: [`filter-display-clone-urls`](../filter-display-clone-urls/) — sidebar must keep the full Push GRASP set
+- gitnostr: `ui/gitnostr/docs/file-fetch-flow.md` + SSH guides cross-link the same doc
+
+## Regression suites (do not treat MCP smoke alone as “file fetch works”)
+
+| Where | Command | Catches |
+| --- | --- | --- |
+| `gittr/ui` | `npm run test:regressions` | tree timestamps (`%x00` orphan), clone sidebar filter, tip fidelity gate |
+| `gittr-mcp` | `npm run test:regressions` | full GRASP `clone[]` set, forge source matchers |
+
+`npm test` / `test:mcp-stdio` alone will **not** catch empty Code dates, missing shakespeare clones, or “Push invents empty commit” tip drift.
 
 ## `git-source-parser.ts`
 

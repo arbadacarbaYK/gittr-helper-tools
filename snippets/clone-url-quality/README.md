@@ -3,7 +3,7 @@
 Offline checks for `clone` tags on discovery surfaces and announce builders.
 
 **Source:** `gittr/ui/src/lib/nostr/clone-url-quality.ts` (+ `nip34-tag-values.ts`)  
-**Synced:** 2026-07-18
+**Synced:** 2026-07-26
 
 ## Problem
 
@@ -31,5 +31,7 @@ Some announces publish **host-only** clone URLs like `https://git.gittr.space` w
 
 ## SSH vs HTTPS
 
-- **HTTPS / MCP / agents:** prefer `https://git.gittr.space/<npub-or-hex>/<repo>.git` (never host-only).
-- **SSH (terminal):** `git@git.gittr.space:<npub>/<repo>.git` — host is **`git.gittr.space`**, not `gittr.space`. Keys are Nostr kind 52 on the bridge.
+- **git.gittr.space** uses **hex** paths: `https://git.gittr.space/<hex>/<repo>.git` and `git@git.gittr.space:<hex>/<repo>.git`. **`/npub1…/` returns 404** on that host.
+- Classic ngit GRASP still uses **npub** in HTTPS paths.
+- **`pickUserFacingCloneUrl`** — prefer GitHub/GitLab/Codeberg, then hex-rewritten gittr HTTPS, then SSH.
+- Keys are Nostr kind 52 on the bridge.

@@ -2,15 +2,12 @@
  * Cheap, offline checks for NIP-34 `clone` tags on discovery surfaces
  * (homepage recent, explore/search, sitemap). No network / bridge probes.
  *
- * Source: gittr/ui/src/lib/nostr/clone-url-quality.ts
- * Synced: 2026-07-18
- *
- * MIT — keep this attribution when copying into your project.
- *
  * Policy: if an announce lists clone URLs and every one is unusable
  * (localhost, loopback, private LAN, *.local), hide it from discovery.
  * Announces with zero clone tags stay visible (legacy / GRASP-only).
  */
+
+import { isHexPathGitHost } from "../grasp-detection/grasp-servers";
 
 /**
  * NIP-34 `d` must be a bare repo identifier (e.g. "gamestr"), not
@@ -141,14 +138,23 @@ export function expandHostOnlyCloneUrl(
 /**
  * Normalize clone URLs for a kind-30617 announcement:
  * expand host-only values, drop empties, optionally add a primary GRASP URL.
+ * For hex-path hosts (git.gittr.space), always use 64-char hex in the path
+ * (npub paths 404 on smart-HTTP).
  */
 export function normalizeCloneUrlsForNip34Announcement(opts: {
   cloneUrls?: string[] | null;
   ownerNpub: string;
+  /** Preferred for git.gittr.space paths; falls back to decoding ownerNpub */
+  ownerHex?: string | null;
   repoName: string;
   fallbackGitServerUrl?: string | null;
 }): string[] {
   const owner = String(opts.ownerNpub || "").trim();
+  const hex =
+    (opts.ownerHex && /^[0-9a-f]{64}$/i.test(opts.ownerHex.trim())
+      ? opts.ownerHex.trim().toLowerCase()
+      : null) ||
+    (/^[0-9a-f]{64}$/i.test(owner) ? owner.toLowerCase() : null);
   const repo = String(opts.repoName || "")
     .trim()
     .replace(/\.git$/i, "");
@@ -158,7 +164,12 @@ export function normalizeCloneUrlsForNip34Announcement(opts: {
     let next = url.trim();
     if (!next) return;
     if (isHostOnlyCloneUrl(next) && owner && repo) {
-      next = expandHostOnlyCloneUrl(next, owner, repo);
+      const pathOwner =
+        isHexPathGitHost(next) && hex ? hex : owner;
+      next = expandHostOnlyCloneUrl(next, pathOwner, repo);
+    }
+    if (isHexPathGitHost(next) && hex) {
+      next = rewriteHexPathGitHostCloneUrl(next, hex);
     }
     if (isHostOnlyCloneUrl(next) || isUnusableCloneUrl(next)) return;
     if (!out.includes(next)) out.push(next);
@@ -211,6 +222,166 @@ export function isUnusableCloneUrl(url: string): boolean {
 export function usableCloneUrls(urls: string[] | undefined | null): string[] {
   if (!Array.isArray(urls)) return [];
   return urls.filter((u) => u && !isUnusableCloneUrl(u));
+}
+
+const UPSTREAM_FORGE_HOSTS = [
+  "github.com",
+  "gitlab.com",
+  "codeberg.org",
+] as const;
+
+function hostnameOfCloneUrl(url: string): string {
+  const raw = String(url || "").trim();
+  if (!raw) return "";
+  try {
+    if (/^git@/i.test(raw)) {
+      return (raw.slice(4).split(":")[0] || "").toLowerCase();
+    }
+    const withProto =
+      raw.startsWith("http://") ||
+      raw.startsWith("https://") ||
+      raw.startsWith("ssh://") ||
+      raw.startsWith("nostr://")
+        ? raw
+        : `https://${raw}`;
+    return new URL(withProto).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+function isUpstreamForgeUrl(url: string): boolean {
+  const host = hostnameOfCloneUrl(url);
+  return UPSTREAM_FORGE_HOSTS.some(
+    (d) => host === d || host.endsWith(`.${d}`)
+  );
+}
+
+function ensureDotGit(url: string): string {
+  const t = url.trim();
+  if (!t || t.endsWith(".git") || t.endsWith("/")) return t;
+  return `${t}.git`;
+}
+
+/**
+ * Rewrite https://git.gittr.space/npub…/repo.git → hex path (smart-HTTP 404s on npub).
+ * Leaves other hosts unchanged. SSH git@ already uses hex when caller passes hex.
+ */
+export function rewriteHexPathGitHostCloneUrl(
+  url: string,
+  ownerHexPubkey: string
+): string {
+  const raw = String(url || "").trim();
+  const hex = String(ownerHexPubkey || "")
+    .trim()
+    .toLowerCase();
+  if (!raw || !/^[0-9a-f]{64}$/.test(hex)) return raw;
+
+  try {
+    if (/^git@/i.test(raw)) {
+      const rest = raw.slice(4);
+      const colon = rest.indexOf(":");
+      if (colon < 0) return raw;
+      const host = rest.slice(0, colon);
+      const path = rest.slice(colon + 1).replace(/^\/+/, "");
+      if (!isHexPathGitHost(host)) return raw;
+      const repoLeaf = path.split("/").filter(Boolean).pop() || path;
+      const repo = ensureDotGit(repoLeaf.replace(/\.git$/i, ""));
+      return `git@${host}:${hex}/${repo}`;
+    }
+
+    const withProto =
+      raw.startsWith("http://") || raw.startsWith("https://")
+        ? raw
+        : `https://${raw}`;
+    const u = new URL(withProto);
+    if (!isHexPathGitHost(u.hostname)) return raw;
+
+    const parts = u.pathname.split("/").filter(Boolean);
+    if (parts.length < 2) {
+      const repo = parts[0] || "repo";
+      u.pathname = `/${hex}/${ensureDotGit(repo)}`;
+      return u.toString().replace(/\/$/, "");
+    }
+    const repoLeaf = parts[parts.length - 1];
+    u.pathname = `/${hex}/${ensureDotGit(repoLeaf)}`;
+    return u.toString().replace(/\/$/, "");
+  } catch {
+    return raw;
+  }
+}
+
+/**
+ * Pick what "Copy clone URL" should put on the clipboard for humans.
+ * Prefer real forge HTTPS, then corrected gittr HTTPS (hex path), never npub-path git.gittr.space.
+ */
+export function pickUserFacingCloneUrl(opts: {
+  cloneUrls?: string[] | null;
+  sourceUrl?: string | null;
+  ownerHexPubkey?: string | null;
+  repoName?: string | null;
+  gitSshBase?: string | null;
+  originFallback?: string | null;
+}): string | null {
+  const clones = Array.isArray(opts.cloneUrls) ? opts.cloneUrls : [];
+  const hex = String(opts.ownerHexPubkey || "")
+    .trim()
+    .toLowerCase();
+  const repo = String(opts.repoName || "")
+    .trim()
+    .replace(/\.git$/i, "");
+  const sshBase = String(opts.gitSshBase || "git.gittr.space").trim();
+
+  const candidates: string[] = [];
+  const add = (u: string | null | undefined) => {
+    if (!u || typeof u !== "string") return;
+    const t = u.trim();
+    if (!t || t.startsWith("nostr://")) return;
+    if (t.includes("localhost") || t.includes("127.0.0.1")) return;
+    candidates.push(t);
+  };
+
+  add(opts.sourceUrl || undefined);
+  for (const u of clones) add(u);
+
+  // 1) Upstream forge HTTPS
+  for (const u of candidates) {
+    if (
+      isUpstreamForgeUrl(u) &&
+      (u.startsWith("http://") || u.startsWith("https://") || /^git@/i.test(u))
+    ) {
+      if (/^git@/i.test(u)) {
+        const m = u.match(/^git@([^:]+):(.+)$/);
+        if (m) return ensureDotGit(`https://${m[1]}/${m[2]}`);
+      }
+      return ensureDotGit(u);
+    }
+  }
+
+  // 2) Working smart-HTTP: rewrite npub→hex on git.gittr.space; keep other HTTPS
+  for (const u of candidates) {
+    if (!(u.startsWith("http://") || u.startsWith("https://"))) continue;
+    if (isHexPathGitHost(u)) {
+      if (!hex) continue;
+      return ensureDotGit(rewriteHexPathGitHostCloneUrl(u, hex));
+    }
+    return ensureDotGit(u);
+  }
+
+  // 3) SSH for our git host (always works when key is authorized)
+  if (hex && repo && /^[0-9a-f]{64}$/.test(hex)) {
+    return `git@${sshBase}:${hex}/${repo}.git`;
+  }
+
+  // 4) Any remaining http(s)
+  for (const u of candidates) {
+    if (u.startsWith("http://") || u.startsWith("https://")) {
+      return ensureDotGit(rewriteHexPathGitHostCloneUrl(u, hex));
+    }
+  }
+
+  if (opts.originFallback) return opts.originFallback;
+  return null;
 }
 
 /**
