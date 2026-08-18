@@ -5,8 +5,13 @@
  * Amber, nak bunker, bunker46, LNbits Remote Nostr Signer, etc. without exposing
  * private keys to the browser.
  *
- * Source: gittr/ui/src/lib/nostr/remoteSigner.ts (trimmed — production is ~1792 lines)
- * Synced: 2026-07-18
+ * Source: gittr/ui/src/lib/nostr/remoteSigner.ts (trimmed — production is ~3200 lines)
+ * Synced: 2026-08-18
+ *
+ * This extract still calls Amber `connect` on reload for a simpler demo.
+ * Production gittr hydrates only, opens bunker WebSockets, and wakes Amber
+ * with `sign_event` (`ensureRpcHealthy` before Push). Copy production for
+ * the live path.
  *
  * NIP-46: https://nips.nostr.com/46
  *
