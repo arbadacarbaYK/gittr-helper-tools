@@ -11,7 +11,9 @@ APIs of note: `getNip46PairingRelays` (never put GRASP in NIP-46 URIs), `isRpcHe
 - [gittr `NIPS_AND_EVENT_KINDS.md` § NIP-46](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main) — how gittr lists support  
 - Source of truth: [`gittr/ui/src/lib/nostr/remoteSigner.ts`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/src/lib/nostr/remoteSigner.ts&branch=main) + [`signer.ts`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/src/lib/nostr/signer.ts&branch=main)
 
-**Not in scope:** the **gitnostr bridge** does not speak NIP-46. Pairing is entirely between **browser ↔ signer** on relays; the bridge only consumes normal signed events.
+**Not in scope:** the **gitnostr bridge** does not speak NIP-46. Pairing is entirely between **browser ↔ signer** on relays; the bridge only consumes normal signed events. **gittr-mcp** signs with a local nsec and does **not** use NIP-46 or SSH.
+
+Settings → SSH Keys uses NIP-46/Amber only if you publish a kind **52** key from the website. Laptop `gn ssh-key add` and MCP HTTPS skip that.
 
 **Not the same as NWC:** Lightning wallet control is **NIP-47** (`nostr+walletconnect://`, kinds `23194`/`23195`). See [`nip47-nwc`](../nip47-nwc). LNbits can offer both a remote signer and an NWC connection — still two protocols, two secrets.
 

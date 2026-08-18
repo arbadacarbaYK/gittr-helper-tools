@@ -34,4 +34,4 @@ Some announces publish **host-only** clone URLs like `https://git.gittr.space` w
 - **git.gittr.space** uses **hex** paths: `https://git.gittr.space/<hex>/<repo>.git` and `git@git.gittr.space:<hex>/<repo>.git`. **`/npub1…/` returns 404** on that host.
 - Classic ngit GRASP still uses **npub** in HTTPS paths.
 - **`pickUserFacingCloneUrl`** — prefer GitHub/GitLab/Codeberg, then hex-rewritten gittr HTTPS, then SSH.
-- Keys are Nostr kind 52 on the bridge.
+- SSH keys are Nostr kind 52 on the bridge (Settings UI *or* `gn ssh-key add`). **gittr-mcp does not use SSH** — agents push over HTTPS + Nostr auth headers.
