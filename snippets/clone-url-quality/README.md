@@ -31,7 +31,11 @@ Some announces publish **host-only** clone URLs like `https://git.gittr.space` w
 
 ## SSH vs HTTPS
 
-- **git.gittr.space** uses **hex** paths: `https://git.gittr.space/<hex>/<repo>.git` and `git@git.gittr.space:<hex>/<repo>.git`. **`/npub1…/` returns 404** on that host.
+- **git.gittr.space** serves both **npub** and **hex** HTTPS/SSH paths (npub → hex symlink on the bridge). Prefer **npub** in published NIP-34 `clone[]` (canonical); hex still works as a disk fallback.
 - Classic ngit GRASP still uses **npub** in HTTPS paths.
-- **`pickUserFacingCloneUrl`** — prefer GitHub/GitLab/Codeberg, then hex-rewritten gittr HTTPS, then SSH.
+- **`pickUserFacingCloneUrl`** — prefer GitHub/GitLab/Codeberg, then gittr HTTPS, then SSH.
 - SSH keys are Nostr kind 52 on the bridge (Settings UI *or* `gn ssh-key add`). **gittr-mcp does not use SSH** — agents push over HTTPS + Nostr auth headers.
+
+## Hosting signal
+
+Listing **`https://git.gittr.space/<npub|hex>/<repo>.git`** in `clone[]` is what tells **this** GRASP to materialize a bare repo. Foreign-only announces (GitHub / other GRASP) are not cloned onto gittr disk.

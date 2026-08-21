@@ -29,7 +29,7 @@ Recent interoperability lessons from gittr.space production pushes:
 
 1. **`clone` row shape:** Prefer **one `clone` tag with multiple HTTPS values**, e.g. `["clone", "https://git.gittr.space/npub/repo.git", "https://relay.gittr.space/npub/repo.git"]`. Parsers must read **every value after index 0**, not only `tag[1]`. Repeated `["clone", url]` rows still appear on older relays — accept both.
 
-2. **HTTPS GRASP clones:** Some GRASP relays validate that the announcement lists **their own HTTPS git URL** on the `clone` row before accepting kind **30617** (historically `ngit-relay.nostrver.se`; gittr examples use `git.gittr.space` + `relay.gittr.space`). Listing the relay under `relays` alone is not enough.
+2. **HTTPS GRASP clones:** Some GRASP relays validate that the announcement lists **their own HTTPS git URL** on the `clone` row before accepting kind **30617** (historically `ngit-relay.nostrver.se`; gittr examples use `git.gittr.space` + `relay.gittr.space`). Listing the relay under `relays` alone is not enough. On **git.gittr.space**, a `clone[]` entry for this host is the signal to **materialize** a bare repo; foreign-only announces do not get disk on that bridge.
 
 3. **Avoid `git@` SSH in `clone` for web-focused announcements:** Many browser-based Nostr Git clients cannot use SSH transports. Gittr keeps **`git@` URLs out of kind 30617 `clone`** and exposes SSH separately (sidebar / env such as `NEXT_PUBLIC_GIT_SSH_BASE`). Laptop `git clone git@…` still works after a kind-52 key. **gittr-mcp** uses HTTPS + Nostr auth, not SSH.
 
