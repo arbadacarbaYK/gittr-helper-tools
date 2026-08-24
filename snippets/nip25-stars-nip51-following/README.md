@@ -7,7 +7,9 @@ Code snippets for **Star** and **Watch** on Nostr git repos.
 | **Star** / unstar | `7` | NIP-25 reaction on the repo’s `30617` event |
 | **Watch** / unwatch | `10018` | NIP-51 *Git repositories list* (full replaceable `a` list) |
 
-**Synced:** 2026-07-18 from gittr `repo-stars.ts` + `events.ts` (kind 10018) + `layout-client.tsx` `handleWatch`.
+**Synced:** 2026-08-24 from gittr `repo-stars.ts` + `events.ts` (kind 10018) + `layout-client.tsx` `handleWatch`.
+
+**Star needs the kind 30617 event id from the same wide discovery as file fetch** (`GET /api/nostr/profile-repos` / `PROFILE_REPOS_RELAYS`), not only the user’s default relay list. Snippet `queryRepoStars` still takes an event id — production gittr resolves that id with `resolveLiveRepoAnnouncement` before calling star helpers. Watch uses `a` tag `30617:owner:d` and does not need the event id.
 
 ## Files
 

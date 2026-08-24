@@ -2,8 +2,10 @@
 
 Code snippets for parsing and handling Git clone URLs from NIP-34 events.
 
-**Synced:** 2026-08-07 — `parseGitSource` + `isGenericHttpsGitRemoteUrl` from `git-source-fetcher.ts`.  
+**Synced:** 2026-08-24 — `parseGitSource` + `isGenericHttpsGitRemoteUrl` from `git-source-fetcher.ts`.  
 Pass injectable `knownGraspDomains` (do not require grasp-servers).
+
+File-fetch **order** is unchanged. Announcement identity (event id, `clone[]`, `source`, `public-read`) is shared across Star / Watch chrome / Refetch / Commits via gittr `resolveLiveRepoAnnouncement` — do not add a second defaultRelays-only 30617 lookup. Do not add unknown GRASP hosts to `knownGraspDomains` just to make Commits work (sidebar filter drops known GRASP that are not on the push allowlist).
 
 Also keep in sync with gittr docs:
 
