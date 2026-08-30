@@ -4,7 +4,12 @@ Code snippets for parsing Git clone URLs from NIP-34 events — the same classif
 
 ![Where Code-tab files come from](file-fetch.gif)
 
-Who can hold the bytes. The **order** of one Code-tab open (forge `source` is the tree when present; otherwise first non-empty `clone[]` listing):
+Who can hold the bytes. **Two layers:**
+
+| Layer | What wins |
+| --- | --- |
+| **Live repo?** | Latest kind **30617**. Soft-deleted → stop. |
+| **File tree?** | Forge **`source`** (no local drafts) is the tree — even if the gittr bridge still has an older listing. No forge, or forge fetch failed → first non-empty `clone[]` listing. gittr does not pick the newest git SHA across mirrors. |
 
 ```mermaid
 flowchart TD
@@ -102,7 +107,7 @@ const gitApiUrl = `/api/git/file-content?sourceUrl=${encodeURIComponent(sourceUr
 4. Per self-hosted URL (including non-GRASP `/npub/…`): **`repo-files` only**.
 5. `repo-files` runs on the **gittr server** — home hosts must be reachable from that host.
 
-`fetchFilesFromMultipleSources` races sources: **first non-empty tree wins**.
+`fetchFilesFromMultipleSources`: with a forge `source`, that listing is the tree. Among remaining clone hosts, first non-empty listing.
 
 Full details: [FILE_FETCHING_INSIGHTS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/FILE_FETCHING_INSIGHTS.md&branch=main).
 
