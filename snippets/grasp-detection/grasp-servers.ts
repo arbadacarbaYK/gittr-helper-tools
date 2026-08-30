@@ -22,10 +22,11 @@
  * This list includes ALL known GRASP servers (for reading/fetching repos).
  */
 export const KNOWN_GRASP_DOMAINS = [
-  // gittr: Pyramid adaptation — Nostr + GRASP on same host (prefer in examples)
-  "relay.gittr.space",
-  // gittr: git-nostr-bridge HTTPS/SSH (clone). Not a wss:// Nostr relay.
+  // gittr: git-nostr-bridge HTTPS/SSH (the real clone host for this deployment).
   "git.gittr.space",
+  // gittr Pyramid — Nostr relay (wss). May also speak GRASP-style HTTPS, but
+  // bare repos for UI Push live on git.gittr.space; treat relay as secondary/read.
+  "relay.gittr.space",
   // Actual GRASP git servers (verified to serve git repos)
   "relay.ngit.dev",
   "ngit-relay.nostrver.se",
@@ -58,7 +59,10 @@ export const GRASP_DOMAINS_EXCLUDED_FROM_PUSHING = [
  * KNOWN_GRASP_DOMAINS for fetching).
  */
 export const GRASP_SERVERS_FOR_PUSHING = [
-  "relay.gittr.space",
+  // Bridge HTTPS/SSH only — do NOT list relay.gittr.space here.
+  // Pyramid's relay hostname is a Nostr relay; on-disk bare repos for gittr
+  // live under git.gittr.space. Advertising relay as a clone host makes the
+  // sidebar "Git Server" look like the relay and often 404s on git fetch.
   "git.gittr.space",
   "relay.ngit.dev",
   "gitnostr.com",
@@ -67,9 +71,9 @@ export const GRASP_SERVERS_FOR_PUSHING = [
 ] as const;
 
 /**
- * Hosts that serve bare repos under /<hex-pubkey>/<repo>.git (SSH and/or smart-HTTP)
- * but are NOT classic ngit GRASP (no WSS relay, no /npub1…/ git paths).
- * Publishing https://host/npub…/repo.git for these returns 404.
+ * Hosts whose **on-disk** bare repos live under `/<hex-pubkey>/…` (gitnostr layout).
+ * HTTPS clone tags still use **npub** paths (NIP-34); the bridge creates `npub → hex`
+ * symlinks so other clients can clone. Prefer publishing npub; hex is storage + SSH fallback.
  */
 export const HEX_PATH_GIT_HOSTS = ["git.gittr.space"] as const;
 
@@ -182,7 +186,69 @@ export function isGraspServer(url: string): boolean {
     return true;
   }
 
+  // Path-based: some home GRASP deployments use https://host/grasp/npub…/repo
+  // (e.g. laantungir.net) — hostname alone is not in KNOWN_GRASP_DOMAINS.
+  if (hasGraspPathPrefix(url)) {
+    return true;
+  }
+
   return false;
+}
+
+/**
+ * True when the URL path is a GRASP-shaped clone (`/grasp/…` or `/grasp` relay).
+ * Used so we do not treat those hosts as "prefer non-GRASP" publisher remotes.
+ */
+export function hasGraspPathPrefix(url: string): boolean {
+  if (!url || typeof url !== "string") return false;
+  try {
+    let raw = url.trim();
+    if (raw.startsWith("git@")) {
+      const m = raw.match(/^git@([^:]+):(.+)$/);
+      if (m) raw = `https://${m[1]}/${m[2]}`;
+    } else if (raw.startsWith("git://")) {
+      raw = raw.replace(/^git:\/\//, "https://");
+    } else if (raw.startsWith("nostr://")) {
+      return /@[^/]+\/grasp\b|\/grasp\b/i.test(raw);
+    } else if (!/^[a-z][a-z0-9+.-]*:/i.test(raw)) {
+      raw = `https://${raw}`;
+    }
+    const pathname = new URL(raw).pathname.toLowerCase();
+    return (
+      pathname === "/grasp" ||
+      pathname.startsWith("/grasp/") ||
+      pathname.includes("/grasp/")
+    );
+  } catch {
+    return /\/grasp(\/|$)/i.test(url);
+  }
+}
+
+/** Clone/relay URL that should be handled as GRASP (known host or /grasp/ path). */
+export function isGraspCloneUrl(url: string): boolean {
+  return isGraspServer(url);
+}
+
+/**
+ * Parse https://host/grasp/npub…/repo(.git) into npub + repo (home GRASP layout).
+ */
+export function parseGraspPathClone(
+  cloneUrl: string
+): { host: string; npub: string; repo: string } | null {
+  if (!cloneUrl || typeof cloneUrl !== "string") return null;
+  let normalized = cloneUrl.trim();
+  const ssh = normalized.match(/^git@([^:]+):(.+)$/);
+  if (ssh) normalized = `https://${ssh[1]}/${ssh[2]}`;
+  else if (normalized.startsWith("git://"))
+    normalized = normalized.replace(/^git:\/\//, "https://");
+  const bare = normalized.replace(/\.git$/i, "");
+  const m = bare.match(
+    /^https?:\/\/([^\/]+)\/grasp\/(npub[a-z0-9]+)\/([^\/]+)$/i
+  );
+  if (!m) return null;
+  const [, host, npub, repo] = m;
+  if (!host || !npub || !repo) return null;
+  return { host, npub, repo };
 }
 
 /**

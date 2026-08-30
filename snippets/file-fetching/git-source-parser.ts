@@ -3,7 +3,7 @@
  *
  * Teaching extract from gittr.space — parse NIP-34 clone URLs and classify source type.
  * Source: gittr/ui/src/lib/utils/git-source-fetcher.ts (parseGitSource + helpers)
- * Synced: 2026-07-26
+ * Synced: 2026-08-30
  *
  * MIT — keep this attribution when copying into your project.
  *
@@ -17,6 +17,7 @@ export type GitSourceType =
   | "codeberg"
   | "gitlab"
   | "self-hosted-git" // Gitea/Forgejo / generic user@host:path
+  | "hashtree" // Iris: htree://npub.../repo — not HTTPS git
   | "unknown";
 
 export interface GitSource {
@@ -97,6 +98,29 @@ export function isRefetchableUpstreamSourceUrl(
 }
 
 /**
+ * Parse https://host/grasp/npub…/repo(.git) (home GRASP layout, e.g. laantungir.net).
+ * Must run before the generic 3-segment self-hosted matcher.
+ */
+export function parseGraspPathClone(
+  cloneUrl: string
+): { host: string; npub: string; repo: string } | null {
+  if (!cloneUrl || typeof cloneUrl !== "string") return null;
+  let normalized = cloneUrl.trim();
+  const ssh = normalized.match(/^git@([^:]+):(.+)$/);
+  if (ssh) normalized = `https://${ssh[1]}/${ssh[2]}`;
+  else if (normalized.startsWith("git://"))
+    normalized = normalized.replace(/^git:\/\//, "https://");
+  const bare = normalized.replace(/\.git$/i, "");
+  const m = bare.match(
+    /^https?:\/\/([^\/]+)\/grasp\/(npub[a-z0-9]+)\/([^\/]+)$/i
+  );
+  if (!m) return null;
+  const [, host, npub, repo] = m;
+  if (!host || !npub || !repo) return null;
+  return { host, npub, repo };
+}
+
+/**
  * Parse a clone URL and determine its source type.
  *
  * @param knownGraspDomains - Inject GRASP hostnames (no hard dependency on grasp-servers).
@@ -110,6 +134,19 @@ export function parseGitSource(
       type: "unknown",
       url: String(cloneUrl || ""),
       displayName: "Invalid URL",
+    };
+  }
+
+  // Iris Hashtree — not fetchable via HTTPS git / bridge
+  if (/^htree:\/\//i.test(cloneUrl.trim())) {
+    const rest = cloneUrl.trim().replace(/^htree:\/\//i, "");
+    const parts = rest.split("/").filter(Boolean);
+    return {
+      type: "hashtree",
+      url: cloneUrl.trim(),
+      displayName: "Hashtree",
+      npub: parts[0],
+      repo: parts.slice(1).join("/") || undefined,
     };
   }
 
@@ -172,6 +209,18 @@ export function parseGitSource(
     "git.vanderwarker.family",
     "jb55.com",
   ];
+
+  // Home GRASP path: https://host/grasp/npub…/repo.git — before 3-segment self-hosted.
+  const graspPath = parseGraspPathClone(normalizedUrl);
+  if (graspPath) {
+    return {
+      type: "nostr-git",
+      url: normalizedUrl,
+      displayName: graspPath.host,
+      npub: graspPath.npub,
+      repo: graspPath.repo,
+    };
+  }
 
   const nostrGitMatch = url.match(
     /^https?:\/\/([^\/]+)\/(npub[a-z0-9]+)\/([^\/]+)$/i

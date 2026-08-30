@@ -2,7 +2,7 @@
 
 Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?branch=main).
 
-**Last sync:** 2026-08-22 from gittr `main` (examples prefer `relay.gittr.space` / `git.gittr.space`). SSH is laptop git to the bridge; **gittr-mcp uses HTTPS + nsec**, not SSH. Bridge retention: bare repos only when `clone[]` includes `git.gittr.space` — see gittr [SETUP_INSTRUCTIONS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/SETUP_INSTRUCTIONS.md&branch=main) / [gitnostr](https://github.com/arbadacarbaYK/gitnostr).
+**Last sync:** 2026-08-30 from gittr `main` (wss examples: `relay.gittr.space`; clone HTTPS: `git.gittr.space` — not the relay hostname). SSH is laptop git to the bridge; **gittr-mcp uses HTTPS + nsec**, not SSH. Bridge retention: bare repos only when `clone[]` includes `git.gittr.space` — see gittr [SETUP_INSTRUCTIONS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/SETUP_INSTRUCTIONS.md&branch=main) / [gitnostr](https://github.com/arbadacarbaYK/gitnostr). File-fetch race (GIF): [`snippets/file-fetching`](./snippets/file-fetching).
 
 Do not commit secrets into examples; use placeholders in `.env.example`.
 
@@ -10,9 +10,9 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 
 | Folder | What it does |
 | --- | --- |
-| [`snippets/file-fetching/`](./snippets/file-fetching) | Parse NIP-34 `clone` URLs — GRASP vs **self-hosted `/npub/`** (Freebox), EOSE-gated GRASP inference |
+| [`snippets/file-fetching/`](./snippets/file-fetching) | Parse NIP-34 `clone` URLs — GRASP vs **self-hosted `/npub/`** (Freebox), EOSE-gated GRASP inference, **`htree://`** (Iris, not HTTPS git) |
 | [`snippets/url-normalization/`](./snippets/url-normalization) | SSH / `git://` / `nostr://` → HTTPS (from `git-source-fetcher.ts`) |
-| [`snippets/grasp-detection/`](./snippets/grasp-detection) | GRASP servers vs normal relays |
+| [`snippets/grasp-detection/`](./snippets/grasp-detection) | GRASP servers vs normal relays; Push `clone[]` uses `git.gittr.space` (not `relay.gittr.space`) |
 | [`snippets/grasp-list/`](./snippets/grasp-list) | NIP-34 kind `10317` GRASP preference lists (`g` tags) |
 | [`snippets/clone-url-quality/`](./snippets/clone-url-quality) | Host-only / unusable clone detection + announce normalize |
 | [`snippets/repair-host-only-clones/`](./snippets/repair-host-only-clones) | “Please republish” predicates (no push coupling) |

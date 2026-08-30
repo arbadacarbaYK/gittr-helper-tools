@@ -21,7 +21,7 @@ export const REQUEST_SCHEMA_EXAMPLE = {
     [
       "clone",
       "https://git.gittr.space/npub1aaaa/my-repo.git",
-      "https://relay.gittr.space/npub1aaaa/my-repo.git",
+      "https://relay.ngit.dev/npub1aaaa/my-repo.git",
     ],
     ["relays", "wss://relay.gittr.space", "wss://relay.damus.io"],
     [
@@ -65,7 +65,7 @@ export const PARSED_DATA_EXAMPLE = {
   description: "A cool repository",
   clone: [
     "https://git.gittr.space/npub1aaaa/my-repo.git",
-    "https://relay.gittr.space/npub1aaaa/my-repo.git",
+    "https://relay.ngit.dev/npub1aaaa/my-repo.git",
   ],
   relays: ["wss://relay.gittr.space", "wss://relay.damus.io"],
   maintainers: [

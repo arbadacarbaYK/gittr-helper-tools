@@ -7,8 +7,10 @@ IP mirrors and random third-party GRASP hosts.
 **Do not** collapse to “primary only” when primary is present — that hid
 shakespeare / gitnostr / ngit even though Push advertises them (fixed Aug 2026).
 
+If you inject `isGraspDomainForPushing`, pass the **production push list** (`git.gittr.space`, ngit, gitnostr.com, shakespeare — **not** `relay.gittr.space`). The relay hostname is wss only; advertising it as a clone host 404s on git fetch.
+
 **Source:** `gittr/ui/src/lib/utils/filter-display-clone-urls.ts`  
-**Synced:** 2026-08-07  
+**Synced:** 2026-08-30  
 **Regression test in gittr:** `ui/src/lib/utils/filter-display-clone-urls.test.ts` (`npm run test:regressions` in `ui/`)
 
 ```typescript

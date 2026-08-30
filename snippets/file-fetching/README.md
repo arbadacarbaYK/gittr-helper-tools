@@ -2,7 +2,11 @@
 
 Code snippets for parsing and handling Git clone URLs from NIP-34 events.
 
-**Synced:** 2026-08-24 — `parseGitSource` + `isGenericHttpsGitRemoteUrl` from `git-source-fetcher.ts`.  
+![Where Code-tab files come from](file-fetch.gif)
+
+The GIF is the race (GitHub cannot embed the live canvas). Open [file-fetch.netdraw.json](file-fetch.netdraw.json) in [NetDraw](https://mr-r3b00t.github.io/net_draw/): **Open** → that file, then **Journey**. Still frame: [file-fetch.png](file-fetch.png). Canonical write-up: gittr [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md).
+
+**Synced:** 2026-08-30 — `parseGitSource` + `isGenericHttpsGitRemoteUrl` from `git-source-fetcher.ts`, plus `htree://` (Iris Hashtree, not HTTPS git).  
 Pass injectable `knownGraspDomains` (do not require grasp-servers).
 
 File-fetch **order** is unchanged. Announcement identity (event id, `clone[]`, `source`, `public-read`) is shared across Star / Watch chrome / Refetch / Commits via gittr `resolveLiveRepoAnnouncement` — do not add a second defaultRelays-only 30617 lookup. Do not add unknown GRASP hosts to `knownGraspDomains` just to make Commits work (sidebar filter drops known GRASP that are not on the push allowlist).
@@ -28,11 +32,12 @@ Parses clone URLs and identifies the source type (GitHub, GitLab, Codeberg, GRAS
 
 **What it does:**
 - Parses clone URLs from NIP-34 `clone` tags
-- Identifies source type (github, gitlab, codeberg, nostr-git, self-hosted-git, unknown)
+- Identifies source type (github, gitlab, codeberg, nostr-git, self-hosted-git, hashtree, unknown)
 - Normalizes **`git@host:path`** and `git://` URLs to HTTPS where appropriate
 - Treats **`user@host:path`** (no scheme, generic SSH remote) as **`self-hosted-git`**
-- **`nostr-git` only** when host is in `knownGraspDomains` **and** path is `/npub1…/repo`
+- **`nostr-git` only** when host is in `knownGraspDomains` **and** path is `/npub1…/repo`, **or** path is `/grasp/npub1…/repo` (home GRASP)
 - **Non-GRASP** hosts with `/npub1…/repo` (home Freebox, NAS) → **`self-hosted-git`** (use `GET /api/git/repo-files`)
+- **`htree://`** → **`hashtree`** (Iris; not HTTPS git — skip bridge fetch)
 - Supports multiple entity formats for Nostr git servers: `npub`, `NIP-05`, and hex pubkey
 
 **Usage:**
@@ -67,6 +72,18 @@ const homeSource = parseGitSource(
   knownGraspDomains
 );
 // { type: 'self-hosted-git', owner: 'npub123abc', ... }  — NOT nostr-git
+
+const iris = parseGitSource(
+  'htree://npub1example/repo',
+  knownGraspDomains
+);
+// { type: 'hashtree', displayName: 'Hashtree' }  — not HTTPS git; skip bridge fetch
+
+const pathGrasp = parseGitSource(
+  'https://laantungir.net/grasp/npub123abc/repo.git',
+  knownGraspDomains
+);
+// { type: 'nostr-git', npub: 'npub123abc', ... }  — /grasp/ path, even if host is unknown
 ```
 
 **Extracted from:** `gittr/ui/src/lib/utils/git-source-fetcher.ts`

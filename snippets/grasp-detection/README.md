@@ -2,7 +2,7 @@
 
 Code snippets for identifying GRASP (Git-Nostr-Bridge) servers vs regular Nostr relays.
 
-**Synced:** 2026-07-18 from `gittr/ui/src/lib/utils/grasp-servers.ts`
+**Synced:** 2026-08-30 from `gittr/ui/src/lib/utils/grasp-servers.ts`
 
 ## `grasp-servers.ts`
 
@@ -10,10 +10,11 @@ Detects GRASP servers (git servers that are also Nostr relays) and filters relay
 
 **What it does:**
 - Maintains list of known GRASP server domains
-- Detects GRASP servers by domain pattern matching
+- Detects GRASP servers by domain pattern matching **and** `/grasp/` path clones
 - Filters relay lists to separate GRASP servers from regular relays
+- Push allowlist does **not** include `relay.gittr.space` (that hostname is the Pyramid wss relay; git bytes live on `git.gittr.space`)
 
-**Exports:** `KNOWN_GRASP_DOMAINS` (all known mirrors for detection), **`GRASP_SERVERS_FOR_PUSHING`** (subset that accept arbitrary user pushes — used when synthesizing extra HTTPS clone lines for relays like ngit-relay).
+**Exports:** `KNOWN_GRASP_DOMAINS` (all known mirrors for detection), **`GRASP_SERVERS_FOR_PUSHING`** (subset that accept arbitrary user pushes), `hasGraspPathPrefix`, `parseGraspPathClone`, `isGraspCloneUrl`.
 
 **Usage:**
 ```typescript
@@ -43,7 +44,7 @@ const regularRelays = getRegularRelays(relays);
 // ['wss://relay.damus.io', 'wss://nos.lol']
 ```
 
-**Hosts:** `relay.gittr.space` = open forge `wss://` (+ GRASP). `git.gittr.space` = HTTPS/SSH bridge only (not a Nostr websocket — `wss://git.gittr.space` 404s).
+**Hosts:** `relay.gittr.space` = open forge `wss://` (read/detect only). `git.gittr.space` = HTTPS/SSH bridge — this is what goes in Push `clone[]`. `wss://git.gittr.space` 404s.
 
 **Why this exists:**
 GRASP servers are special - they're both Nostr relays AND git servers. They serve repos via git protocol (not REST APIs), so they need special handling in the file-fetch flow. Regular relays should NOT be included in clone URLs.
