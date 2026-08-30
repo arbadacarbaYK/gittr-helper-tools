@@ -1,30 +1,35 @@
 # File Fetching Snippets
 
-Code snippets for parsing and handling Git clone URLs from NIP-34 events.
+Code snippets for parsing Git clone URLs from NIP-34 events — the same classification the gittr Code tab uses.
 
 ![Where Code-tab files come from](file-fetch.gif)
 
-The GIF is the race (GitHub cannot embed the live canvas). Open [file-fetch.netdraw.json](file-fetch.netdraw.json) in [NetDraw](https://mr-r3b00t.github.io/net_draw/): **Open** → that file, then **Journey**. Still frame: [file-fetch.png](file-fetch.png). Canonical write-up: gittr [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md).
+Who can hold the bytes. The **order** of one Code-tab open:
 
-**Synced:** 2026-08-30 — `parseGitSource` + `isGenericHttpsGitRemoteUrl` from `git-source-fetcher.ts`, plus `htree://` (Iris Hashtree, not HTTPS git).  
-Pass injectable `knownGraspDomains` (do not require grasp-servers).
+```mermaid
+flowchart TD
+  open[Open Code tab] --> local{Browser already has a tree}
+  local -->|yes| show[Show it]
+  local -->|no| nostr[Ask relays for kind 30617]
+  show --> nostr
+  nostr --> tags[Read clone and source tags]
+  tags --> race[Ask those URLs in parallel]
+  race --> win[First non-empty tree wins]
+  win --> file[README and open-file use that winner]
+```
 
-File-fetch **order** is unchanged. Announcement identity (event id, `clone[]`, `source`, `public-read`) is shared across Star / Watch chrome / Refetch / Commits via gittr `resolveLiveRepoAnnouncement` — do not add a second defaultRelays-only 30617 lookup. Do not add unknown GRASP hosts to `knownGraspDomains` just to make Commits work (sidebar filter drops known GRASP that are not on the push allowlist).
+Full timeline, hosts, and README/openFile order: gittr [FILE_FETCHING_INSIGHTS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/FILE_FETCHING_INSIGHTS.md&branch=main).
 
-Also keep in sync with gittr docs:
+`parseGitSource` and `isGenericHttpsGitRemoteUrl` match `git-source-fetcher.ts` (`htree://` is Iris Hashtree, not HTTPS git). Pass injectable `knownGraspDomains`.
 
-- [FILE_FETCHING_INSIGHTS.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/FILE_FETCHING_INSIGHTS.md) — Code tab order, timestamps, tip fidelity, clone sidebar
-- Sibling snippet: [`filter-display-clone-urls`](../filter-display-clone-urls/) — sidebar must keep the full Push GRASP set
-- gitnostr: `ui/gitnostr/docs/file-fetch-flow.md` + SSH guides cross-link the same doc
+Star / Watch / Refetch / Commits use the **same** 30617 as the file list (`resolveLiveRepoAnnouncement`). Sidebar clone list: [`filter-display-clone-urls`](../filter-display-clone-urls/). Bridge disk layout: gitnostr `docs/file-fetch-flow.md`.
 
-## Regression suites (do not treat MCP smoke alone as “file fetch works”)
+## Tests (in the gittr / gittr-mcp checkouts)
 
-| Where | Command | Catches |
-| --- | --- | --- |
-| `gittr/ui` | `npm run test:regressions` | tree timestamps (`%x00` orphan), clone sidebar filter, tip fidelity gate |
-| `gittr-mcp` | `npm run test:regressions` | full GRASP `clone[]` set, forge source matchers |
-
-`npm test` / `test:mcp-stdio` alone will **not** catch empty Code dates, missing shakespeare clones, or “Push invents empty commit” tip drift.
+| Where | Command |
+| --- | --- |
+| `gittr/ui` | `npm run test:regressions` |
+| `gittr-mcp` | `npm run test:regressions` |
 
 ## `git-source-parser.ts`
 
@@ -45,27 +50,21 @@ Parses clone URLs and identifies the source type (GitHub, GitLab, Codeberg, GRAS
 import { parseGitSource } from './git-source-parser';
 
 const knownGraspDomains = [
-  'relay.gittr.space',
+  'git.gittr.space',
   'relay.ngit.dev',
   'gitnostr.com',
-  'git.gittr.space',
+  'relay.gittr.space', // wss relay — classify tags that still mention it; clone URLs use git.gittr.space
 ];
 
 const source = parseGitSource('https://github.com/user/repo.git', knownGraspDomains);
 // { type: 'github', ... }
 
-// gittr Pyramid GRASP (wss + https git on same host)
-const graspSource = parseGitSource(
-  'https://relay.gittr.space/npub123abc/repo.git',
-  knownGraspDomains
-);
-// { type: 'nostr-git', ... }
-
-// Bridge HTTPS clone host (gitnostr layout — not a wss:// relay)
+// Bridge HTTPS clone (git bytes)
 const bridgeSource = parseGitSource(
   'https://git.gittr.space/npub123abc/repo.git',
   knownGraspDomains
 );
+// { type: 'nostr-git', ... }
 
 const homeSource = parseGitSource(
   'http://myfreebox.example:7334/npub123abc/repo.git',
@@ -97,13 +96,13 @@ const apiUrl = `/api/nostr/repo/file-content?ownerPubkey=${encodeURIComponent(ow
 const gitApiUrl = `/api/git/file-content?sourceUrl=${encodeURIComponent(sourceUrl)}&path=${encodeURIComponent(filePath)}&branch=${encodeURIComponent(branch)}`;
 ```
 
-## GRASP + self-hosted file trees (gittr behaviour)
+## GRASP + self-hosted file trees
 
-1. **Published `clone[]` / `source` are authoritative** — do not infer well-known GRASP mirrors until **after Nostr EOSE** if still no clones (`buildGraspHttpsCloneCandidates`).
-2. When both exist, **prefer non-GRASP remotes** (GitHub / Freebox / self-hosted) **before** GRASP mirrors.
+1. **Published `clone[]` / `source` are the map.** If the announcement has no clone URLs after the relay query finishes, fill well-known GRASP HTTPS (`buildGraspHttpsCloneCandidates`).
+2. When both exist, **forge and self-hosted HTTPS before GRASP**.
 3. Per GRASP URL: bridge `GET /api/nostr/repo/files` → `GET /api/git/repo-files?sourceUrl=…` → optional `POST /api/nostr/repo/clone`.
 4. Per self-hosted URL (including non-GRASP `/npub/…`): **`repo-files` only**.
-5. `repo-files` runs on the **gittr server** — home hosts must be publicly reachable from that host.
+5. `repo-files` runs on the **gittr server** — home hosts must be reachable from that host.
 
 `fetchFilesFromMultipleSources` races sources: **first non-empty tree wins**.
 

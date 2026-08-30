@@ -44,10 +44,10 @@ const regularRelays = getRegularRelays(relays);
 // ['wss://relay.damus.io', 'wss://nos.lol']
 ```
 
-**Hosts:** `relay.gittr.space` = open forge `wss://` (read/detect only). `git.gittr.space` = HTTPS/SSH bridge — this is what goes in Push `clone[]`. `wss://git.gittr.space` 404s.
+**Hosts:** `git.gittr.space` is HTTPS/SSH git (clone URLs, Push). `relay.gittr.space` is the open forge `wss://` relay. `wss://git.gittr.space` 404s.
 
 **Why this exists:**
-GRASP servers are special - they're both Nostr relays AND git servers. They serve repos via git protocol (not REST APIs), so they need special handling in the file-fetch flow. Regular relays should NOT be included in clone URLs.
+Some GRASP hosts are both a Nostr relay and a git server (git protocol, not a file-browse REST API). On this deployment those jobs are split: relay vs git host. Clone URLs are git hosts.
 
 **Extracted from:** `gittr/ui/src/lib/utils/grasp-servers.ts`
 
