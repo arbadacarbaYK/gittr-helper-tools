@@ -4,18 +4,16 @@ Code snippets for parsing Git clone URLs from NIP-34 events — the same classif
 
 ![Where Code-tab files come from](file-fetch.gif)
 
-Who can hold the bytes. The **order** of one Code-tab open:
+Who can hold the bytes. The **order** of one Code-tab open (forge `source` is the tree when present; otherwise first non-empty `clone[]` listing):
 
 ```mermaid
 flowchart TD
-  open[Open Code tab] --> local{Browser already has a tree}
-  local -->|yes| show[Show it]
-  local -->|no| nostr[Ask relays for kind 30617]
-  show --> nostr
-  nostr --> tags[Read clone and source tags]
-  tags --> race[Ask those URLs in parallel]
-  race --> win[First non-empty tree wins]
-  win --> file[README and open-file use that winner]
+  open[Open Code tab] --> nostr[Latest live 30617]
+  nostr --> gone{Soft-deleted}
+  gone -->|yes| stop[Stop]
+  gone -->|no| forge{Has a forge source}
+  forge -->|yes| src[Show that forge tip]
+  forge -->|no| race[First non-empty clone listing]
 ```
 
 Full timeline, hosts, and README/openFile order: gittr [FILE_FETCHING_INSIGHTS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/FILE_FETCHING_INSIGHTS.md&branch=main).
@@ -99,7 +97,7 @@ const gitApiUrl = `/api/git/file-content?sourceUrl=${encodeURIComponent(sourceUr
 ## GRASP + self-hosted file trees
 
 1. **Published `clone[]` / `source` are the map.** If the announcement has no clone URLs after the relay query finishes, fill well-known GRASP HTTPS (`buildGraspHttpsCloneCandidates`).
-2. When both exist, **forge and self-hosted HTTPS before GRASP**.
+2. A forge **`source`** is the Code-tab tree when there are no local drafts. Otherwise forge/self-hosted HTTPS before GRASP; among those remotes, first non-empty listing.
 3. Per GRASP URL: bridge `GET /api/nostr/repo/files` → `GET /api/git/repo-files?sourceUrl=…` → optional `POST /api/nostr/repo/clone`.
 4. Per self-hosted URL (including non-GRASP `/npub/…`): **`repo-files` only**.
 5. `repo-files` runs on the **gittr server** — home hosts must be reachable from that host.
