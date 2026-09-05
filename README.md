@@ -23,7 +23,8 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | [`snippets/nip47-nwc/`](./snippets/nip47-nwc) | NIP-47 **Nostr Wallet Connect** — `pay_invoice` / balance (browser; not NIP-46) |
 | [`snippets/nip25-stars-nip51-following/`](./snippets/nip25-stars-nip51-following) | **Star** (NIP-25) + **Watch** (NIP-51 kind `10018`) |
 | [`snippets/nip34-issue-bounties/`](./snippets/nip34-issue-bounties) | Bounties **offer / take** (kind `9806` + LNURL-withdraw) |
-| [`snippets/nip5a-gittr-pages/`](./snippets/nip5a-gittr-pages) | **Make a Page** — NIP-5A named sites (`35128` + Blossom) |
+| [`snippets/nip5a-gittr-pages/`](./snippets/nip5a-gittr-pages) | **Make a Page** — NIP-5A named sites (`35128` + Pages Blossom) |
+| [`snippets/nip82-software-announce/`](./snippets/nip82-software-announce) | **Announce app** — NIP-82 (`32267` / `30063` / `3063`) + optional public Blossom pin |
 | [`snippets/markdown-media-handling/`](./snippets/markdown-media-handling) | Markdown images, embeds, relative links (`markdown-anchor.ts`) |
 | [`snippets/nip-c0-code-snippets/`](./snippets/nip-c0-code-snippets) | NIP-C0 kind `1337` events + renderer |
 | [`snippets/nip34-repository-events/`](./snippets/nip34-repository-events) | NIP-34 `30617` / `30618` — clone, **docs `link`**, **private `public-read`**, paywall tags |
@@ -39,6 +40,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | Watch a repo | [`nip25-stars-nip51-following`](./snippets/nip25-stars-nip51-following) (kind `10018`) |
 | Offer / take bounty | [`nip34-issue-bounties`](./snippets/nip34-issue-bounties) |
 | Make a Page | [`nip5a-gittr-pages`](./snippets/nip5a-gittr-pages) |
+| Announce app (NIP-82 / Zapstore) | [`nip82-software-announce`](./snippets/nip82-software-announce) |
 | Push: docs links + private repo | Same `30617` announce — [`nip34-repository-events`](./snippets/nip34-repository-events) (no extra snapshot) |
 | Push: pay-to-push | [`nip34-push-paywall`](./snippets/nip34-push-paywall) |
 | Pay invoice / NWC wallet | [`nip47-nwc`](./snippets/nip47-nwc) (NIP-47; separate from remote signer) |

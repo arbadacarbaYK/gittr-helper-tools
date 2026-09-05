@@ -6,6 +6,8 @@ Docs-first folder — copy the tag shapes; wire Blossom + your gateway.
 **Synced:** 2026-07-18 from gittr `publish-named-site-manifest.ts`, `nsite-url.ts`, `events.ts` (`KIND_NSITE_NAMED`).  
 **Live UX:** gittr.space → repo → **Pages** (requires root `index.html`).
 
+Pages Blossom is **`https://blossom.gittr.space`**. That host is for static site files only. App installers (NIP-82 / Zapstore) are a separate flow — see [`nip82-software-announce`](../nip82-software-announce).
+
 ## Kinds
 
 | Kind | Role |
