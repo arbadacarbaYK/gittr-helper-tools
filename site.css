@@ -386,40 +386,71 @@ section {
 
 .shot {
   margin: 1.3rem 0 0;
-  background: #0b0d14;
-  border: 2px solid var(--acid);
-  border-radius: 2px;
-  padding: 0.7rem 0.7rem 0.95rem;
-  box-shadow: 8px 8px 0 var(--cyan), -3px -3px 0 var(--pink);
+  background: #f4efe4;
+  color: #111;
+  border: 2px solid #111;
+  border-radius: 0;
+  padding: 0.55rem 0.55rem 0.2rem;
+  box-shadow:
+    14px 14px 0 var(--pink),
+    0 0 40px rgba(184, 255, 60, 0.18);
+  transform: rotate(-1.4deg);
 }
 
 .shot.tilt-l {
-  transform: rotate(-0.7deg);
+  transform: rotate(-2.2deg);
 }
 .shot.tilt-r {
-  transform: rotate(0.8deg);
+  transform: rotate(2.4deg);
+  box-shadow:
+    14px 14px 0 var(--violet),
+    0 0 40px rgba(34, 211, 238, 0.18);
 }
 
 .shot img {
   display: block;
   width: 100%;
-  max-height: min(52vh, 520px);
+  height: auto;
+  max-height: none;
   object-fit: contain;
-  object-position: top;
-  background: #05060a;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  object-position: top center;
+  background: #0b1118;
+  border-radius: 0;
+  border: 0;
+  filter: contrast(1.08) saturate(1.08);
 }
 
-.shot.crop img {
-  object-fit: cover;
-  max-height: 380px;
+.shot.portrait {
+  max-width: 16rem;
+  width: 100%;
+  justify-self: center;
+}
+
+.shot.portrait img {
+  max-height: 28rem;
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.shot.strip img {
+  background: #111;
 }
 
 .shot figcaption {
-  margin: 0.65rem 0.2rem 0;
-  color: var(--muted);
-  font-size: 0.9rem;
+  margin: 0;
+  padding: 0.5rem 0.25rem 0.65rem;
+  color: #1a1a1a;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.shot figcaption a {
+  color: #0e7490;
+}
+
+.shot figcaption code {
+  font-size: 0.85em;
 }
 
 .steps {
@@ -483,33 +514,37 @@ section {
 .recipe {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: 1rem;
+  gap: 1.15rem;
   margin: 0 0 1.6rem;
-  align-items: stretch;
+  align-items: start;
 }
 
 .recipe.flip {
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
 }
 
+.recipe.stacked,
+.recipe.stacked.flip {
+  grid-template-columns: 1fr;
+}
+
 .recipe > .shot {
   margin: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  height: auto;
+  display: block;
 }
 
 .recipe > .shot img {
-  height: 280px;
-  max-height: 280px;
-  object-fit: cover;
-  object-position: top left;
+  height: auto;
+  max-height: none;
+  object-fit: contain;
+  object-position: top center;
 }
 
 .recipe > .shot.strip img {
   object-fit: contain;
   height: auto;
-  max-height: 280px;
+  max-height: none;
 }
 
 button.kind {
@@ -707,7 +742,8 @@ a.card:focus-visible {
   .hero,
   .two,
   .recipe,
-  .recipe.flip {
+  .recipe.flip,
+  .recipe.stacked {
     grid-template-columns: 1fr;
   }
   .hero-card {
