@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Steal our homework — gittr helper tools</title>
+    <title>gittr-snips — client recipes from gittr</title>
     <meta
       name="description"
-      content="Fun, stolen-from-production recipes for building a Git + Nostr client. Screenshots from gittr.space, snippets you can copy."
+      content="Production recipes for building a Git + Nostr client. Screenshots from gittr.space and snippets you can copy. Public Pages name: gittr-snips."
     />
     <link rel="stylesheet" href="./site.css" />
     <link
@@ -20,7 +20,7 @@
       <div class="wrap topbar-inner">
         <a class="brand" href="#top">
           <span class="logo" aria-hidden="true">⚡</span>
-          helper-tools
+          gittr-snips
         </a>
         <nav class="topnav" aria-label="On this page">
           <a href="#layers">Two layers</a>
@@ -38,11 +38,11 @@
           <p class="kicker">Production extracts · MIT · no secrets</p>
           <h1>How to build a <em>git Nostr</em> client without starting from a blank panic.</h1>
           <p class="lede">
-            This is the public face of
+            This is <strong>gittr-snips</strong>, the public Page for
             <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?branch=main">gittr-helper-tools</a>:
-            the same snippets gittr uses, plus the screenshots so you can see
+            the same snippets gittr uses, plus screenshots so you can see
             <em>why</em> they exist. Copy a folder. Adapt relays. Keep the attribution.
-            The boring README is still in the repo — this page is the fun door.
+            The repo README is the file list — this page is the door.
           </p>
           <div class="cta-row">
             <a class="btn btn-primary" href="#cookbook">Start the cookbook</a>
@@ -58,13 +58,13 @@
             >
             <a
               class="btn btn-ghost"
-              href="https://3un05jr4dnwh6njreq6uhzgv67st83jxi5lnpsbf8y3dkdq1qkgittr.pages.gittr.space/"
-              >gittr map</a
+              href="https://3un05jr4dnwh6njreq6uhzgv67st83jxi5lnpsbf8y3dkdq1qkgittr-docu.pages.gittr.space/"
+              >gittr docs hub</a
             >
           </div>
         </div>
         <aside class="hero-card">
-          <h2>Plot twist: you are already on the homework.</h2>
+          <h2>This page is the recipe, running.</h2>
           <p>
             This site is a <strong>Nostr Page</strong> (NIP-5A kind <code>35128</code>).
             Static files live on Blossom. A tiny manifest on relays tells the gateway
@@ -195,7 +195,7 @@
                 <h3>Optional sparkle</h3>
                 <p>
                   Stars, watch lists, zaps, issue bounties, a static Page, an app
-                  listing. Each has a snippet. Steal only what your product needs.
+                  listing. Each has a snippet. Copy only what your product needs.
                 </p>
               </div>
             </article>
@@ -206,7 +206,7 @@
       <section id="recipes">
         <div class="wrap">
           <div class="section-title">
-            <span class="badge">See it · steal it</span>
+            <span class="badge">See it, then copy it</span>
             <h2>Screenshot, then the snippet that makes that screen honest</h2>
           </div>
 
@@ -282,8 +282,11 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
               <figcaption>
                 Sidebar split is a label, not two query engines. Grasp chips are
                 hosts that look like git+Nostr. Relays are wss addresses from the
-                announcement plus what this browser already connected. Live PR/issue
-                lookup uses a wider merged set.
+                announcement plus what this browser already connected.
+                <code>relay.gittr.space</code> can still appear under Grasp
+                Servers in this UI — it is the Pyramid <em>wss</em> relay, not a
+                clone host. Do not put it on a <code>clone</code> tag; git bytes
+                for gittr live on <code>git.gittr.space</code>.
               </figcaption>
             </figure>
           </article>
@@ -332,11 +335,11 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
   "kind": 35128,
   "content": "",
   "tags": [
-    ["d", "helper-tools"],          // 1–13 chars
+    ["d", "gittr-snips"],          // 1–13 chars (not the full repo slug)
     ["path", "/index.html", "&lt;sha256&gt;"],
     ["path", "/site.css", "&lt;sha256&gt;"],
     ["server", "https://blossom.gittr.space"],
-    ["title", "Steal our homework"],
+    ["title", "gittr-snips cookbook"],
     ["relay", "wss://relay.gittr.space"]
   ]
 }
@@ -355,8 +358,11 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
               />
               <figcaption>
                 <a href="https://gittr.space/pages">gittr.space/pages</a> lists
-                sites that actually have a homepage. Yours shows up after
-                <strong>Push Manifest</strong> on the repo sidebar.
+                named sites that have a homepage. After
+                <strong>Push Manifest</strong>, this cookbook is
+                <strong>gittr-snips</strong> — not the full repo slug
+                <code>gittr-helper-tools</code> (too long for a NIP-5A
+                <code>d</code> tag) and not <code>helper-tools</code>.
               </figcaption>
             </figure>
           </article>
@@ -415,33 +421,29 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
 // PRs are kind 1618. Issues are 1621.
 // Comments / threads often 1111.</code></pre>
             </div>
-            <figure class="shot">
-              <img
-                src="./docs-site/assets/gittr-platform.png"
-                alt="gittr platform map: client, bridge, relay, pages, blossom, other NIP-34 clients"
-                width="1280"
-                height="900"
-              />
-              <figcaption>
-                The neighborhood: gittr client, gitnostr bridge, Pyramid relay,
-                Pages gateway, Blossom, plus gitworkshop / ngit / gitplaza.
-                Helper-tools ships the recipes, not another forge.
-              </figcaption>
-            </figure>
+            <p class="lede" style="margin-top: 0">
+              Issues and PRs are Nostr events, not git objects. Funded issues
+              show up on
+              <a href="https://gittr.space/bounty-hunt">gittr.space/bounty-hunt</a>
+              and on the repo Issues tab. PRs are kind <code>1618</code>;
+              issues are <code>1621</code>.
+            </p>
           </article>
 
           <article class="recipe" id="social">
-            <figure class="shot crop">
+            <figure class="shot">
               <img
-                src="./docs-site/assets/git-server-clones.png"
-                alt="Clone URL event list including nostr:// helper form"
-                width="420"
-                height="640"
+                src="./docs-site/assets/star-watch.png"
+                alt="gittr repo header with Watch, Zaps, and Fork on gittr-helper-tools"
+                width="2450"
+                height="160"
               />
               <figcaption>
-                <code>nostr://npub/repo</code> is a helper URL for
-                git-remote-nostr, not a fourth copy of the git. Plain
-                <code>git clone https://…</code> is what most humans want.
+                Repo chrome: <strong>Watch</strong> is a kind <code>10018</code>
+                list. <strong>Star</strong> is kind <code>7</code> on the kind
+                <code>30617</code> announcement (same header row; sign in to use
+                it). Neither lives in Git Server / Clone URL —
+                <a href="#layers">that is a different recipe</a>.
               </figcaption>
             </figure>
             <div class="snippet">
@@ -769,8 +771,9 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
         </p>
         <p>
           After you edit this repo: <strong>Push to Nostr</strong>, then sidebar
-          <strong>Nostr Pages → Push Manifest</strong>. Site name slug
-          <code>helper-tools</code> (13 characters, the max). It will appear on
+          <strong>Nostr Pages → Push Manifest</strong>.           Site name slug
+          <code>gittr-snips</code> (11 characters; NIP-5A max is 13 — the repo
+          name <code>gittr-helper-tools</code> does not fit). It will appear on
           <a href="https://gittr.space/pages">/pages</a>.
         </p>
       </div>
