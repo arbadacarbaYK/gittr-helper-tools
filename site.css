@@ -304,9 +304,28 @@ h1 em {
   color: #f9a8d4;
 }
 .kind-7,
-.kind-10018 {
+.kind-10018,
+.kind-1337 {
   background: rgba(74, 222, 128, 0.14);
   color: #bbf7d0;
+}
+.kind-10317,
+.kind-10002 {
+  background: rgba(34, 211, 238, 0.14);
+  color: #a5f3fc;
+}
+.kind-9806,
+.kind-24133,
+.kind-23194,
+.kind-24242 {
+  background: rgba(251, 191, 36, 0.14);
+  color: #fde68a;
+}
+
+.kinds-board .kind {
+  font: inherit;
+  font-family: var(--mono);
+  font-size: 0.72rem;
 }
 
 section {
@@ -357,6 +376,12 @@ section {
 }
 .layer.nostr h3 {
   color: var(--violet);
+}
+.layer.pages h3 {
+  color: var(--amber);
+}
+.layer.blossom h3 {
+  color: var(--pink);
 }
 
 .shot {
@@ -460,11 +485,44 @@ section {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 1rem;
   margin: 0 0 1.6rem;
-  align-items: start;
+  align-items: stretch;
 }
 
 .recipe.flip {
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+}
+
+.recipe > .shot {
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe > .shot img {
+  height: 280px;
+  max-height: 280px;
+  object-fit: cover;
+  object-position: top left;
+}
+
+.recipe > .shot.strip img {
+  object-fit: contain;
+  height: auto;
+  max-height: 280px;
+}
+
+button.kind {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.recipe > .lede {
+  margin: 0;
+  padding: 1.1rem 1.15rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
 }
 
 .snippet {
@@ -472,11 +530,15 @@ section {
   border: 1px solid var(--line);
   border-radius: 16px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
 }
 
 .snippet-head {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 0.6rem;
   padding: 0.65rem 0.85rem;
   border-bottom: 1px solid var(--line);
@@ -491,6 +553,16 @@ section {
   color: var(--muted);
   font-size: 0.78rem;
   margin-right: auto;
+}
+
+.snippet-head .open-folder {
+  font-size: 0.75rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.snippet pre {
+  flex: 1;
 }
 
 .copy {
@@ -536,26 +608,38 @@ pre {
   flex-direction: column;
 }
 
+a.card {
+  color: inherit;
+  text-decoration: none;
+}
+
+a.card:hover,
+a.card:focus-visible {
+  border-color: var(--cyan);
+  color: inherit;
+}
+
 .card[hidden] {
   display: none;
 }
 
 .card h3 {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.2rem;
   font-size: 1rem;
 }
 
+.card .folder {
+  margin: 0 0 0.45rem;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+}
+
 .card p {
-  margin: 0 0 0.7rem;
+  margin: 0;
   color: var(--muted);
   font-size: 0.9rem;
   flex: 1;
-}
-
-.card .links {
-  display: flex;
-  gap: 0.7rem;
-  font-size: 0.82rem;
 }
 
 .gotchas {

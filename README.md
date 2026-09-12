@@ -1,6 +1,8 @@
 # gittr helper tools & snippets
 
-**Read this in a browser:** after Pages publish, this repo’s root [`index.html`](./index.html) is the cookbook — screenshots from gittr plus copy-paste snippets. It shows up on [gittr.space/pages](https://gittr.space/pages) as **gittr-snips** (the public Pages name; About → Links uses whatever name you Save). Until then, open `index.html` locally or browse the repo on [gittr](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?branch=main).
+**Cookbook (Nostr Page):** [gittr-snips](https://3un05jr4dnwh6njreq6uhzgv67st83jxi5lnpsbf8y3dkdq1qkgittr-snips.pages.gittr.space/) — screenshots from gittr plus copy-paste snippets. Root [`index.html`](./index.html) is that page. After **Push Manifest** it is listed on [gittr.space/pages](https://gittr.space/pages) as **gittr-snips**. Browse the folders on [gittr](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?branch=main).
+
+**Docs hub:** [gittr-docu](https://3un05jr4dnwh6njreq6uhzgv67st83jxi5lnpsbf8y3dkdq1qkgittr-docu.pages.gittr.space/) — what you can do on gittr and the clickable platform map.
 
 Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?branch=main).
 

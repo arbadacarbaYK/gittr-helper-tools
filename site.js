@@ -50,7 +50,12 @@
   document.querySelectorAll(".kind[data-jump]").forEach(function (el) {
     el.addEventListener("click", function () {
       const target = document.querySelector(el.getAttribute("data-jump"));
-      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (!target) return;
+      if (target.hidden) {
+        const all = document.querySelector('.filter[data-filter="all"]');
+        if (all) all.click();
+      }
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 

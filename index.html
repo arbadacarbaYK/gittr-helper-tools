@@ -23,11 +23,11 @@
           gittr-snips
         </a>
         <nav class="topnav" aria-label="On this page">
-          <a href="#layers">Two layers</a>
+          <a href="#layers">Layers</a>
           <a href="#cookbook">Cookbook</a>
           <a href="#recipes">Recipes</a>
           <a href="#snippets">Snippet drawer</a>
-          <a href="#gotchas">Don't ship this</a>
+          <a href="#kinds">Kinds</a>
         </nav>
       </div>
     </header>
@@ -73,11 +73,15 @@
           </p>
           <div class="sticker-row" aria-label="Jump to a kind">
             <button class="kind kind-30617" data-jump="#announce" type="button">30617 announce</button>
+            <button class="kind kind-30618" data-jump="#announce" type="button">30618 state</button>
             <button class="kind kind-1618" data-jump="#issues" type="button">1618 PR</button>
             <button class="kind kind-1621" data-jump="#issues" type="button">1621 issue</button>
+            <button class="kind kind-7" data-jump="#social" type="button">7 star</button>
+            <button class="kind kind-10018" data-jump="#social" type="button">10018 watch</button>
             <button class="kind kind-35128" data-jump="#pages" type="button">35128 page</button>
             <button class="kind kind-32267" data-jump="#apps" type="button">32267 app</button>
-            <button class="kind kind-7" data-jump="#social" type="button">7 star</button>
+            <button class="kind kind-24242" data-jump="#pages" type="button">24242 blossom</button>
+            <button class="kind kind-1337" data-jump="#snip-c0" type="button">1337 snippet</button>
           </div>
         </aside>
       </div>
@@ -97,8 +101,9 @@
             <h2>Git files and Nostr notes are not the same pile.</h2>
           </div>
           <p class="lede">
-            Clients that mix these up show empty PRs, 0 commits, or a clone URL that
-            is actually a relay. Two layers. Two jobs. Same hostname can wear both hats.
+            Clients that mix these up show empty PRs, a clone URL that is actually a
+            relay, or a Page that never appears on /pages. Four piles. Four jobs.
+            Same hostname can wear more than one hat.
           </p>
           <div class="two" style="margin-top: 1.2rem">
             <article class="layer git">
@@ -113,24 +118,47 @@
             <article class="layer nostr">
               <h3>⚡ Nostr — the conversation</h3>
               <p>
-                Announcements, PRs, issues, stars, pages, apps. These are events on
+                Announcements, PRs, issues, stars, watch lists. These are events on
                 <code>wss://</code> relays. Looking at git will never find a pull
                 request. Looking at a random social relay may miss the git announce.
                 Query both worlds on purpose.
+              </p>
+            </article>
+            <article class="layer pages">
+              <h3>📄 Pages / nsite — the website</h3>
+              <p>
+                A named static site (kind <code>35128</code>). This cookbook is one
+                (<strong>gittr-snips</strong>). A git commit is not enough: upload
+                bytes, then <strong>Push Manifest</strong>. Browse
+                <a href="https://gittr.space/pages">/pages</a>. Snippet:
+                <code>nip5a-gittr-pages</code>.
+              </p>
+            </article>
+            <article class="layer blossom">
+              <h3>🌸 Blossom — the blob disk</h3>
+              <p>
+                Where the bytes of a Page (and optional app binaries) actually sit.
+                Pages use <code>blossom.gittr.space</code>. APKs use public Blossom
+                (Primal / Ditto / Haven), never Pages Blossom. Auth is kind
+                <code>24242</code>. Not git objects. Not the kind <code>30617</code>
+                announce.
               </p>
             </article>
           </div>
           <figure class="shot tilt-l crop">
             <img
               src="./docs-site/assets/git-server-clones.png"
-              alt="gittr sidebar Git Server and Clone URL list with three HTTPS remotes"
-              width="420"
-              height="640"
+              alt="gittr sidebar Clone URL list starting with git.gittr.space for the gittr repo"
+              width="884"
+              height="690"
             />
             <figcaption>
-              Live gittr sidebar: <strong>Git Server</strong> is the preferred clone
-              from the announcement (not “where the original push happened”).
-              <strong>Clone URL (event)</strong> is the author’s advertised HTTPS remotes.
+              Live <strong>gittr</strong> repo sidebar. First clone is
+              <code>git.gittr.space/…/gittr.git</code> — the gittr disk, not
+              someone else’s GRASP host. <strong>Git Server</strong> can still
+              show a forge <code>source</code> (GitHub here) when that is the
+              preferred tree. <strong>Clone URL (event)</strong> is the advertised
+              HTTPS remotes.
             </figcaption>
           </figure>
         </div>
@@ -237,6 +265,7 @@
               <div class="snippet-head">
                 <strong>Announce a repo</strong>
                 <span>snippets/nip34-repository-events</span>
+                <a class="open-folder" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip34-repository-events&amp;branch=main" target="_blank" rel="noopener noreferrer">Open folder on gittr</a>
                 <button class="copy" type="button" data-copy="code-announce">Copy</button>
               </div>
               <pre id="code-announce"><code>const event = {
@@ -265,6 +294,7 @@
               <div class="snippet-head">
                 <strong>GRASP vs normal relays</strong>
                 <span>snippets/grasp-detection</span>
+                <a class="open-folder" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/grasp-detection&amp;branch=main" target="_blank" rel="noopener noreferrer">Open folder on gittr</a>
                 <button class="copy" type="button" data-copy="code-grasp">Copy</button>
               </div>
               <pre id="code-grasp"><code>export const GRASP_SERVERS_FOR_PUSHING = [
@@ -318,6 +348,7 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
               <div class="snippet-head">
                 <strong>Parse a clone URL</strong>
                 <span>snippets/file-fetching</span>
+                <a class="open-folder" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/file-fetching&amp;branch=main" target="_blank" rel="noopener noreferrer">Open folder on gittr</a>
                 <button class="copy" type="button" data-copy="code-fetch">Copy</button>
               </div>
               <pre id="code-fetch"><code>export type GitSourceType =
@@ -338,6 +369,7 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
               <div class="snippet-head">
                 <strong>Make a Page (this one)</strong>
                 <span>snippets/nip5a-gittr-pages</span>
+                <a class="open-folder" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip5a-gittr-pages&amp;branch=main" target="_blank" rel="noopener noreferrer">Open folder on gittr</a>
                 <button class="copy" type="button" data-copy="code-pages">Copy</button>
               </div>
               <pre id="code-pages"><code>{
@@ -394,6 +426,7 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
               <div class="snippet-head">
                 <strong>Announce an app</strong>
                 <span>snippets/nip82-software-announce</span>
+                <a class="open-folder" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip82-software-announce&amp;branch=main" target="_blank" rel="noopener noreferrer">Open folder on gittr</a>
                 <button class="copy" type="button" data-copy="code-apps">Copy</button>
               </div>
               <pre id="code-apps"><code>// 32267  application  (d = app id, name, repository)
@@ -414,6 +447,7 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
               <div class="snippet-head">
                 <strong>Bounties on issues</strong>
                 <span>snippets/nip34-issue-bounties</span>
+                <a class="open-folder" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip34-issue-bounties&amp;branch=main" target="_blank" rel="noopener noreferrer">Open folder on gittr</a>
                 <button class="copy" type="button" data-copy="code-bounty">Copy</button>
               </div>
               <pre id="code-bounty"><code>{
@@ -440,12 +474,12 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
           </article>
 
           <article class="recipe" id="social">
-            <figure class="shot">
+            <figure class="shot strip">
               <img
                 src="./docs-site/assets/star-watch.png"
-                alt="gittr repo header with Watch, Zaps, and Fork on gittr-helper-tools"
-                width="2450"
-                height="160"
+                alt="gittr repo header with Watch, Zaps, Fork, and Star on the gittr repository"
+                width="980"
+                height="70"
               />
               <figcaption>
                 Repo chrome: <strong>Watch</strong> is a kind <code>10018</code>
@@ -459,6 +493,7 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
               <div class="snippet-head">
                 <strong>Star and watch</strong>
                 <span>snippets/nip25-stars-nip51-following</span>
+                <a class="open-folder" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip25-stars-nip51-following&amp;branch=main" target="_blank" rel="noopener noreferrer">Open folder on gittr</a>
                 <button class="copy" type="button" data-copy="code-star">Copy</button>
               </div>
               <pre id="code-star"><code>// Star  = kind 7  reaction on the 30617 event id  ("+")
@@ -468,8 +503,7 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
 // Star needs the announcement event id from a WIDE
 // relay set. Watching only needs the a-tag coordinate.
 
-// Auth: NIP-07 in the browser, NIP-46 for Amber.
-// Pay:  NIP-47 nostr+walletconnect://  (not the signer)</code></pre>
+// Auth: NIP-07 in the browser, NIP-46 for Amber.</code></pre>
             </div>
           </article>
         </div>
@@ -482,7 +516,8 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
             <h2>Every snippet, without the lecture</h2>
           </div>
           <p class="lede">
-            Each folder has a README plus TypeScript you can paste. No
+            Titles match the recipes above. Each card opens that folder on gittr
+            (README + snippets) in a new tab. No
             <code>@/</code> imports. Stub key storage yourself. Filter by mood:
           </p>
           <div class="filters" role="toolbar" aria-label="Filter snippets">
@@ -493,269 +528,146 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
             <button class="filter" type="button" data-filter="fun" aria-pressed="false">Pages / apps / extra</button>
           </div>
           <div class="cards">
-            <article class="card" data-tags="git">
-              <h3>file-fetching</h3>
-              <p>Parse clone URLs: GRASP, forges, NAS, <code>htree://</code>.</p>
-              <div class="links">
-                <a href="./snippets/file-fetching/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/file-fetching/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="git">
-              <h3>url-normalization</h3>
+            <a class="card" data-tags="git" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/file-fetching&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Parse clone URLs</h3>
+              <p class="folder">snippets/file-fetching</p>
+              <p>GRASP, forges, NAS, <code>htree://</code>.</p>
+            </a>
+            <a class="card" data-tags="git" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/url-normalization&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Normalize git URLs</h3>
+              <p class="folder">snippets/url-normalization</p>
               <p>SSH / <code>git://</code> / <code>nostr://</code> → HTTPS.</p>
-              <div class="links">
-                <a href="./snippets/url-normalization/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/url-normalization/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="git">
-              <h3>grasp-detection</h3>
+            </a>
+            <a class="card" id="snip-grasp" data-tags="git" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/grasp-detection&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Detect GRASP hosts</h3>
+              <p class="folder">snippets/grasp-detection</p>
               <p>Known GRASP domains vs ordinary relays. Push allowlist.</p>
-              <div class="links">
-                <a href="./snippets/grasp-detection/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/grasp-detection/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="git">
-              <h3>grasp-list</h3>
+            </a>
+            <a class="card" id="snip-grasp-list" data-tags="git" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/grasp-list&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Preferred GRASP list</h3>
+              <p class="folder">snippets/grasp-list</p>
               <p>Kind <code>10317</code> preferred GRASP hosts (<code>g</code> tags).</p>
-              <div class="links">
-                <a href="./snippets/grasp-list/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/grasp-list/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="git">
-              <h3>clone-url-quality</h3>
+            </a>
+            <a class="card" data-tags="git" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/clone-url-quality&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Clone URL quality</h3>
+              <p class="folder">snippets/clone-url-quality</p>
               <p>Host-only / localhost / LAN clones that break other clients.</p>
-              <div class="links">
-                <a href="./snippets/clone-url-quality/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/clone-url-quality/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="git">
-              <h3>repair-host-only-clones</h3>
+            </a>
+            <a class="card" data-tags="git" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/repair-host-only-clones&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Repair host-only clones</h3>
+              <p class="folder">snippets/repair-host-only-clones</p>
               <p>“Please republish” predicates. No sneaky push coupling.</p>
-              <div class="links">
-                <a href="./snippets/repair-host-only-clones/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/repair-host-only-clones/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="git">
-              <h3>filter-display-clone-urls</h3>
-              <p>Sidebar: hide extra GRASP mirrors when a primary host exists.</p>
-              <div class="links">
-                <a href="./snippets/filter-display-clone-urls/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/filter-display-clone-urls/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="git">
-              <h3>filter-grasp-mirror-pollution</h3>
+            </a>
+            <a class="card" data-tags="git" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/filter-display-clone-urls&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Filter clone URLs in the sidebar</h3>
+              <p class="folder">snippets/filter-display-clone-urls</p>
+              <p>Hide extra GRASP mirrors when a primary host exists.</p>
+            </a>
+            <a class="card" data-tags="git" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/filter-grasp-mirror-pollution&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Filter GRASP mirror pollution</h3>
+              <p class="folder">snippets/filter-grasp-mirror-pollution</p>
               <p>Strip mirror npub/hex roots from file trees.</p>
-              <div class="links">
-                <a href="./snippets/filter-grasp-mirror-pollution/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/filter-grasp-mirror-pollution/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="git">
-              <h3>repo-status</h3>
+            </a>
+            <a class="card" data-tags="git" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/repo-status&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Repo status badges</h3>
+              <p class="folder">snippets/repo-status</p>
               <p>Local → live_soon → live badges.</p>
-              <div class="links">
-                <a href="./snippets/repo-status/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/repo-status/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="nostr">
-              <h3>nip34-repository-events</h3>
+            </a>
+            <a class="card" id="snip-announce" data-tags="nostr" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip34-repository-events&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Announce a repo</h3>
+              <p class="folder">snippets/nip34-repository-events</p>
               <p>Build/parse <code>30617</code> / <code>30618</code>. Multi-value tags.</p>
-              <div class="links">
-                <a href="./snippets/nip34-repository-events/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/nip34-repository-events/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="nostr">
-              <h3>nip34-push-paywall</h3>
+            </a>
+            <a class="card" data-tags="nostr" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip34-push-paywall&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Push paywall</h3>
+              <p class="folder">snippets/nip34-push-paywall</p>
               <p>Optional <code>push_cost_sats</code> on the announce.</p>
-              <div class="links">
-                <a href="./snippets/nip34-push-paywall/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/nip34-push-paywall/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="nostr fun">
-              <h3>nip34-issue-bounties</h3>
+            </a>
+            <a class="card" id="snip-bounty" data-tags="nostr fun" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip34-issue-bounties&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Bounties on issues</h3>
+              <p class="folder">snippets/nip34-issue-bounties</p>
               <p>Kind <code>9806</code> offer/take + LNURL-withdraw.</p>
-              <div class="links">
-                <a href="./snippets/nip34-issue-bounties/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/nip34-issue-bounties/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="nostr fun">
-              <h3>nip25-stars-nip51-following</h3>
+            </a>
+            <a class="card" id="snip-star" data-tags="nostr fun" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip25-stars-nip51-following&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Star and watch</h3>
+              <p class="folder">snippets/nip25-stars-nip51-following</p>
               <p>Star (kind 7) and Watch (kind <code>10018</code>).</p>
-              <div class="links">
-                <a href="./snippets/nip25-stars-nip51-following/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/nip25-stars-nip51-following/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="auth">
-              <h3>nip46-remote-signer</h3>
-              <p>Amber / bunker pairing. No nsec in the page.</p>
-              <div class="links">
-                <a href="./snippets/nip46-remote-signer/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/nip46-remote-signer/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="auth">
-              <h3>nip47-nwc</h3>
-              <p>Wallet Connect <code>pay_invoice</code> / balance. Not NIP-46.</p>
-              <div class="links">
-                <a href="./snippets/nip47-nwc/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/nip47-nwc/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="fun">
-              <h3>nip5a-gittr-pages</h3>
-              <p>Named sites. You are looking at the result.</p>
-              <div class="links">
-                <a href="./snippets/nip5a-gittr-pages/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/nip5a-gittr-pages/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="fun">
-              <h3>nip82-software-announce</h3>
-              <p>Zapstore-shaped app events from a forge Release.</p>
-              <div class="links">
-                <a href="./snippets/nip82-software-announce/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/nip82-software-announce/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="fun">
-              <h3>markdown-media-handling</h3>
+            </a>
+            <a class="card" id="snip-signer" data-tags="auth" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip46-remote-signer&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Remote signer (Amber)</h3>
+              <p class="folder">snippets/nip46-remote-signer</p>
+              <p>Amber / bunker pairing. No nsec in the page. Kind <code>24133</code>.</p>
+            </a>
+            <a class="card" id="snip-nwc" data-tags="auth" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip47-nwc&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Wallet Connect (NWC)</h3>
+              <p class="folder">snippets/nip47-nwc</p>
+              <p>Wallet Connect <code>pay_invoice</code> / balance. Kind <code>23194</code>. Not NIP-46.</p>
+            </a>
+            <a class="card" id="snip-pages" data-tags="fun" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip5a-gittr-pages&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Make a Page</h3>
+              <p class="folder">snippets/nip5a-gittr-pages</p>
+              <p>Named nsite. You are looking at the result. Kind <code>35128</code>.</p>
+            </a>
+            <a class="card" id="snip-apps" data-tags="fun" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip82-software-announce&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Announce an app</h3>
+              <p class="folder">snippets/nip82-software-announce</p>
+              <p>Zapstore-shaped app events from a forge Release. Blossom pin is optional.</p>
+            </a>
+            <a class="card" data-tags="fun" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/markdown-media-handling&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>README images and links</h3>
+              <p class="folder">snippets/markdown-media-handling</p>
               <p>README images, embeds, relative links that don’t 404.</p>
-              <div class="links">
-                <a href="./snippets/markdown-media-handling/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/markdown-media-handling/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="fun">
-              <h3>nip-c0-code-snippets</h3>
+            </a>
+            <a class="card" id="snip-c0" data-tags="fun" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/nip-c0-code-snippets&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Code snippet events</h3>
+              <p class="folder">snippets/nip-c0-code-snippets</p>
               <p>Kind <code>1337</code> snippet events + renderer.</p>
-              <div class="links">
-                <a href="./snippets/nip-c0-code-snippets/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/nip-c0-code-snippets/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="fun">
-              <h3>wot-trust-badges</h3>
+            </a>
+            <a class="card" data-tags="fun" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/wot-trust-badges&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Web of Trust badges</h3>
+              <p class="folder">snippets/wot-trust-badges</p>
               <p>Viewer-relative Web of Trust hop labels.</p>
-              <div class="links">
-                <a href="./snippets/wot-trust-badges/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/wot-trust-badges/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="fun">
-              <h3>todos-discussions-kanban</h3>
+            </a>
+            <a class="card" data-tags="fun" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/todos-discussions-kanban&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>ToDo / Kanban</h3>
+              <p class="folder">snippets/todos-discussions-kanban</p>
               <p>How gittr does ToDo / Kanban today + future NIP notes.</p>
-              <div class="links">
-                <a href="./snippets/todos-discussions-kanban/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/todos-discussions-kanban/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
-            <article class="card" data-tags="fun">
-              <h3>github-oauth-writeback</h3>
+            </a>
+            <a class="card" data-tags="fun" href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?path=snippets/github-oauth-writeback&amp;branch=main" target="_blank" rel="noopener noreferrer">
+              <h3>Forge write-back (plan)</h3>
+              <p class="folder">snippets/github-oauth-writeback</p>
               <p>Plan only: forge write-back. Not a NIP.</p>
-              <div class="links">
-                <a href="./snippets/github-oauth-writeback/README.md">README</a>
-                <a href="https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?file=snippets/github-oauth-writeback/README.md&amp;branch=main">on gittr</a>
-              </div>
-            </article>
+            </a>
           </div>
         </div>
       </section>
 
-      <section id="gotchas">
-        <div class="wrap">
-          <div class="section-title">
-            <span class="badge">Scars</span>
-            <h2>Don't ship this (we already did, then we un-did it)</h2>
-          </div>
-          <div class="gotchas" style="margin-top: 1.1rem">
-            <article class="gotcha">
-              <h3>Host-only clone tags</h3>
-              <p>
-                <code>https://git.example.com</code> with no <code>/owner/repo.git</code>
-                makes gitworkshop and friends try to clone the hostname. Hide those
-                announces or repair them before publish.
-              </p>
-            </article>
-            <article class="gotcha">
-              <h3>SSH inside <code>clone[]</code> for a web client</h3>
-              <p>
-                Browsers cannot git-over-SSH. Keep <code>git@</code> out of kind 30617
-                <code>clone</code>. Show SSH in the sidebar if you must.
-              </p>
-            </article>
-            <article class="gotcha">
-              <h3>Only reading <code>tag[1]</code></h3>
-              <p>
-                gittr (and ngit-style clients) put several HTTPS URLs on one
-                <code>clone</code> row. If you only take the first extra cell, you
-                throw away the mirrors.
-              </p>
-            </article>
-            <article class="gotcha">
-              <h3><code>relay.gittr.space</code> as a git remote</h3>
-              <p>
-                That hostname is the Nostr relay. On-disk repos for gittr live under
-                <code>git.gittr.space</code>. Mixing them makes the sidebar lie and
-                <code>git fetch</code> 404.
-              </p>
-            </article>
-            <article class="gotcha">
-              <h3>Pages Blossom vs Apps Blossom</h3>
-              <p>
-                <code>blossom.gittr.space</code> is static sites. APKs / AppImages go
-                to the forge or public Blossom (Primal / Ditto / Haven). Mixing them
-                is how you accidentally host installers on the Pages disk.
-              </p>
-            </article>
-            <article class="gotcha ok">
-              <h3>Do this instead</h3>
-              <p>
-                Copy one snippet folder. Point relays at your defaults plus a
-                discovery set (ngit, shakespeare, gitnostr, a general relay). Sign
-                with NIP-07 or NIP-46. Keep nsecs out of git. Then add sparkle.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section>
+      <section id="kinds">
         <div class="wrap">
           <div class="section-title">
             <span class="badge">Kinds</span>
             <h2>Sticker sheet</h2>
           </div>
-          <p class="lede">Tap a pill in the hero, or just steal the numbers.</p>
+          <p class="lede">Tap a pill to jump to the recipe or the matching folder in the drawer.</p>
           <div class="kinds-board" style="margin-top: 0.8rem">
-            <span class="kind kind-30617">30617 repo announce</span>
-            <span class="kind kind-30618">30618 repo state</span>
-            <span class="kind kind-1618">1618 pull request</span>
-            <span class="kind kind-1621">1621 issue</span>
-            <span class="kind kind-1111">1111 comment</span>
-            <span class="kind kind-7">7 star</span>
-            <span class="kind kind-10018">10018 watch list</span>
-            <span class="kind kind-10317">10317 GRASP list</span>
-            <span class="kind kind-35128">35128 named page</span>
-            <span class="kind kind-32267">32267 app</span>
-            <span class="kind kind-3063">3063 file asset</span>
-            <span class="kind kind-30063">30063 release</span>
-            <span class="kind">9806 bounty</span>
-            <span class="kind">24133 NIP-46 RPC</span>
-            <span class="kind">23194 NWC</span>
-            <span class="kind">24242 Blossom auth</span>
-            <span class="kind">10002 NIP-65 relays</span>
+            <button class="kind kind-30617" data-jump="#announce" type="button">30617 repo announce</button>
+            <button class="kind kind-30618" data-jump="#announce" type="button">30618 repo state</button>
+            <button class="kind kind-1618" data-jump="#issues" type="button">1618 pull request</button>
+            <button class="kind kind-1621" data-jump="#issues" type="button">1621 issue</button>
+            <button class="kind kind-1111" data-jump="#issues" type="button">1111 comment</button>
+            <button class="kind kind-7" data-jump="#social" type="button">7 star</button>
+            <button class="kind kind-10018" data-jump="#social" type="button">10018 watch list</button>
+            <button class="kind kind-10317" data-jump="#snip-grasp-list" type="button">10317 GRASP list</button>
+            <button class="kind kind-35128" data-jump="#pages" type="button">35128 named page</button>
+            <button class="kind kind-32267" data-jump="#apps" type="button">32267 app</button>
+            <button class="kind kind-3063" data-jump="#apps" type="button">3063 file asset</button>
+            <button class="kind kind-30063" data-jump="#apps" type="button">30063 release</button>
+            <button class="kind kind-9806" data-jump="#issues" type="button">9806 bounty</button>
+            <button class="kind kind-24133" data-jump="#snip-signer" type="button">24133 NIP-46 RPC</button>
+            <button class="kind kind-23194" data-jump="#snip-nwc" type="button">23194 NWC</button>
+            <button class="kind kind-24242" data-jump="#pages" type="button">24242 Blossom auth</button>
+            <button class="kind kind-10002" data-jump="#grasp" type="button">10002 NIP-65 relays</button>
+            <button class="kind kind-1337" data-jump="#snip-c0" type="button">1337 code snippet</button>
           </div>
         </div>
       </section>
