@@ -1,5 +1,7 @@
 # gittr helper tools & snippets
 
+**Read this in a browser:** after Pages publish, this repo’s root [`index.html`](./index.html) is the fun cookbook — screenshots from gittr plus copy-paste snippets. It shows up on [gittr.space/pages](https://gittr.space/pages) as **helper-tools**. Until then, open `index.html` locally or browse the repo on [gittr](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr-helper-tools?branch=main).
+
 Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?branch=main).
 
 Clone and git: **`git.gittr.space`**. Nostr relay: **`relay.gittr.space`** (`wss://`). SSH is laptop git to the bridge; **gittr-mcp uses HTTPS + nsec**. The bridge keeps a bare repo when `clone[]` includes `git.gittr.space` — gittr [SETUP_INSTRUCTIONS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/SETUP_INSTRUCTIONS.md&branch=main) / [gitnostr](https://github.com/arbadacarbaYK/gitnostr). Code-tab fetch map: [`snippets/file-fetching`](./snippets/file-fetching).
