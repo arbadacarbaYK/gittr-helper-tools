@@ -1,22 +1,25 @@
 :root {
   color-scheme: dark;
-  --bg: #07080d;
+  --bg: #05040a;
   --bg-2: #10131c;
-  --panel: #161a24;
+  --panel: #120f18;
   --panel-2: #1c2130;
   --ink: #f4f1ea;
   --muted: #9aa3b8;
-  --line: rgba(196, 181, 253, 0.18);
+  --line: rgba(255, 45, 149, 0.28);
   --violet: #c4b5fd;
   --violet-2: #8b5cf6;
-  --cyan: #5eead4;
-  --pink: #f472b6;
+  --cyan: #22d3ee;
+  --pink: #ff2d95;
   --amber: #fbbf24;
-  --good: #4ade80;
+  --good: #b8ff3c;
   --bad: #fb7185;
-  --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --acid: #b8ff3c;
+  --shadow: 8px 8px 0 rgba(255, 45, 149, 0.55);
   --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
   --sans: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --mx: 50%;
+  --my: 18%;
 }
 
 * {
@@ -30,13 +33,10 @@ html {
 body {
   margin: 0;
   font-family: var(--sans);
-  background:
-    radial-gradient(1200px 500px at 10% -10%, rgba(139, 92, 246, 0.22), transparent 55%),
-    radial-gradient(900px 420px at 110% 8%, rgba(94, 234, 212, 0.12), transparent 50%),
-    radial-gradient(700px 500px at 50% 120%, rgba(244, 114, 182, 0.1), transparent 45%),
-    var(--bg);
+  background: var(--bg);
   color: var(--ink);
   line-height: 1.55;
+  overflow-x: hidden;
 }
 
 body::before {
@@ -44,11 +44,28 @@ body::before {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
   z-index: 0;
+  background:
+    radial-gradient(480px 260px at var(--mx) var(--my), rgba(34, 211, 238, 0.16), transparent 55%),
+    radial-gradient(900px 420px at 8% -8%, rgba(255, 45, 149, 0.16), transparent 55%),
+    radial-gradient(800px 380px at 100% 0%, rgba(184, 255, 60, 0.1), transparent 50%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.22) 3px
+    );
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.11;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
 }
 
 a {
@@ -124,12 +141,14 @@ kbd {
 .logo {
   width: 34px;
   height: 34px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, var(--violet-2), var(--cyan));
+  border-radius: 4px;
+  background: var(--acid);
+  color: #050308;
   display: grid;
   place-items: center;
   font-size: 1.05rem;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 18px rgba(184, 255, 60, 0.55);
+  animation: pulse-glow 2.4s ease-in-out infinite;
 }
 
 .topnav {
@@ -176,11 +195,10 @@ h1 {
 }
 
 h1 em {
-  font-style: normal;
-  background: linear-gradient(90deg, var(--violet), var(--cyan), var(--pink));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-style: italic;
+  background: none;
+  color: var(--acid);
+  text-shadow: 0 0 22px rgba(184, 255, 60, 0.45);
 }
 
 .lede {
@@ -198,9 +216,9 @@ h1 em {
 
 .btn {
   border: 0;
-  border-radius: 999px;
+  border-radius: 4px;
   padding: 0.72rem 1.15rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
@@ -209,22 +227,24 @@ h1 em {
 }
 
 .btn-primary {
-  background: var(--violet-2);
-  color: white;
+  background: var(--acid);
+  color: #050308;
+  box-shadow: 0 0 24px rgba(184, 255, 60, 0.35);
 }
 
 .btn-ghost {
   background: transparent;
   color: var(--ink);
-  border: 1px solid var(--line);
+  border: 1px solid var(--pink);
+  box-shadow: 3px 3px 0 var(--pink);
 }
 
 .hero-card {
-  background: linear-gradient(180deg, rgba(28, 33, 48, 0.9), rgba(16, 19, 28, 0.95));
-  border: 1px solid var(--line);
-  border-radius: 22px;
+  background: #120f18;
+  border: 2px solid var(--cyan);
+  border-radius: 4px;
   padding: 1.2rem;
-  box-shadow: var(--shadow);
+  box-shadow: 10px 10px 0 var(--pink), 0 0 28px rgba(34, 211, 238, 0.2);
   transform: rotate(1.4deg);
 }
 
@@ -342,10 +362,10 @@ section {
 .shot {
   margin: 1.3rem 0 0;
   background: #0b0d14;
-  border: 1px solid var(--line);
-  border-radius: 18px;
+  border: 2px solid var(--acid);
+  border-radius: 2px;
   padding: 0.7rem 0.7rem 0.95rem;
-  box-shadow: var(--shadow);
+  box-shadow: 8px 8px 0 var(--cyan), -3px -3px 0 var(--pink);
 }
 
 .shot.tilt-l {
@@ -616,5 +636,86 @@ pre {
   .shot.tilt-l,
   .shot.tilt-r {
     transform: none;
+  }
+}
+
+.stamp {
+  display: inline-block;
+  margin: 0.4rem 0 0.2rem;
+  padding: 0.2rem 0.55rem;
+  border: 3px solid var(--pink);
+  color: var(--pink);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  transform: rotate(-8deg);
+  box-shadow: 0 0 18px rgba(255, 45, 149, 0.35);
+  animation: stamp-flicker 3.2s steps(2, end) infinite;
+}
+
+.marquee {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border-top: 1px solid var(--cyan);
+  border-bottom: 1px solid var(--cyan);
+  background: #04060c;
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.marquee span {
+  display: inline-block;
+  padding: 0.45rem 0;
+  animation: marquee 32s linear infinite;
+}
+
+.glitch {
+  position: relative;
+}
+
+.xerox {
+  filter: contrast(1.08) saturate(1.2);
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(184, 255, 60, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 26px rgba(184, 255, 60, 0.8);
+  }
+}
+@keyframes stamp-flicker {
+  0%,
+  92%,
+  100% {
+    opacity: 1;
+  }
+  94% {
+    opacity: 0.35;
+  }
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

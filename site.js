@@ -53,4 +53,16 @@
       if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
+
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduce) {
+    document.addEventListener(
+      "pointermove",
+      function (e) {
+        document.documentElement.style.setProperty("--mx", e.clientX + "px");
+        document.documentElement.style.setProperty("--my", e.clientY + "px");
+      },
+      { passive: true }
+    );
+  }
 })();
