@@ -359,6 +359,12 @@ section {
   gap: 1.2rem;
 }
 
+.three {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.2rem;
+}
+
 .layer {
   border: 1px solid var(--line);
   background: var(--panel);
@@ -741,6 +747,7 @@ a.card:focus-visible {
 @media (max-width: 860px) {
   .hero,
   .two,
+  .three,
   .recipe,
   .recipe.flip,
   .recipe.stacked {

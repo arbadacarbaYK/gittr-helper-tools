@@ -23,6 +23,7 @@
           gittr-snips
         </a>
         <nav class="topnav" aria-label="On this page">
+          <a href="#what">What this is</a>
           <a href="#layers">Layers</a>
           <a href="#cookbook">Cookbook</a>
           <a href="#recipes">Recipes</a>
@@ -44,6 +45,8 @@
             the same snippets gittr uses, plus screenshots so you can see
             <em>why</em> they exist. Copy a folder. Adapt relays. Keep the attribution.
             The repo README is the file list — this page is the door.
+            This repo is <strong>not a hosted forge</strong>: copy a folder into
+            your client.
           </p>
           <div class="cta-row">
             <a class="btn btn-primary" href="#cookbook">Start the cookbook</a>
@@ -93,6 +96,45 @@
           attribution · we write code · 30617 · 1618 · 1621 · 35128 · 32267 ·
         </span>
       </div>
+
+      <section id="what">
+        <div class="wrap">
+          <div class="section-title">
+            <span class="badge">Why this repo</span>
+            <h2>Recipes from gittr. Not another forge.</h2>
+          </div>
+          <p class="lede">
+            Production code snippets from gittr.space for people and agents
+            building Nostr-native Git clients. Copy a folder, read its README,
+            adapt relays. Keep the attribution. MIT.
+          </p>
+          <div class="three" style="margin-top: 1.2rem">
+            <article class="layer pages">
+              <h3>This repo · xerox</h3>
+              <p>
+                Copy-paste recipes from gittr production. Not a hosted forge.
+                Not a git server. MIT — keep the attribution.
+              </p>
+            </article>
+            <article class="layer git">
+              <h3>gittr is the forge</h3>
+              <p>
+                Issues, PRs, Pages, apps. Clone and git:
+                <code>git.gittr.space</code>. Relay:
+                <code>wss://relay.gittr.space</code>.
+                SSH is laptop git. <strong>gittr-mcp uses HTTPS + nsec</strong>.
+              </p>
+            </article>
+            <article class="layer nostr">
+              <h3>gitnostr is the disk</h3>
+              <p>
+                Bare repos over SSH/HTTPS. Kind 52 keys. This Page only
+                explains how to talk to that stack from your own client.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
 
       <section id="layers">
         <div class="wrap">
@@ -519,6 +561,16 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
             Titles match the recipes above. Each card opens that folder on gittr
             (README + snippets) in a new tab. No
             <code>@/</code> imports. Stub key storage yourself. Filter by mood:
+          </p>
+          <p class="lede">
+            Product → recipe:
+            Watch → <code>nip25-stars-nip51-following</code> ·
+            Bounty → <code>nip34-issue-bounties</code> ·
+            Page → <code>nip5a-gittr-pages</code> ·
+            App → <code>nip82-software-announce</code> ·
+            Paywall → <code>nip34-push-paywall</code> ·
+            NWC → <code>nip47-nwc</code> ·
+            Amber → <code>nip46-remote-signer</code>.
           </p>
           <div class="filters" role="toolbar" aria-label="Filter snippets">
             <button class="filter" type="button" data-filter="all" aria-pressed="true">All</button>
