@@ -68,4 +68,4 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 
 ## License
 
-MIT, keeping attribution to @spearson78's original gitnostr and the gittr.space fork.
+MIT © [gittr.space](https://gittr.space). Keep this attribution when you copy snippets.
