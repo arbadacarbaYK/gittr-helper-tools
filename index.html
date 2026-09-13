@@ -253,7 +253,11 @@
                 <p>
                   Kinds <code>1621</code> / <code>1618</code> / <code>1111</code> on
                   relays. Subscribe wider than “our one default relay” or you will
-                  show empty threads that other clients can see.
+                  show empty threads that other clients can see. gittr lists
+                  GitHub/Gitea copies as origin <code>#12</code> and Nostr tickets
+                  by event id — do not treat a local counter as the forge number.
+                  Close or merge forge copies on the origin; comments on gittr stay
+                  on Nostr.
                 </p>
               </div>
             </article>
@@ -511,7 +515,9 @@ const isGrasp = isGraspServer("wss://relay.ngit.dev");
               show up on
               <a href="https://gittr.space/bounty-hunt" target="_blank" rel="noopener noreferrer">gittr.space/bounty-hunt</a>
               and on the repo Issues tab. PRs are kind <code>1618</code>;
-              issues are <code>1621</code>.
+              issues are <code>1621</code>. A bounty pays when a
+              <strong>gittr Nostr PR</strong> is merged — merging the same
+              change on GitHub does not release it.
             </p>
           </article>
 

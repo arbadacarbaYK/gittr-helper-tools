@@ -22,7 +22,7 @@ Implementation profile for **Lightning bounties on git issues**: **offer** (fund
 1. **Discovery on Nostr** — publish kind `9806` to repo relays (issue/PR pages do this).
 2. **Enforcement on host** — LNURL-withdraw create/delete and merge detection are **client/host** responsibilities (like `push_cost_sats`).
 3. **Payment rail is pluggable** — gittr uses **LNbits LNURL-withdraw** today; interop should describe withdraw semantics, not a wallet brand.
-4. **Link to NIP-34 PR merge** — bounty releases when maintainer merges a PR linked to the issue.
+4. **Link to NIP-34 PR merge** — bounty releases when a maintainer merges a **gittr Nostr PR** (kind 1618) linked to the issue. Merging the same work on GitHub / Gitea / GitLab does **not** pay.
 
 ## Event kind
 
