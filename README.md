@@ -6,7 +6,7 @@
 
 Production **code snippets** from [gittr.space](https://gittr.space) for developers and coding agents building Nostr-native Git clients. Copy a folder, read its README, adapt URLs and relay lists for your app. Source: [gittr on gittr.space](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?branch=main).
 
-Clone and git: **`git.gittr.space`**. Nostr relay: **`relay.gittr.space`** (`wss://`). SSH is laptop git to the bridge; **gittr-mcp uses HTTPS + nsec**. The bridge keeps a bare repo when `clone[]` includes `git.gittr.space` — gittr [SETUP_INSTRUCTIONS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/SETUP_INSTRUCTIONS.md&branch=main) / [gitnostr](https://github.com/arbadacarbaYK/gitnostr). Code-tab fetch map: [`snippets/file-fetching`](./snippets/file-fetching).
+Clone and git: **`git.gittr.space`**. Nostr relay: **`relay.gittr.space`** (`wss://`). Pages blobs: [gittr-blossom](https://github.com/arbadacarbaYK/gittr-blossom) at **`blossom.gittr.space`**. SSH is laptop git to the bridge; **gittr-mcp uses HTTPS + nsec**. The bridge keeps a bare repo when `clone[]` includes `git.gittr.space` — gittr [SETUP_INSTRUCTIONS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/SETUP_INSTRUCTIONS.md&branch=main) / [gitnostr](https://github.com/arbadacarbaYK/gitnostr). Code-tab fetch map: [`snippets/file-fetching`](./snippets/file-fetching).
 
 Do not commit secrets into examples; use placeholders in `.env.example`.
 
