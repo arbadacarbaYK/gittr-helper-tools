@@ -2,7 +2,7 @@
 
 Code snippets for implementing **NIP-46** (remote signing) in a Nostr **web client**, so users can pair **Amber**, **Nowser**, **LNbits remote signer**, self-hosted **bunker**, etc., without putting the user’s **nsec** in the page.
 
-**Synced:** 2026-08-18 — teaching extract (not the full ~3200-line production file).  
+**Synced:** 2026-10-01 — teaching extract (not the full ~3200-line production file).  
 APIs of note: `getNip46PairingRelays` (never put GRASP in NIP-46 URIs), `ensureBootstrapped` (hydrate + bunker sockets, **no Amber popup**), `ensureRpcHealthy` (warm sockets before Push), `isRpcHealthy`, kind-scoped `DEFAULT_REMOTE_PERMISSIONS`, prefer manager over `window.nostr` when a remote session exists.
 
 **Canonical docs (keep in sync with production):**
@@ -140,6 +140,8 @@ Production pattern (gittr `remoteSigner.ts`):
 
 **Browser WebSocket slots:** the app’s main relay pool and the Amber `directPool` must not share hosts. `nostr-relaypool` `removeRelay(url)` matches the **exact** map key (trailing `/` counts). Closing the wrong key leaves discovery sockets up and bunker sockets stay CLOSED — Push then says “Could not open any bunker relay” even with Amber open. Close via the pool’s real keys, dial bunker sockets **before** file-fetch subscribe, and never reset the bunker pool while a socket is still CONNECTING.
 
+**Dial one Amber relay at a time.** On a busy repository page the browser is already full of file-fetch sockets. Wait for that git-source HTTP to drain, pause the page’s open sockets, then open the bunker list **one host at a time** and stop at the first that connects. Do not dial the whole URI plus the default hosts in parallel — that left every Amber relay closed and Push never reached the phone. A Push must drop the “already closed” cache from the page-load warm, then walk the relays Amber actually has, including ones the previous page never opened. A warm that only tried the URI and found nothing must not count as “Amber is ready.”
+
 ```typescript
 // Pseudocode — see gittr getNip46PairingRelays()
 const relays = getNip46PairingRelays(appRelaysFromEnv, 8);
@@ -184,7 +186,7 @@ Connect result handling:
 
 After page reload, **do not** require a blocking `connect` before `sign_event`. Production hydrates the cached pubkey, opens bunker WebSockets, and lets **`sign_event` wake Amber**. A silent reconnect `connect` is often ignored (no popup) and used to abort Push after a 25s timeout.
 
-**Encryption:** Amber bunker still decrypts **NIP-04** RPC. Production sends **NIP-04 first** for `sign_event` (and encrypt/decrypt RPC) and dual-publishes NIP-44. NIP-44-only `sign_event` can land on Amber’s relays and never pop a prompt. Keep NIP-44 primary for pairing `connect` / `get_public_key`.
+**Encryption:** Amber bunker still decrypts **NIP-04** RPC. Production sends **one NIP-04** `sign_event`. A second copy (NIP-44, a 10s republish, or another fan-out of the same request) makes Amber prompt again for the same event, and the page was showing failure after both approvals because it had already dropped the waiter. NIP-44-only `sign_event` can land on Amber’s relays and never pop a prompt. Keep NIP-44 primary for pairing `connect` / `get_public_key`; those may still dual-publish. Do not dual-publish `sign_event`.
 
 ---
 
@@ -193,7 +195,7 @@ After page reload, **do not** require a blocking `connect` before `sign_event`. 
 | RPC | Suggested timeout | Notes |
 |-----|-------------------|--------|
 | `connect` / `get_public_key` | ~25s | Retries only cover relay flakiness — never alternate param layouts |
-| **`sign_event`** | **~120s** | User must approve on phone; repo events are large |
+| **`sign_event`** | **~120s** after a relay accepts | User must approve on phone; repo events are large. Abort around **20s** only when **no relay accepted** the envelope. If a relay said OK, keep waiting — do not unsub the listener and do not send the request again. |
 
 **Repo push = two signatures** (NIP-34 kind `30617` announcement + kind `30618` state). Amber “auto-allow” / “always approve” often still shows **one prompt per `sign_event`** — that is normal.
 
@@ -221,14 +223,15 @@ Use **`ensureBootstrapped()`** (hydrate) plus **`ensureRpcHealthy()`** before Pu
 **Every Push / Save / issue:**
 
 1. `resolveNostrSigner()` then **`ensureRpcHealthy()`** (need ≥1 OPEN bunker socket).
-2. `sign_event` (NIP-04 first) — that is what pops Amber.
-3. Never `resetDirectPool` while a bunker socket is still CONNECTING.
+2. `sign_event` **once**, NIP-04 only — that is what pops Amber. Do not publish a second envelope.
+3. If a relay accepts it, keep the listener until Amber replies or the long timeout. A “published” log is not a signature.
+4. Never `resetDirectPool` while a bunker socket is still CONNECTING.
 
 The teaching extract’s `bootstrapFromStorage()` still does connect-on-reload; copy production `remoteSigner.ts` for the live path.
 
 ---
 
-## Implementation learnings (production, Aug 2026)
+## Implementation learnings (production, through Oct 2026)
 
 These are the issues that show up as “I approved on the phone and **nothing happened**” or **`sign_event timed out`**:
 
@@ -268,8 +271,8 @@ These are the issues that show up as “I approved on the phone and **nothing ha
 12. **Never `connect()` a CONNECTING socket**  
     `nostr-relaypool`'s `connect()` replaces the WebSocket whenever `readyState !== OPEN`. Calling it once per request (e.g. inside `addRelay`) kills every in-flight connection — the relay never reaches OPEN. Only dial when the socket is CLOSED.
 
-13. **Fail loudly on `sign_event` timeout**  
-    A silent second 120s retry only hides the failure. Throw an actionable error ("open your signer app, make sure it is online") so the UI can show it, and repair transport in the background for the next attempt.
+13. **One `sign_event`, then wait if a relay accepted it**  
+    Send a single NIP-04 envelope. Do not dual-publish NIP-44, do not republish after 10s, and do not fan the same request out again — Amber prompts a second time and the first approval is thrown away. While waiting, do not unsubscribe the kind-24133 listener. Abort around 20s only when no relay accepted the envelope. If a relay said OK, keep the sign wait so that one approval can finish the push. A cached login must not run a blocking `connect` probe before the repository event is sent.
 
 14. **`removeRelay` is exact-key**  
     Trailing `/` mismatch means “Freed 7 sockets” can be a lie. Close via `getRelayStatuses()` keys. Dial bunker sockets before file-fetch, or discovery steals the browser slots.
@@ -308,4 +311,4 @@ Targets **NIP-46** signers that use **`bunker://`** or **`nostrconnect://`** and
 - **NIP-04 / NIP-44:** encryption inside `24133` content  
 - **NIP-34:** repo kinds `30617` / `30618` (two signatures per push)
 
-**Extracted from:** `gittr/ui/src/lib/nostr/remoteSigner.ts` + `signer.ts` (Aug 2026 production: hydrate-only boot, `ensureRpcHealthy` before Push, NIP-04-first `sign_event`)
+**Extracted from:** `gittr/ui/src/lib/nostr/remoteSigner.ts` + `signer.ts` (Oct 2026 production: hydrate-only boot, one bunker socket at a time, one NIP-04 `sign_event`, keep waiting after a relay accepts it)

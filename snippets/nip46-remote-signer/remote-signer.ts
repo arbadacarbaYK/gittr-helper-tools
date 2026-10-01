@@ -6,7 +6,7 @@
  * private keys to the browser.
  *
  * Source: gittr/ui/src/lib/nostr/remoteSigner.ts (trimmed — production is ~3200 lines)
- * Synced: 2026-08-18
+ * Synced: 2026-10-01
  *
  * This extract still calls Amber `connect` on reload for a simpler demo.
  * Production gittr hydrates only, opens bunker WebSockets, and wakes Amber
@@ -34,8 +34,11 @@
  *    those — you desync both sides and sign_event times out. NIP-46 transport
  *    stays on the URI relays; publish signed events to app relays yourself.
  *
- * 4. Encryption: modern signers (Amber, nak) reply NIP-44. Encrypt requests with
- *    NIP-44 and accept NIP-04 only as legacy fallback on decrypt.
+ * 4. Encryption: Amber still decrypts NIP-04 for `sign_event`. Send that request
+ *    ONCE as NIP-04. A second envelope (NIP-44, a republish, or a fan-out of the
+ *    same request) makes Amber prompt again, and the page was dropping the
+ *    signature. Pairing `connect` / `get_public_key` stay NIP-44 primary and
+ *    may dual-publish NIP-04. Decrypt tries NIP-44, then NIP-04.
  *
  * 5. Connect result may be "ack" OR an echo of the pairing secret (bunker46,
  *    nostrconnect responses per spec). "already connected" error = success.
@@ -199,22 +202,83 @@ function hexToBytes(hex: string): Uint8Array {
   return out;
 }
 
-/** Encrypt a NIP-46 request. Prefer NIP-44 (what Amber/nak reply with). */
-async function encryptForRemoteSigner(
+/** Amber-waking RPC is NIP-04. Pairing stays NIP-44. */
+export function nip46PrimaryEncryption(method: string): "nip04" | "nip44" {
+  if (
+    method === "sign_event" ||
+    method === "nip04_encrypt" ||
+    method === "nip04_decrypt" ||
+    method === "nip44_encrypt" ||
+    method === "nip44_decrypt"
+  ) {
+    return "nip04";
+  }
+  return "nip44";
+}
+
+/**
+ * A second envelope is a second Amber prompt.
+ * `sign_event` is sent once. Pairing and encrypt/decrypt RPC may dual-publish.
+ */
+export function nip46ShouldDualPublish(method: string): boolean {
+  return (
+    method === "connect" ||
+    method === "get_public_key" ||
+    method === "nip04_encrypt" ||
+    method === "nip04_decrypt" ||
+    method === "nip44_encrypt" ||
+    method === "nip44_decrypt"
+  );
+}
+
+function encryptNip44ForRemoteSigner(
   clientSecretKey: string,
   remotePubkey: string,
   plaintext: string
-): Promise<string> {
+): string {
+  const key = nip44v2.getConversationKey(
+    hexToBytes(clientSecretKey),
+    remotePubkey
+  );
+  return nip44v2.encrypt(plaintext, key);
+}
+
+/** One ciphertext for `sign_event`. Pairing may also carry the other scheme. */
+async function encryptNip46RpcPayload(
+  method: string,
+  clientSecretKey: string,
+  remotePubkey: string,
+  plaintext: string
+): Promise<{ primary: string; dual: string | null }> {
+  const primaryScheme = nip46PrimaryEncryption(method);
+  let nip44Cipher: string | null = null;
+  let nip04Cipher: string | null = null;
   try {
-    const key = nip44v2.getConversationKey(
-      hexToBytes(clientSecretKey),
-      remotePubkey
+    nip44Cipher = encryptNip44ForRemoteSigner(
+      clientSecretKey,
+      remotePubkey,
+      plaintext
     );
-    return nip44v2.encrypt(plaintext, key);
   } catch {
-    // Legacy signers only speak NIP-04.
-    return nip04.encrypt(clientSecretKey, remotePubkey, plaintext);
+    nip44Cipher = null;
   }
+  try {
+    nip04Cipher = await nip04.encrypt(clientSecretKey, remotePubkey, plaintext);
+  } catch {
+    nip04Cipher = null;
+  }
+  const primary =
+    primaryScheme === "nip04"
+      ? nip04Cipher || nip44Cipher
+      : nip44Cipher || nip04Cipher;
+  if (!primary) {
+    throw new Error("Could not encrypt the remote-signer request");
+  }
+  if (!nip46ShouldDualPublish(method)) {
+    return { primary, dual: null };
+  }
+  const dual = primary === nip04Cipher ? nip44Cipher : nip04Cipher;
+  return { primary, dual: dual && dual !== primary ? dual : null };
 }
 
 /** Decrypt a NIP-46 response: try NIP-44 first, fall back to NIP-04. */
@@ -779,28 +843,37 @@ export class RemoteSignerManager {
       method,
       params,
     });
-    const ciphertext = await encryptForRemoteSigner(
+    const encrypted = await encryptNip46RpcPayload(
+      method,
       session.clientSecretKey,
       session.remotePubkey,
       payload
     );
-    const unsignedEvent: any = {
-      kind: KIND_NIP46,
-      created_at: Math.floor(Date.now() / 1000),
-      content: ciphertext,
-      tags: [["p", session.remotePubkey]],
-      pubkey: getPublicKey(session.clientSecretKey),
+    const buildRpcEvent = (content: string) => {
+      const unsignedEvent: any = {
+        kind: KIND_NIP46,
+        created_at: Math.floor(Date.now() / 1000),
+        content,
+        tags: [["p", session.remotePubkey]],
+        pubkey: getPublicKey(session.clientSecretKey),
+      };
+      unsignedEvent.id = getEventHash(unsignedEvent);
+      unsignedEvent.sig = signEvent(unsignedEvent, session.clientSecretKey);
+      return unsignedEvent;
     };
-    unsignedEvent.id = getEventHash(unsignedEvent);
-    const sig = signEvent(unsignedEvent, session.clientSecretKey);
-    this.deps.publish({ ...unsignedEvent, sig }, session.relays);
 
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.pending.delete(id);
         reject(new Error(`Remote signer request ${method} timed out`));
       }, timeoutMs);
+      // Register the waiter before publish so a fast reply is not dropped.
       this.pending.set(id, { method, resolve, reject, timeout });
+      this.deps.publish(buildRpcEvent(encrypted.primary), session.relays);
+      // sign_event has dual === null. Do not publish it again.
+      if (encrypted.dual) {
+        this.deps.publish(buildRpcEvent(encrypted.dual), session.relays);
+      }
     });
   }
 
