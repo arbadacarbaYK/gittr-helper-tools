@@ -5,8 +5,8 @@
  * Amber, nak bunker, bunker46, LNbits Remote Nostr Signer, etc. without exposing
  * private keys to the browser.
  *
- * Source: gittr/ui/src/lib/nostr/remoteSigner.ts (trimmed — production is ~3200 lines)
- * Synced: 2026-10-01
+ * Source: gittr/ui/src/lib/nostr/remoteSigner.ts (trimmed — production is larger)
+ * Synced: 2026-10-03
  *
  * This extract still calls Amber `connect` on reload for a simpler demo.
  * Production gittr hydrates only, opens bunker WebSockets, and wakes Amber
@@ -35,10 +35,13 @@
  *    stays on the URI relays; publish signed events to app relays yourself.
  *
  * 4. Encryption: Amber still decrypts NIP-04 for `sign_event`. Send that request
- *    ONCE as NIP-04. A second envelope (NIP-44, a republish, or a fan-out of the
- *    same request) makes Amber prompt again, and the page was dropping the
- *    signature. Pairing `connect` / `get_public_key` stay NIP-44 primary and
- *    may dual-publish NIP-04. Decrypt tries NIP-44, then NIP-04.
+ *    ONCE as NIP-04 (one event id) to every OPEN relay in the bunker URI.
+ *    Page-load may stop at the first open socket. sign_event must not — Amber
+ *    is often listening on a different relay in the same bunker link (Orbot).
+ *    A second envelope (NIP-44, or a new event while waiting) makes Amber
+ *    prompt again, and the page was dropping the signature. Pairing `connect`
+ *    / `get_public_key` stay NIP-44 primary and may dual-publish NIP-04.
+ *    Decrypt tries NIP-44, then NIP-04.
  *
  * 5. Connect result may be "ack" OR an echo of the pairing secret (bunker46,
  *    nostrconnect responses per spec). "already connected" error = success.
@@ -869,8 +872,10 @@ export class RemoteSignerManager {
       }, timeoutMs);
       // Register the waiter before publish so a fast reply is not dropped.
       this.pending.set(id, { method, resolve, reject, timeout });
+      // Publish this one event to every bunker relay in the session, not the
+      // first socket that happened to be open. Do not build a second event.
       this.deps.publish(buildRpcEvent(encrypted.primary), session.relays);
-      // sign_event has dual === null. Do not publish it again.
+      // sign_event has dual === null. Do not publish a second envelope.
       if (encrypted.dual) {
         this.deps.publish(buildRpcEvent(encrypted.dual), session.relays);
       }
