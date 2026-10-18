@@ -33,6 +33,7 @@ export const KNOWN_GRASP_DOMAINS = [
   "gitnostr.com",
   "ngit.danconwaydev.com",
   "git.shakespeare.diy",
+  "git.nostrhub.io",
   "git-01.uid.ovh",
   "git-02.uid.ovh",
   "git.jb55.com", // Read-only: jb55 hosts repos but only their own, not a public GRASP server for pushing
@@ -48,6 +49,9 @@ export const GRASP_DOMAINS_EXCLUDED_FROM_PUSHING = [
   "git.jb55.com",
   // Public ngit mirror; often 502 / WSS refused (2026-07) — stalls Push sync
   "ngit-relay.nostrver.se",
+  // Nostr relay only. Bare repos live on a git host. A kind 10317 entry
+  // for this hostname must not become an https clone URL.
+  "relay.gittr.space",
 ] as const;
 
 /**

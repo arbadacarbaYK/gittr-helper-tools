@@ -121,15 +121,19 @@ Wrong mental model (breaks Amber / QR): treating `nostrconnect` host as the sign
 
 **`wss://relay.gittr.space` does accept ephemeral kind `24133`.** Keep it when the bunker link or Amber’s relay screen lists it. It is a bunker relay, not a clone URL.
 
-Production dial order for relays Amber shows as connected (page-load still opens the first one and moves on):
+Production dial order for relays Amber shows as connected:
 
 - `wss://relay.gittr.space`
 - `wss://bucket.coracle.social`
-- `wss://relay.ditto.pub`
+- `wss://nrs.primal.net`
+- `wss://relay.primal.net`
+- `wss://relay.nip46.com`
 - `wss://theforest.nostr1.com`
-- `wss://nos.lol`
+- `wss://relay.ditto.pub`
+- `wss://relay.damus.io`
+- `wss://auth.nostr1.com`
 
-`wss://relay.primal.net`, `wss://nostr.oxtr.dev`, `wss://relay.damus.io`, and `wss://relay.azzamo.net` are skipped on that fast page-load dial because browsers often close them immediately. **`sign_event` still dials them** when they are in the saved bunker link — Amber is often listening there. Damus stays last.
+`wss://nos.lol`, `wss://nostr.oxtr.dev`, `wss://directory.yabu.me`, and `wss://relay.azzamo.net` stay off the dial. The socket does not open, and waiting on them burns the only quiet window.
 
 Repo browse/push still uses GRASP relays from `NEXT_PUBLIC_NOSTR_RELAYS`; that list is separate from NIP-46 transport.
 

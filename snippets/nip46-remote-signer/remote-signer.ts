@@ -105,14 +105,29 @@ export const DEFAULT_REMOTE_PERMISSIONS = [
   "nip44_decrypt",
 ];
 
-/** Relays signers like Amber reliably use for NIP-46 (pairing + sign_event). */
-const NIP46_PAIRING_RELAY_FALLBACKS = ["wss://relay.damus.io", "wss://nos.lol"];
-
-/** Amber bunker default relays — must overlap QR pairing when user has no prior session. */
-const NIP46_SIGNER_DEFAULT_RELAYS = [
-  "wss://relay.primal.net",
-  "wss://theforest.nostr1.com",
+/** Relays Amber actually keeps open. Down hosts are never dialed first. */
+const BUNKER_RELAYS_DOWN = new Set([
+  "wss://nos.lol",
   "wss://nostr.oxtr.dev",
+  "wss://directory.yabu.me",
+  "wss://relay.azzamo.net",
+]);
+
+/** Amber login QR, five slots. */
+const NIP46_SIGNER_DEFAULT_RELAYS = [
+  "wss://relay.gittr.space",
+  "wss://bucket.coracle.social",
+  "wss://nrs.primal.net",
+  "wss://relay.primal.net",
+  "wss://relay.nip46.com",
+];
+
+/** Extra relays a current Amber screen shows as connected. */
+const NIP46_PAIRING_RELAY_FALLBACKS = [
+  "wss://theforest.nostr1.com",
+  "wss://relay.ditto.pub",
+  "wss://relay.damus.io",
+  "wss://auth.nostr1.com",
 ];
 
 const normalizeRelayUrl = (url: string) =>
@@ -132,6 +147,7 @@ export function getNip46PairingRelays(
     const normalized = normalizeRelayUrl(url);
     if (
       normalized.startsWith("wss://") &&
+      !BUNKER_RELAYS_DOWN.has(normalized) &&
       !merged.includes(normalized) &&
       !isGrasp(normalized)
     ) {

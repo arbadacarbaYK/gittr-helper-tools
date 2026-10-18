@@ -2,7 +2,7 @@
 
 Code snippets for identifying GRASP (Git-Nostr-Bridge) servers vs regular Nostr relays.
 
-**Synced:** 2026-08-30 from `gittr/ui/src/lib/utils/grasp-servers.ts`
+**Synced:** 2026-10-18 from `gittr/ui/src/lib/utils/grasp-servers.ts`
 
 ## `grasp-servers.ts`
 
@@ -12,7 +12,8 @@ Detects GRASP servers (git servers that are also Nostr relays) and filters relay
 - Maintains list of known GRASP server domains
 - Detects GRASP servers by domain pattern matching **and** `/grasp/` path clones
 - Filters relay lists to separate GRASP servers from regular relays
-- Push allowlist does **not** include `relay.gittr.space` (that hostname is the Pyramid wss relay; git bytes live on `git.gittr.space`)
+- Push allowlist does **not** include `relay.gittr.space` (that hostname is the Pyramid wss relay; git bytes live on a git host such as `git.gittr.space`)
+- A server the user saved (kind 10317) is listed first when the hostname contains `git.`
 
 **Exports:** `KNOWN_GRASP_DOMAINS` (all known mirrors for detection), **`GRASP_SERVERS_FOR_PUSHING`** (subset that accept arbitrary user pushes), `hasGraspPathPrefix`, `parseGraspPathClone`, `isGraspCloneUrl`.
 
