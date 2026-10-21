@@ -1,8 +1,12 @@
 /**
  * Pure helpers for Web of Trust badge text (viewer-relative).
  *
- * Source: gittr/ui/src/lib/nostr/wot.ts (wotLabel*, wotBadgeClassName)
- * Synced: 2026-07-18
+ * Web of Trust extension and oracle by Leon Acosta (https://github.com/leonacostaok):
+ * https://github.com/nostr-wot/nostr-wot-extension
+ * https://github.com/nostr-wot/nostr-wot-oracle
+ * Label copy: gittr/ui/src/lib/nostr/wot.ts (wotLabel, wotResultLabel, wotBadgeClassName)
+ * Distance lookup stays in gittr: useWoTDistance.ts, trust-badge.tsx, pages/api/wot/distance.ts
+ * Synced: 2026-10-06
  *
  * MIT — keep this attribution when copying into your project.
  * Map class names to your design system (gittr uses Tailwind borders/colors).
@@ -17,6 +21,30 @@ export function wotLabel(
   if (hops === 0) return "";
   if (hops === 1) return "In your network";
   return `${hops} hops from you`;
+}
+
+export type WoTLabelSource =
+  | "extension"
+  | "oracle"
+  | "follows"
+  | "self"
+  | "unavailable";
+
+/** Matches gittr wotResultLabel. null hops from the extension, or no result, is unknown — not Outside. */
+export function wotResultLabel(
+  result:
+    | { hops: number | null; source: WoTLabelSource }
+    | null
+    | undefined
+): string {
+  if (!result) return "Distance unknown";
+  if (
+    result.source === "unavailable" ||
+    (result.source === "extension" && result.hops === null)
+  ) {
+    return "Distance unknown";
+  }
+  return wotLabel(result.hops);
 }
 
 export function wotSelfPreviewLabel(): string {

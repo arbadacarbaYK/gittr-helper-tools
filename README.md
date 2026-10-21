@@ -49,6 +49,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 | Push: pay-to-push | [`nip34-push-paywall`](./snippets/nip34-push-paywall) |
 | Pay invoice / NWC wallet | [`nip47-nwc`](./snippets/nip47-nwc) (NIP-47; separate from remote signer) |
 | Pair remote signer (auth) | [`nip46-remote-signer`](./snippets/nip46-remote-signer) (NIP-46) |
+| Web of Trust badges | [Leon Acosta](https://github.com/leonacostaok): [extension](https://github.com/nostr-wot/nostr-wot-extension) and [oracle](https://github.com/nostr-wot/nostr-wot-oracle). Snippet [`wot-trust-badges`](./snippets/wot-trust-badges) is labels only. gittr wiring: [`wot.ts`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/src/lib/nostr/wot.ts&branch=main), [`useWoTDistance.ts`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/src/lib/nostr/useWoTDistance.ts&branch=main), [`trust-badge.tsx`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/src/components/ui/trust-badge.tsx&branch=main), [`pages/api/wot/distance.ts`](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/src/pages/api/wot/distance.ts&branch=main). Write-up: [WOT.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/WOT.md) |
 | GitHub write-back (ToDo / Discussions) | [`github-oauth-writeback`](./snippets/github-oauth-writeback) (planned; OAuth bridge, not a kind) |
 | ToDo / Kanban / Discussions (NIP prep) | [`todos-discussions-kanban`](./snippets/todos-discussions-kanban) |
 
@@ -63,7 +64,7 @@ Do not commit secrets into examples; use placeholders in `.env.example`.
 
 - [Nostr schemata (NIPs / kinds)](https://gittr.space/npub1zafcms4xya5ap9zr7xxr0jlrtrattwlesytn2s42030lzu0dwlzqpd26k5/schemata?file=README.md) · [NIP-34](https://gittr.space/npub1zafcms4xya5ap9zr7xxr0jlrtrattwlesytn2s42030lzu0dwlzqpd26k5/schemata?file=README.md&path=nips%2Fnip-34)
 - [NIPS_AND_EVENT_KINDS.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIPS_AND_EVENT_KINDS.md&branch=main)
-- [WOT.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/WOT.md) (Web of Trust on gittr)
+- [WOT.md](https://github.com/arbadacarbaYK/gittr/blob/main/docs/WOT.md) — gittr's badges. Hop distance is [Leon Acosta](https://github.com/leonacostaok)’s [extension](https://github.com/nostr-wot/nostr-wot-extension) and [oracle](https://github.com/nostr-wot/nostr-wot-oracle)
 - [NIP46_REMOTE_SIGNER_INTEGRATION.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=docs/NIP46_REMOTE_SIGNER_INTEGRATION.md&branch=main)
 - [NWC_IMPLEMENTATION_NOTES.md](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gittr?file=ui/NWC_IMPLEMENTATION_NOTES.md&branch=main)
 - [gitnostr bridge docs](https://gittr.space/npub1n2ph08n4pqz4d3jk6n2p35p2f4ldhc5g5tu7dhftfpueajf4rpxqfjhzmc/gitnostr?branch=main)
