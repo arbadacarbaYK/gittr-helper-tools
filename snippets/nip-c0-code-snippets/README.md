@@ -71,7 +71,7 @@ const snippet: CodeSnippetEvent = {
   extension: "ts",
   name: "greet.ts",
   description: "Simple greeting function",
-  runtime: "node v18.15.0",
+  runtime: "node v22.23.4",
   license: ["MIT"],
   dependencies: ["typescript"],
   // Optional: Link to source repository using NIP-34 format
@@ -155,7 +155,7 @@ function MyComponent({ event }) {
 | `extension` | No | File extension (without dot) | `["extension", "js"]` |
 | `name` | No | Filename or snippet name | `["name", "hello-world.js"]` |
 | `description` | No | Human-readable description | `["description", "Simple hello world"]` |
-| `runtime` | No | Runtime environment | `["runtime", "node v18.15.0"]` |
+| `runtime` | No | Runtime environment | `["runtime", "node v22.23.4"]` |
 | `license` | No | License (SPDX identifier, can repeat) | `["license", "MIT"]` |
 | `dep` | No | Dependency (can repeat) | `["dep", "react@18.0.0"]` |
 | `repo` | No | Repository reference (URL or NIP-34) | `["repo", "30617:pubkey:repo-name", "wss://relay"]` |
