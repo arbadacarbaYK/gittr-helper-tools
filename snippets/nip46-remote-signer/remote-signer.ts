@@ -6,7 +6,7 @@
  * private keys to the browser.
  *
  * Source: gittr/ui/src/lib/nostr/remoteSigner.ts (trimmed — production is larger)
- * Synced: 2026-10-03
+ * Synced: 2026-11-01
  *
  * This extract still calls Amber `connect` on reload for a simpler demo.
  * Production gittr hydrates only, opens bunker WebSockets, and wakes Amber
@@ -28,20 +28,23 @@
  * 2. Signers identify your app by the CLIENT KEY on the kind-24133 event.
  *    Reuse the same client key per bunker URI: Amber then answers re-connects
  *    with a silent "ack" (no popup) and does NOT create a new app entry.
+ *    Modern Amber (`v4+` / `v7`) also uses a per-connection `localKey` pubkey
+ *    (`remotePubkey` ≠ `userPubkey`), and freezes `application.relays` when an
+ *    app is first paired (adding `wss://relay.gittr.space` in Amber's global
+ *    settings later requires minting a fresh `bunker://` URI).
  *
  * 3. NEVER call `switch_relays` with your own relay list. Per Amber's source the
  *    signer IGNORES your params, answers with ITS relays and rebinds the app to
  *    those — you desync both sides and sign_event times out. NIP-46 transport
  *    stays on the URI relays; publish signed events to app relays yourself.
  *
- * 4. Encryption: Amber still decrypts NIP-04 for `sign_event`. Send that request
- *    ONCE as NIP-04 (one event id) to every OPEN relay in the bunker URI.
- *    Page-load may stop at the first open socket. sign_event must not — Amber
- *    is often listening on a different relay in the same bunker link (Orbot).
- *    A second envelope (NIP-44, or a new event while waiting) makes Amber
- *    prompt again, and the page was dropping the signature. Pairing `connect`
- *    / `get_public_key` stay NIP-44 primary and may dual-publish NIP-04.
- *    Decrypt tries NIP-44, then NIP-04.
+ * 4. Encryption & timestamps: Amber still decrypts NIP-04 for `sign_event`.
+ *    Stamp `created_at` right before publishing (after relay prep) and send that
+ *    request ONCE as NIP-04 (one event id) to every OPEN relay in the bunker URI.
+ *    Never reset the bunker pool after a relay already returned `OK` (`acked: true`).
+ *    Note: if Amber shows `"invalid: ephemeral event expired"` right after
+ *    approving `30617`, a `strfry` relay rejected Amber's outgoing kind-24133
+ *    reply (phone clock >60s behind UTC, or stale per-app relays).
  *
  * 5. Connect result may be "ack" OR an echo of the pairing secret (bunker46,
  *    nostrconnect responses per spec). "already connected" error = success.
@@ -158,6 +161,53 @@ export function getNip46PairingRelays(
   NIP46_PAIRING_RELAY_FALLBACKS.forEach(add);
   appRelays.filter((r) => !isGrasp(r)).forEach(add);
   return merged.slice(0, max);
+}
+
+const AMBER_INDEXER_RELAYS = new Set([
+  "wss://purplepag.es",
+  "wss://profiles.nostr1.com",
+  "wss://user.kindpag.es",
+]);
+
+/**
+ * Order for the one sign_event publish: URI relays that match Amber's
+ * connected set first, then custom signer-specific URI relays (e.g.
+ * wss://nostr.mom) BEFORE non-URI fallback extras so the 8-relay cap
+ * never cuts off a custom URI relay.
+ */
+export function planSignEventDialOrder(
+  uriRelays: string[],
+  max = 8
+): string[] {
+  const connected = [
+    ...NIP46_SIGNER_DEFAULT_RELAYS,
+    ...NIP46_PAIRING_RELAY_FALLBACKS,
+  ];
+  const uri = Array.from(
+    new Set(
+      (uriRelays || [])
+        .map(normalizeRelayUrl)
+        .filter((u) => u.startsWith("wss://"))
+    )
+  );
+  const live = connected.filter(
+    (u) => uri.includes(u) && !BUNKER_RELAYS_DOWN.has(u)
+  );
+  const extra = connected.filter(
+    (u) => !uri.includes(u) && !BUNKER_RELAYS_DOWN.has(u)
+  );
+  const rest = uri.filter((u) => !live.includes(u));
+  const signerSpecific = rest.filter(
+    (u) => !BUNKER_RELAYS_DOWN.has(u) && !AMBER_INDEXER_RELAYS.has(u)
+  );
+  const indexers = rest.filter(
+    (u) => !BUNKER_RELAYS_DOWN.has(u) && AMBER_INDEXER_RELAYS.has(u)
+  );
+  const down = rest.filter((u) => BUNKER_RELAYS_DOWN.has(u));
+  return [...live, ...signerSpecific, ...extra, ...indexers, ...down].slice(
+    0,
+    max
+  );
 }
 
 export interface RemoteSignerConfig {

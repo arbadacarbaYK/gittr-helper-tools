@@ -2,8 +2,8 @@
 
 Code snippets for implementing **NIP-46** (remote signing) in a Nostr **web client**, so users can pair **Amber**, **Nowser**, **LNbits remote signer**, self-hosted **bunker**, etc., without putting the user’s **nsec** in the page.
 
-**Synced:** 2026-10-03 — teaching extract (not the full production file).  
-APIs of note: `getNip46PairingRelays` (never put git-only hosts in NIP-46 URIs), `planSignEventDialOrder` (every bunker-URI relay before one `sign_event`), `ensureBootstrapped` (hydrate + bunker sockets, **no Amber popup**), `ensureRpcHealthy` (warm sockets before Push), `isRpcHealthy`, kind-scoped `DEFAULT_REMOTE_PERMISSIONS`, prefer manager over `window.nostr` when a remote session exists.
+**Synced:** 2026-11-01 — teaching extract (not the full production file).  
+APIs of note: `getNip46PairingRelays` (never put git-only hosts in NIP-46 URIs), `planSignEventDialOrder` (keeps custom URI relays ahead of non-URI extras and skips dead/Cloudflare-dropped hosts during sign cover), `ensureBootstrapped` (hydrate + bunker sockets, **no Amber popup**), `ensureRpcHealthy` (warm sockets before Push), `isRpcHealthy`, kind-scoped `DEFAULT_REMOTE_PERMISSIONS`, prefer manager over `window.nostr` when a remote session exists.
 
 **Canonical docs (keep in sync with production):**
 
@@ -101,7 +101,8 @@ The resolver:
 
 ### `bunker://`
 
-- **Host** = **remote signer** pubkey (64-hex).
+- **Host** = **remote signer** pubkey (64-hex). In modern Amber (`v4+` / `v7`), this is a per-connection `localKey` pubkey distinct from the user’s `userPubkey` — filter response subscriptions by `kinds: [24133], "#p": [session.clientPubkey]` only (never restrict `authors` to a single pubkey).
+- **Amber freezes per-app relays at pairing time (`application.relays`)**: adding a relay (such as `wss://relay.gittr.space`) in Amber’s global settings later does **not** update an already-paired app. Mint a fresh `bunker://` token after changing Amber’s relays so the connection picks up the new relay list.
 - **Reuse the client key per bunker URI** (persist it in `localStorage` keyed by `remotePubkey:secret`). Signers identify your app by the client key on the kind-`24133` event: a fresh key per “Pair” press creates a **new app entry in Amber every time** and breaks silent-ack re-login. Only generate a new keypair on first pairing.
 - The `secret` is **single-use**: consumed on the first successful pairing. A rejected re-pair returns `invalid secret` — the user must mint a fresh bunker token in the signer app.
 
@@ -140,15 +141,15 @@ Repo browse/push still uses GRASP relays from `NEXT_PUBLIC_NOSTR_RELAYS`; that l
 Production pattern (gittr `remoteSigner.ts`):
 
 1. Filter `isGraspServer(url)` out of every NIP-46 relay list. Keep `wss://relay.gittr.space` — it accepts kind `24133`. Drop `git.gittr.space` and other git-only hosts.
-2. Keep the bunker URI first. Page-load may skip primal / oxtr / damus / azzamo. `sign_event` still dials those when they are in the URI. **Damus last**
+2. Keep the bunker URI first (`planSignEventDialOrder` places URI relays in `AMBER_CONNECTED_RELAYS` first, then custom signer-specific URI relays like `wss://nostr.mom` **before** non-URI fallback extras so the 8-relay cap never cuts off a custom URI relay). Skip `BUNKER_RELAYS_SIGN_SKIP` (`nos.lol`, `nostr.oxtr.dev`, `directory.yabu.me`, `relay.azzamo.net`, profile indexers, and `relay.damus.io`) during `sign_event` cover and listen refresh once at least one bunker socket is open.
 3. Cap dial expansion (~8). Cap nostrconnect QR ~5–6
 4. **Never call `switch_relays` with your own relay list.** Per Amber's source the signer *ignores* your params, answers with *its* relays and rebinds the app to those — both sides desync and every later `sign_event` times out. NIP-46 transport stays on the URI relays; publish the signed events to your app relays yourself.
 
-**Browser WebSocket slots:** the app’s main relay pool and the Amber `directPool` must not share hosts. `nostr-relaypool` `removeRelay(url)` matches the **exact** map key (trailing `/` counts). Closing the wrong key leaves discovery sockets up and bunker sockets stay CLOSED — Push then says “Could not open any bunker relay” even with Amber open. Close via the pool’s real keys, dial bunker sockets **before** file-fetch subscribe, and never reset the bunker pool while a socket is still CONNECTING.
+**Browser WebSocket slots & instant-abort backoff:** the app’s main relay pool and the Amber `directPool` must not share hosts. `nostr-relaypool` `removeRelay(url)` matches the **exact** map key (trailing `/` counts). Closing the wrong key leaves discovery sockets up and bunker sockets stay CLOSED — Push then says “Could not open any bunker relay” even with Amber open. Close via the pool’s real keys, dial bunker sockets **before** file-fetch subscribe, and never reset the bunker pool while a socket is still CONNECTING. When the browser aborts an in-flight WebSocket handshake (`ws.onerror` → `ensureRelay` rejects in `< 500ms`), `openDirectRelay` must pause **1.5s / 1.0s inside `catch`** (`elapsed < BUNKER_INSTANT_ABORT_MS`) so closing page sockets can drain instead of firing an 80-socket zero-millisecond retry storm. When all non-skipped bunker relays are already OPEN (`missing.length === 0 && have.size > 0`), `coverAmberUriRelays` reuses them immediately without suspending the main pool again — so the second Push signature (`30618` right after `30617`) signs immediately.
 
 **Dial one Amber relay at a time. Do not stop after the first one on Push.** On a busy repository page the browser is already full of file-fetch sockets. Wait for that git-source HTTP to drain, pause the page’s open sockets, then open bunker hosts **one at a time**. Opening the whole list in parallel left every Amber relay closed (readyState 3) and Push never reached the phone.
 
-Page-load may stop at the first OPEN socket so the tab can render. **`sign_event` must not.** A cached identity plus one open socket is not “Amber is ready.” Before the request, walk every relay in the bunker URI (`planSignEventDialOrder`: live relays first, primal / oxtr / damus / azzamo last when they are in that URI), drop CLOSED cache entries, subscribe on every socket that opened, and publish **one** NIP-04 event to all of them. Stopping at the first socket is how Push logs `overlap: 1` / `uriOnly: 6` and times out while Amber’s own relay screen shows healthy pings — including when the phone is on Orbot and is only connected to a different relay in the same bunker link. A warm that only tried the URI and found nothing must not count as “Amber is ready.” Keepalive should reopen closed URI relays while the tab is open; nostr-tools never reconnects them, so a tab that sat idle otherwise signs on one leftover socket again.
+Page-load may stop at the first OPEN socket so the tab can render. **`sign_event` must not.** A cached identity plus one open socket is not “Amber is ready.” Before the request, walk every live relay in the bunker URI (`planSignEventDialOrder`), drop CLOSED cache entries, subscribe only on OPEN `directPool` sockets (prune closed relays from `directListenRelays` first so `SimplePool.sub()` never implicitly dials dead relays), build `requestEvent` with a fresh `created_at = Math.floor(Date.now() / 1000)` right before publish, and publish **one** NIP-04 event to all open sockets. Never reset `directPool` after `acked: true`.
 
 ```typescript
 // Pseudocode — see gittr getNip46PairingRelays()
@@ -239,9 +240,9 @@ The teaching extract’s `bootstrapFromStorage()` still does connect-on-reload; 
 
 ---
 
-## Implementation learnings (production, through Oct 2026)
+## Implementation learnings (production, through Nov 2026)
 
-These are the issues that show up as “I approved on the phone and **nothing happened**” or **`sign_event timed out`**:
+These are the issues that show up as “I approved on the phone and **nothing happened**”, **`invalid: ephemeral event expired` in Amber**, or **`sign_event timed out`**:
 
 1. **Subscribe before the phone sends**  
    Start the session when you mint the QR, not only on a second button with stale state.
@@ -288,6 +289,12 @@ These are the issues that show up as “I approved on the phone and **nothing ha
 15. **`removeRelay` is exact-key**  
     Trailing `/` mismatch means “Freed 7 sockets” can be a lie. Close via `getRelayStatuses()` keys. Dial bunker sockets before file-fetch, or discovery steals the browser slots.
 
+16. **Amber shows `invalid: ephemeral event expired` right after approving `30617` (and `30618` never appears)**  
+    Amber never creates that string itself — it comes from **`strfry` relays** (`relay.primal.net`, `theforest.nostr1.com`, `nos.lol`) rejecting a kind `24133` event whose `created_at` is more than **60s behind UTC**. Amber accepts incoming requests up to `±300s` (`EventNotificationConsumer.kt`), then stamps its outgoing kind `24133` response with the phone’s clock (`TimeUtils.now()` in `BunkerRequestUtils.kt`). If the phone clock drifted >60s behind UTC (or the app pairing only has relays that reject/drop the reply), the relays reject Amber’s outgoing reply, Amber pops `invalid: ephemeral event expired`, and the browser receives 0 inbound events. In addition, Amber freezes each connected app’s relay list (`application.relays`) when it is first paired — adding `wss://relay.gittr.space` in Amber’s global settings later does **not** update an existing app entry. **Fix:** enable automatic network time on the phone, add `wss://relay.gittr.space` in Amber, and mint a **fresh `bunker://` string** in Amber to re-pair.
+
+17. **Zero-ms WebSocket retry storm (`openDirectRelay` `catch` backoff) & `#p`-only response filter**  
+    When `ensureRelay(url)` rejects via `ws.onerror` in `< 500ms` (browser still closing ~20–30 old page sockets after reload), the 1.5s / 1.0s backoff (`BUNKER_INSTANT_ABORT_MS`) must run inside the `catch` block of `openDirectRelay`, and `coverAmberUriRelays` must skip suspending the main pool when the needed bunker sockets are already open. Always subscribe to responses with `kinds: [24133], "#p": [session.clientPubkey]` only (no `authors` filter) because modern Amber signs responses with a per-connection `localKey` (`remotePubkey` ≠ `userPubkey`).
+
 ---
 
 ## NIP-07 adapter
@@ -322,4 +329,4 @@ Targets **NIP-46** signers that use **`bunker://`** or **`nostrconnect://`** and
 - **NIP-04 / NIP-44:** encryption inside `24133` content  
 - **NIP-34:** repo kinds `30617` / `30618` (two signatures per push)
 
-**Extracted from:** `gittr/ui/src/lib/nostr/remoteSigner.ts` + `signer.ts` (Oct 2026 production: hydrate-only boot, serial bunker dial, `sign_event` covers every bunker-URI relay with one NIP-04 event, keep waiting after a relay accepts it)
+**Extracted from:** `gittr/ui/src/lib/nostr/remoteSigner.ts` + `signer.ts` (Nov 2026 production: hydrate-only boot, serial bunker dial with instant-abort `catch` backoff, `planSignEventDialOrder` keeping custom URI relays ahead of non-URI extras, `#p`-only response filter for Amber `localKey`, no pool reset after `acked: true`)

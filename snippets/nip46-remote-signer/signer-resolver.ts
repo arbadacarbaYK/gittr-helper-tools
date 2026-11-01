@@ -3,7 +3,7 @@
  * Supports NIP-07 extensions, NIP-46 remote signers, and stored nsec keys.
  *
  * Source: gittr/ui/src/lib/nostr/signer.ts
- * Synced: 2026-07-18
+ * Synced: 2026-11-01
  *
  * MIT — keep this attribution when copying into your project.
  */
